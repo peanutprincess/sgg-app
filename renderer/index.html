@@ -1,0 +1,2635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SG</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      background: #fafafa;
+      color: #111;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: #111;
+      display: flex;
+      flex-direction: column;
+      -webkit-app-region: drag;
+      border-right: 1px solid #000;
+    }
+    .sidebar-top {
+      padding: 44px 20px 16px;
+    }
+    .sidebar-logo {
+      width: 160px;
+      display: block;
+    }
+    .nav-section {
+      flex: 1;
+      padding: 4px 0;
+      -webkit-app-region: no-drag;
+    }
+    .nav-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #444;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 14px 20px 5px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 20px;
+      color: #666;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      border-left: 2px solid transparent;
+      transition: color 0.12s, background 0.12s;
+      -webkit-user-select: none;
+    }
+    .nav-item:hover { color: #bbb; background: rgba(255,255,255,0.04); }
+    .nav-item.active { color: #fff; background: rgba(255,255,255,0.07); border-left-color: #c9a84c; }
+    .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+    .nav-soon {
+      margin-left: auto;
+      font-size: 9px;
+      color: #3a3a3a;
+      background: #1c1c1c;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+    .sidebar-footer {
+      padding: 14px 20px;
+      color: #333;
+      font-size: 10px;
+      -webkit-app-region: no-drag;
+      border-top: 1px solid #1a1a1a;
+    }
+    .sidebar-quick-links {
+      display: flex;
+      gap: 6px;
+      padding: 0 16px 14px;
+      -webkit-app-region: no-drag;
+    }
+    .ql-btn {
+      flex: 1;
+      padding: 5px 0;
+      background: #1a1a1a;
+      border: 1px solid #2e2e2e;
+      border-radius: 5px;
+      color: #888;
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      text-align: center;
+      transition: color 0.12s, border-color 0.12s;
+    }
+    .ql-btn:hover { color: #e5e7eb; border-color: #555; }
+
+    /* ── Content ── */
+    .content { flex: 1; overflow-y: auto; background: #fafafa; }
+    .module { display: none; }
+    .module.active { display: block; }
+
+    .module-header {
+      padding: 28px 40px 0;
+      -webkit-app-region: drag;
+    }
+    .module-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #111;
+      -webkit-app-region: no-drag;
+    }
+    .module-subtitle {
+      font-size: 13px;
+      color: #888;
+      margin-top: 4px;
+      -webkit-app-region: no-drag;
+    }
+
+    /* ── Form Card ── */
+    .form-card {
+      max-width: 700px;
+      margin: 22px 40px 40px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 32px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 20px rgba(0,0,0,0.04);
+    }
+
+    /* ── Drop Zone ── */
+    .drop-zone {
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 26px 16px;
+      text-align: center;
+      cursor: pointer;
+      background: #fafafa;
+      margin-bottom: 20px;
+      transition: all 0.15s;
+    }
+    .drop-zone:hover { border-color: #9ca3af; background: #f3f4f6; }
+    .drop-zone.drag-over { border-color: #c9a84c; background: #fdf8ee; }
+    .drop-zone.has-file { border-color: #22c55e; background: #f0fdf4; border-style: solid; }
+    .dz-icon { font-size: 26px; margin-bottom: 5px; }
+    .dz-label { font-size: 13px; color: #6b7280; }
+    .dz-name { font-size: 12px; font-weight: 600; color: #16a34a; margin-top: 4px; }
+
+    /* ── Location ── */
+    .loc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .loc-btn {
+      padding: 11px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      background: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #374151;
+      font-family: inherit;
+      transition: all 0.12s;
+    }
+    .loc-btn:hover { border-color: #9ca3af; }
+    .loc-btn.sel-nyc { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
+    .loc-btn.sel-la  { border-color: #f59e0b; background: #fffbeb; color: #92400e; }
+
+    /* ── Fields ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .form-full { margin-bottom: 14px; }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #6b7280;
+      margin-bottom: 5px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .field input, .field select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 9px;
+      font-size: 14px;
+      color: #111;
+      background: #fff;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.12s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .field input:focus, .field select:focus { border-color: #c9a84c; box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+
+    /* ── Submit ── */
+    .submit-btn {
+      width: 100%;
+      padding: 13px;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+      font-family: inherit;
+      transition: background 0.12s, transform 0.05s;
+      letter-spacing: 0.01em;
+    }
+    .submit-btn:hover { background: #1f1f1f; }
+    .submit-btn:active { transform: scale(0.995); }
+    .submit-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+
+    /* ── Feedback ── */
+    .error-msg {
+      background: #fef2f2;
+      color: #dc2626;
+      border-radius: 8px;
+      padding: 10px 13px;
+      font-size: 13px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .loading-overlay, .success-overlay { display: none; text-align: center; padding: 50px 20px; }
+    .spinner {
+      width: 38px; height: 38px;
+      border: 3px solid #e5e7eb;
+      border-top-color: #111;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-overlay p { color: #6b7280; font-size: 14px; }
+    .success-icon { font-size: 46px; margin-bottom: 12px; }
+    .success-title { font-size: 20px; font-weight: 700; color: #16a34a; margin-bottom: 6px; }
+    .success-detail { color: #6b7280; font-size: 13px; margin-bottom: 16px; }
+    .success-link { color: #3b82f6; font-size: 13px; text-decoration: none; font-weight: 600; display: inline-block; margin-bottom: 20px; }
+    .success-link:hover { text-decoration: underline; }
+    .again-btn {
+      padding: 11px 28px;
+      background: #f3f4f6;
+      border: none;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.12s;
+    }
+    .again-btn:hover { background: #e5e7eb; }
+
+    /* ── Bennet Module ── */
+    .bn-filters {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      padding: 20px 32px 0;
+    }
+    .bn-filter-btn {
+      padding: 5px 14px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 20px;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b7280;
+      cursor: pointer;
+      transition: all 0.12s;
+      font-family: inherit;
+    }
+    .bn-filter-btn:hover { border-color: #9ca3af; color: #374151; }
+    .bn-filter-btn.active { background: #111; border-color: #111; color: #fff; }
+
+    .bn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+      padding: 18px 32px 40px;
+    }
+    .bn-card {
+      background: #fff;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 16px;
+      cursor: pointer;
+      transition: border-color 0.12s, box-shadow 0.12s;
+      position: relative;
+    }
+    .bn-card:hover { border-color: #9ca3af; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+
+    /* Status card colors */
+    .bn-card-inprod    { background: #d1fae5; border-color: #a7f3d0; }
+    .bn-card-inprod    .bn-card-client,
+    .bn-card-inprod    .bn-card-title,
+    .bn-card-inprod    .bn-card-price,
+    .bn-card-inprod    .bn-card-due    { color: #111; }
+    .bn-card-inprod    .bn-initials    { background: #a7f3d0; color: #065f46; }
+
+    .bn-card-delivered { background: #1e3a8a; border-color: #1e3a8a; }
+    .bn-card-delivered .bn-card-client,
+    .bn-card-delivered .bn-card-title,
+    .bn-card-delivered .bn-card-price,
+    .bn-card-delivered .bn-card-due    { color: #fff; }
+    .bn-card-delivered .bn-initials    { background: #2d4faa; color: #bfdbfe; }
+    .bn-card-delivered:hover           { border-color: #2d4faa; }
+
+    .bn-card-cornflower { background: #6495ed; border-color: #5585e0; }
+    .bn-card-cornflower .bn-card-client,
+    .bn-card-cornflower .bn-card-title,
+    .bn-card-cornflower .bn-card-price,
+    .bn-card-cornflower .bn-card-due    { color: #b91c1c; }
+    .bn-card-cornflower .bn-initials    { background: #5585e0; color: #fee2e2; }
+    .bn-card-cornflower:hover           { border-color: #4575d0; }
+
+    .bn-card-preprod   { background: #f3f4f6; border-color: #e5e7eb; }
+    .bn-card-preprod   .bn-card-client { color: #374151; }
+    .bn-card-preprod   .bn-card-title,
+    .bn-card-preprod   .bn-card-price,
+    .bn-card-preprod   .bn-card-due    { color: #6b7280; }
+    .bn-card-preprod   .bn-initials    { background: #e5e7eb; color: #374151; }
+    .bn-card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+    .bn-initials {
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      background: #f3f4f6;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #374151;
+      flex-shrink: 0;
+    }
+    .bn-card-meta { flex: 1; min-width: 0; }
+    .bn-card-client { font-size: 13px; font-weight: 700; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bn-card-title  { font-size: 12px; color: #6b7280; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bn-pill {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .bn-pill-inquiry       { background: #f1f5f9; color: #475569; }
+    .bn-pill-preprod       { background: #fef3c7; color: #92400e; }
+    .bn-pill-inprod        { background: #dbeafe; color: #1d4ed8; }
+    .bn-pill-ready         { background: #ede9fe; color: #6d28d9; }
+    .bn-pill-willcall      { background: #ffedd5; color: #c2410c; }
+    .bn-pill-delivered     { background: #dcfce7; color: #15803d; }
+
+    .bn-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+    .bn-card-price  { font-size: 13px; font-weight: 600; color: #111; }
+    .bn-card-due    { font-size: 11px; color: #9ca3af; }
+    .bn-card-due.urgent { color: #ef4444; font-weight: 600; }
+
+    /* Drawer */
+    .bn-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 200;
+    }
+    .bn-overlay.open { display: block; }
+    .bn-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 460px;
+      background: #fff;
+      box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+      z-index: 201;
+      transform: translateX(100%);
+      transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+      display: flex; flex-direction: column;
+    }
+    .bn-drawer.open { transform: translateX(0); }
+    .bn-drawer-head {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid #f3f4f6;
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .bn-drawer-client { font-size: 18px; font-weight: 700; color: #111; }
+    .bn-drawer-sub    { font-size: 13px; color: #6b7280; margin-top: 2px; }
+    .bn-close-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 20px; color: #9ca3af; padding: 0; line-height: 1;
+    }
+    .bn-close-btn:hover { color: #374151; }
+    .bn-drawer-body {
+      flex: 1; overflow-y: auto;
+      padding: 20px 24px;
+    }
+    .bn-section-label {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #9ca3af;
+      margin: 18px 0 10px;
+    }
+    .bn-section-label:first-child { margin-top: 0; }
+    .bn-field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .bn-field-grid.single { grid-template-columns: 1fr; }
+    .bn-field { display: flex; flex-direction: column; gap: 4px; }
+    .bn-field label {
+      font-size: 10px; font-weight: 600; color: #9ca3af;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .bn-field input, .bn-field select, .bn-field textarea {
+      border: 1.5px solid #e5e7eb;
+      border-radius: 7px;
+      padding: 7px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      color: #111;
+      background: #fff;
+      transition: border-color 0.12s;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .bn-field input:focus, .bn-field select:focus, .bn-field textarea:focus {
+      outline: none; border-color: #6b7280;
+    }
+    .bn-field textarea { resize: vertical; min-height: 70px; }
+    .bn-drawer-foot {
+      padding: 14px 24px;
+      border-top: 1px solid #f3f4f6;
+      display: flex; gap: 10px;
+    }
+    .bn-save-btn {
+      flex: 1; padding: 10px;
+      background: #111; color: #fff;
+      border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      transition: background 0.12s;
+    }
+    .bn-save-btn:hover { background: #333; }
+    .bn-save-btn:disabled { background: #9ca3af; cursor: default; }
+    .bn-cancel-btn {
+      padding: 10px 18px;
+      background: #f3f4f6; color: #374151;
+      border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+    }
+    .bn-cancel-btn:hover { background: #e5e7eb; }
+
+    /* Inquiries panel */
+    .bn-inq-wrap {
+      padding: 0 32px 0;
+    }
+    .bn-inq-header {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #9ca3af;
+      padding: 4px 0 12px;
+      border-top: 1px solid #f3f4f6;
+      margin-top: 8px;
+    }
+    .bn-inq-scroll {
+      height: 320px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-bottom: 48px;
+    }
+    .bn-inq-tile {
+      background: #fff;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 90px 1fr auto;
+      gap: 0 16px;
+      align-items: start;
+      cursor: default;
+      transition: border-color 0.12s;
+    }
+    .bn-inq-tile:hover { border-color: #d1d5db; }
+    .bn-inq-date {
+      font-size: 11px; color: #9ca3af; font-weight: 500;
+      padding-top: 1px;
+    }
+    .bn-inq-name    { font-size: 13px; font-weight: 700; color: #111; }
+    .bn-inq-org     { font-size: 11px; color: #6b7280; margin-top: 1px; }
+    .bn-inq-artwork { font-size: 11px; color: #6b7280; margin-top: 4px; font-style: italic; }
+    .bn-inq-notes   { font-size: 12px; color: #374151; margin-top: 5px; line-height: 1.5; }
+    .bn-mailto {
+      color: #6b7280; text-decoration: none;
+      font-size: 11px; padding: 4px 10px;
+      border: 1px solid #e5e7eb; border-radius: 6px;
+      white-space: nowrap; align-self: start;
+    }
+    .bn-mailto:hover { color: #111; border-color: #9ca3af; }
+    .bn-empty { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 14px; }
+    .bn-loading { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 14px; }
+
+    /* ── Gallery ── */
+    .gallery-wrap { padding: 24px 40px 40px; }
+    .year-toggle { display: flex; gap: 8px; margin-bottom: 28px; }
+    .year-btn {
+      padding: 7px 22px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      color: #374151;
+      transition: all 0.12s;
+    }
+    .year-btn:hover { border-color: #9ca3af; }
+    .year-btn.active { background: #111; color: #fff; border-color: #111; }
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+    .loc-col-header {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #888;
+      padding-bottom: 12px;
+      margin-bottom: 4px;
+      border-bottom: 2px solid #111;
+    }
+    .show-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 11px 0;
+      border-bottom: 1px solid #f3f4f6;
+      gap: 16px;
+    }
+    .show-row:last-child { border-bottom: none; }
+    .show-name-text { font-size: 14px; font-weight: 500; color: #111; flex: 1; display: flex; align-items: center; gap: 7px; }
+    .show-dates-text { font-size: 12px; color: #999; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .show-now-dot { width: 7px; height: 7px; border-radius: 50%; background: #16a34a; flex-shrink: 0; display: inline-block; }
+    .show-row.is-active .show-name-text { color: #111; }
+    .show-row.is-active .show-dates-text { color: #16a34a; font-weight: 600; }
+    .show-row.is-upcoming .show-dates-text { color: #c9a84c; }
+    .gallery-loading { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 13px; }
+    .gallery-empty { padding: 24px 0; color: #9ca3af; font-size: 13px; }
+
+
+    /* ── Shipping Log ── */
+    .ship-loc-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+    .ship-loc-btn {
+      padding: 8px 14px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 9px;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      color: #374151;
+      transition: all 0.12s;
+    }
+    .ship-loc-btn:hover { border-color: #9ca3af; }
+    .ship-loc-btn.active { border-color: #c9a84c; background: #fdf8ee; color: #78350f; }
+    .ship-other-input {
+      margin-top: 8px; width: 100%; padding: 10px 12px;
+      border: 1.5px solid #e5e7eb; border-radius: 9px;
+      font-size: 14px; color: #111; outline: none; font-family: inherit;
+      transition: border-color 0.12s;
+    }
+    .ship-other-input:focus { border-color: #c9a84c; box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
+    .artwork-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
+
+    /* ── Operations Calendar ── */
+    .ops-wrap { padding: 24px 40px 40px; height: calc(100vh - 80px); display: flex; flex-direction: column; }
+    .ops-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      flex: 1;
+      min-height: 0;
+    }
+    .ops-col-header {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #888;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #111;
+    }
+    .ops-cal-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 12px;
+      background: #f9f9f9;
+    }
+    .ops-col { display: flex; flex-direction: column; min-height: 0; }
+    .ops-col-body { flex: 1; min-height: 0; border-radius: 12px; overflow: hidden; border: 1.5px solid #e5e7eb; }
+
+
+    /* ── Calendar color overlays ── */
+    .ops-col-body { position: relative; }
+    .ops-col-body .cal-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      border-radius: 12px;
+    }
+    .ops-col-body.nyc-tint .cal-overlay { background: rgba(234, 88, 12, 0.10); }
+    .ops-col-body.la-tint  .cal-overlay { background: rgba(234, 179, 8, 0.12); }
+    .ops-col-header.nyc-hdr { border-bottom-color: rgba(234, 88, 12, 0.7); color: rgba(234, 88, 12, 0.85); }
+    .ops-col-header.la-hdr  { border-bottom-color: rgba(180, 140, 0, 0.7); color: rgba(160, 120, 0, 0.85); }
+    /* ── Coming Soon ── */
+    .coming-soon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: calc(100vh - 80px);
+      text-align: center;
+      color: #9ca3af;
+      -webkit-app-region: drag;
+    }
+    .coming-soon .cs-icon { font-size: 46px; margin-bottom: 14px; -webkit-app-region: no-drag; }
+    .coming-soon h2 { font-size: 18px; font-weight: 600; color: #374151; margin-bottom: 8px; -webkit-app-region: no-drag; }
+    .coming-soon p { font-size: 13px; max-width: 280px; line-height: 1.6; -webkit-app-region: no-drag; }
+
+    /* ── Handbook ── */
+    #mod-handbook.active { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+    .hb-topbar { padding: 22px 28px 14px; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; -webkit-app-region: drag; }
+    .hb-topbar-inner { display: flex; align-items: center; gap: 14px; -webkit-app-region: no-drag; }
+    .hb-title { font-size: 20px; font-weight: 700; color: #111; flex-shrink: 0; }
+    .hb-search { flex: 1; max-width: 360px; padding: 7px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; outline: none; background: #f9fafb; }
+    .hb-search:focus { border-color: #c9a84c; background: #fff; }
+    .hb-body { display: flex; flex: 1; overflow: hidden; }
+    .hb-toc { width: 220px; flex-shrink: 0; overflow-y: auto; border-right: 1px solid #e5e7eb; padding: 20px 0 40px; }
+    .hb-toc-item { display: block; padding: 5px 18px; font-size: 12px; color: #6b7280; cursor: pointer; border-left: 2px solid transparent; transition: color 0.1s, border-color 0.1s; line-height: 1.4; -webkit-user-select: none; }
+    .hb-toc-item:hover { color: #111; }
+    .hb-toc-item.toc-h1 { font-weight: 700; color: #374151; font-size: 12px; margin-top: 10px; }
+    .hb-toc-item.toc-h2 { padding-left: 28px; }
+    .hb-toc-item.toc-h3 { padding-left: 40px; font-size: 11px; }
+    .hb-toc-item.active { color: #111; border-left-color: #c9a84c; }
+    .hb-content { flex: 1; overflow-y: auto; padding: 32px 52px 60px; max-width: 760px; }
+    .hb-content h1 { font-size: 22px; font-weight: 800; color: #111; margin: 36px 0 12px; padding-top: 8px; border-top: 2px solid #e5e7eb; }
+    .hb-content h1:first-child { margin-top: 0; border-top: none; }
+    .hb-content h2 { font-size: 16px; font-weight: 700; color: #1f2937; margin: 26px 0 8px; }
+    .hb-content h3 { font-size: 13px; font-weight: 700; color: #374151; margin: 18px 0 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .hb-content p  { font-size: 13px; color: #374151; line-height: 1.75; margin-bottom: 10px; }
+    .hb-content ul { margin: 6px 0 12px 20px; }
+    .hb-content li { font-size: 13px; color: #374151; line-height: 1.7; margin-bottom: 3px; }
+    .hb-content a  { color: #3b82f6; text-decoration: none; }
+    .hb-content a:hover { text-decoration: underline; }
+    .hb-content mark { background: #fef08a; border-radius: 2px; padding: 0 1px; }
+    .hb-loading { display: flex; align-items: center; justify-content: center; flex: 1; color: #9ca3af; font-size: 13px; flex-direction: column; gap: 14px; }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-top">
+    <img src="../assets/logo.svg" alt="Sebastian Gladstone" class="sidebar-logo">
+  </div>
+
+  <nav class="nav-section">
+    <div class="nav-label">Finance</div>
+    <div class="nav-item active" onclick="showModule('expenses', this)">
+      <span class="nav-icon">💸</span> Expenses
+    </div>
+    <div class="nav-item" onclick="showModule('invoices', this)">
+      <span class="nav-icon">📋</span> Contractor Invoices
+    </div>
+
+    <div class="nav-label">Logistics</div>
+    <div class="nav-item" onclick="showModule('shipping', this)">
+      <span class="nav-icon">📦</span> Shipping &amp; Movements
+    </div>
+    <div class="nav-item" onclick="showModule('books', this)">
+      <span class="nav-icon">📚</span> Books
+    </div>
+
+    <div class="nav-label">Studio</div>
+    <div class="nav-item" onclick="showModule('gallery', this)">
+      <span class="nav-icon">🗓</span> Exhibition Schedule
+    </div>
+    <div class="nav-item" onclick="showModule('operations', this)">
+      <span class="nav-icon">📅</span> Operations
+    </div>
+    <div class="nav-item" onclick="showModule('bol', this)">
+      <span class="nav-icon">📦</span> BOL Tracker
+    </div>
+    <div class="nav-item" onclick="showModule('backtag', this)">
+      <span class="nav-icon">🏷</span> Back Tags
+    </div>
+
+    <div class="nav-label">Artists</div>
+    <div class="nav-item" onclick="showModule('bennet', this)">
+      <span class="nav-icon">🎨</span> Bennet Schlesinger
+    </div>
+
+    <div class="nav-label">Company</div>
+    <div class="nav-item" onclick="showModule('handbook', this)">
+      <span class="nav-icon">📖</span> Company Handbook
+    </div>
+  </nav>
+
+  <div class="sidebar-quick-links">
+    <button class="ql-btn" onclick="window.open('https://drive.google.com/drive/u/0/folders/1SaiY0KVhBgL-giWpCl5P47ZOQYKsbsUd')">G-D</button>
+    <button class="ql-btn" onclick="window.open('https://website-artlogicwebsite0261.artlogic.net/admin/')">W</button>
+    <button class="ql-btn" onclick="window.open('https://app.squareup.com/dashboard/')">SQ</button>
+    <button class="ql-btn" onclick="window.open('https://www.fedex.com/secure-login/en-us/#/credentials')">FX</button>
+    <button class="ql-btn" onclick="window.open('https://www.dropbox.com/home')">DB</button>
+  </div>
+  <div class="sidebar-footer">v1.0.0</div>
+</aside>
+
+<!-- ══ CONTENT ══ -->
+<main class="content">
+
+  <!-- EXPENSES -->
+  <section id="mod-expenses" class="module active">
+    <div class="module-header">
+      <div class="module-title">Expenses</div>
+      <div class="module-subtitle">Upload receipts — saved to Drive &amp; logged to sheet</div>
+    </div>
+    <div class="form-card">
+      <div id="exp-form">
+        <div class="drop-zone" id="exp-dropZone">
+          <div class="dz-icon" id="exp-dzIcon">📎</div>
+          <div class="dz-label" id="exp-dzLabel">Drop receipts here or click — select multiple</div>
+          <div class="dz-name" id="exp-dzName"></div>
+        </div>
+        <input type="file" id="exp-fileInput" accept="image/*,.pdf" multiple style="display:none">
+
+        <div class="loc-row">
+          <button class="loc-btn" id="exp-btn-nyc" onclick="setLoc('exp','NYC')">🗽 NYC</button>
+          <button class="loc-btn" id="exp-btn-la"  onclick="setLoc('exp','LA')">🌴 LA</button>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Vendor</label>
+            <input type="text" id="exp-vendor" placeholder="e.g. Adobe, FedEx">
+          </div>
+          <div class="field">
+            <label>Amount ($)</label>
+            <input type="number" id="exp-amount" placeholder="0.00" step="0.01" min="0">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Category</label>
+            <select id="exp-category">
+              <option value="">Select…</option>
+              <option>Advertising</option>
+              <option>Art Handling</option>
+              <option>Bennet Expense</option>
+              <option>Cleaning</option>
+              <option>Construction</option>
+              <option>Framing</option>
+              <option>General Operation Expense</option>
+              <option>Materials</option>
+              <option>Office Supplies</option>
+              <option>Opening Expenses</option>
+              <option>Photo</option>
+              <option>Production</option>
+              <option>Publishing</option>
+              <option>Security</option>
+              <option>Shipping</option>
+              <option>Show Expense</option>
+              <option>Software</option>
+              <option>Storage</option>
+              <option>Taxes</option>
+              <option>Utilities</option>
+              <option>Vehicle Rental</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Account</label>
+            <select id="exp-account">
+              <option value="">Select…</option>
+              <option>AmEx 1034 - Gold</option>
+              <option>AmEx 1016 _ Plat</option>
+              <option>Amex 1004</option>
+              <option>AmEx 7399</option>
+              <option>AMEX****3252</option>
+              <option>Checking 5560- NY</option>
+              <option>Checking 7129- LA</option>
+              <option>MasterCard9059</option>
+              <option>Visa 6251</option>
+              <option>CC 0129</option>
+              <option>Card 2002</option>
+              <option>Zelle</option>
+              <option>Cash</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Date</label>
+            <input type="date" id="exp-date">
+          </div>
+          <div class="field">
+            <label>Note</label>
+            <input type="text" id="exp-note" placeholder="Optional">
+          </div>
+        </div>
+
+        <div class="error-msg" id="exp-error"></div>
+        <button class="submit-btn" onclick="submitExpense()">Save Expense →</button>
+      </div>
+
+      <div id="exp-loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Saving receipt &amp; updating sheet…</p>
+      </div>
+
+      <div id="exp-success" class="success-overlay">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Expense Saved</div>
+        <div class="success-detail" id="exp-success-detail"></div>
+        <a class="success-link" id="exp-success-link" href="#" target="_blank">View receipt in Drive ↗</a><br>
+        <button class="again-btn" onclick="resetForm('exp')">+ Add Another</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTRACTOR INVOICES -->
+  <section id="mod-invoices" class="module">
+    <div class="module-header">
+      <div class="module-title">Contractor Invoices</div>
+      <div class="module-subtitle">Upload invoices — saved to Drive &amp; logged to sheet</div>
+    </div>
+    <div class="form-card">
+      <div id="inv-form">
+        <div class="drop-zone" id="inv-dropZone">
+          <div class="dz-icon" id="inv-dzIcon">📎</div>
+          <div class="dz-label" id="inv-dzLabel">Drop invoice here or click to upload</div>
+          <div class="dz-name" id="inv-dzName"></div>
+        </div>
+        <input type="file" id="inv-fileInput" accept="image/*,.pdf" style="display:none">
+
+        <div class="loc-row">
+          <button class="loc-btn" id="inv-btn-nyc" onclick="setLoc('inv','NYC')">🗽 NYC</button>
+          <button class="loc-btn" id="inv-btn-la"  onclick="setLoc('inv','LA')">🌴 LA</button>
+        </div>
+
+        <div class="form-full field">
+          <label>Contractor</label>
+          <select id="inv-contractor">
+            <option value="">Select contractor…</option>
+            <option>Chasen Wolcott</option>
+            <option>Jesus Cardenas</option>
+            <option>Jonathan Austin</option>
+            <option>Kial Hocker</option>
+            <option>Matthew Debbaudt</option>
+            <option>Sheila Alcibar</option>
+            <option>Stevie Soares</option>
+            <option>Sydney Busic</option>
+            <option>Yatta</option>
+          </select>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Invoice #</label>
+            <input type="text" id="inv-invoiceNum" placeholder="e.g. INV-001">
+          </div>
+          <div class="field">
+            <label>Amount ($)</label>
+            <input type="number" id="inv-amount" placeholder="0.00" step="0.01" min="0">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Date</label>
+            <input type="date" id="inv-date">
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <input type="text" id="inv-note" placeholder="Brief description">
+          </div>
+        </div>
+
+        <div class="error-msg" id="inv-error"></div>
+        <button class="submit-btn" onclick="submitInvoice()">Save Invoice →</button>
+      </div>
+
+      <div id="inv-loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Saving invoice &amp; updating sheet…</p>
+      </div>
+
+      <div id="inv-success" class="success-overlay">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Invoice Saved</div>
+        <div class="success-detail" id="inv-success-detail"></div>
+        <a class="success-link" id="inv-success-link" href="#" target="_blank">View invoice in Drive ↗</a><br>
+        <button class="again-btn" onclick="resetForm('inv')">+ Add Another</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY SCHEDULE -->
+  <section id="mod-gallery" class="module">
+    <div class="module-header">
+      <div class="module-title">Exhibition Schedule</div>
+      <div class="module-subtitle">Exhibition program — NY &amp; LA</div>
+    </div>
+    <div class="gallery-wrap">
+      <div class="year-toggle">
+        <button class="year-btn active" id="yr-THIS" onclick="setGalleryYear(THIS_YEAR, this)">THIS_YEAR</button>
+        <button class="year-btn" id="yr-NEXT" onclick="setGalleryYear(NEXT_YEAR, this)">NEXT_YEAR</button>
+        <button class="year-btn" style="margin-left:auto;font-weight:400;color:#888;font-size:13px;" onclick="refreshGallery()">↻ Refresh</button>
+      </div>
+      <div id="gallery-body">
+        <div class="gallery-loading">
+          <div class="spinner" style="margin:0 auto 10px;width:30px;height:30px;border-width:2px;"></div>
+          Loading schedule…
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OPERATIONS CALENDARS -->
+  <section id="mod-operations" class="module">
+    <div class="module-header">
+      <div class="module-title">Operations</div>
+      <div class="module-subtitle">NY &amp; LA operations calendars</div>
+    </div>
+    <div class="ops-wrap">
+      <div class="ops-grid">
+        <div class="ops-col">
+          <div class="ops-col-header nyc-hdr">🗽 NYC Operations</div>
+          <div class="ops-col-body nyc-tint"><div class="cal-overlay"></div>
+            <iframe class="ops-cal-frame"
+              src="https://calendar.google.com/calendar/embed?src=c_2a45070c7ac7165c99809dc722ac4b6a602664bcc9317da9b0ed6dc3c30ea7d1%40group.calendar.google.com&ctz=America%2FNew_York&showNav=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0&mode=AGENDA"
+              title="NYC Operations Calendar">
+            </iframe>
+          </div>
+        </div>
+        <div class="ops-col">
+          <div class="ops-col-header la-hdr">🌴 LA Operations</div>
+          <div class="ops-col-body la-tint"><div class="cal-overlay"></div>
+            <iframe class="ops-cal-frame"
+              src="https://calendar.google.com/calendar/embed?src=c_13f57c3abf55bc443c9eb2657908101f78c50f7ffc08dbac8593cadb4706ca16%40group.calendar.google.com&ctz=America%2FLos_Angeles&showNav=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0&mode=AGENDA"
+              title="LA Operations Calendar">
+            </iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- SHIPPING LOG -->
+  <section id="mod-shipping" class="module">
+    <div class="module-header">
+      <div class="module-title">Shipping &amp; Movements</div>
+      <div class="module-subtitle">Log artwork shipments and transfers</div>
+    </div>
+    <div class="form-card">
+
+      <div id="ship-form">
+        <!-- Direction -->
+        <div class="loc-row" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:20px;">
+          <button class="loc-btn" id="ship-btn-out"      onclick="setShipDir('OUT')">📤 OUT</button>
+          <button class="loc-btn" id="ship-btn-in"       onclick="setShipDir('IN')">📥 IN</button>
+          <button class="loc-btn" id="ship-btn-transfer" onclick="setShipDir('TRANSFER')">🔄 Transfer</button>
+        </div>
+
+        <!-- Date -->
+        <div class="form-grid">
+          <div class="field"><label>Date *</label><input type="date" id="ship-date"></div>
+        </div>
+
+        <!-- Photo (optional, multiple) -->
+        <div class="drop-zone" id="ship-dropZone" style="margin-bottom:20px;">
+          <div class="dz-icon" id="ship-dzIcon">📷</div>
+          <div class="dz-label" id="ship-dzLabel">Photos (optional) — drop or click, select multiple</div>
+          <div class="dz-name" id="ship-dzName"></div>
+        </div>
+        <input type="file" id="ship-fileInput" accept="image/*,.pdf" multiple style="display:none">
+
+        <!-- Artwork -->
+        <div class="form-full">
+          <div id="ship-art-new">
+            <div class="form-grid">
+              <div class="field"><label>Artist</label><select id="ship-artist">
+                  <option value="">Select artist…</option>
+            <option>Chad Murray</option>
+            <option>Clayton Schiff</option>
+            <option>Cosima zu Knyphausen</option>
+            <option>Darya Diamond</option>
+            <option>Dustin Hodges</option>
+            <option>Eli Peng</option>
+            <option>Emma McMillan</option>
+            <option>Emmanuel Louisnord Desir</option>
+            <option>Francis Picabia</option>
+            <option>Franne Davids</option>
+            <option>G.V. Rodriguez</option>
+            <option>Herman Cherry</option>
+            <option>Jason Nocito</option>
+            <option>Jiang Chiang</option>
+            <option>Kate Spencer Stewart</option>
+            <option>Luis Bermudez</option>
+            <option>Malcolm Kenter</option>
+            <option>Melvino Garretti</option>
+            <option>Nan Montgomery</option>
+            <option>Nevine Mahmoud</option>
+            <option>Nick Angelo</option>
+            <option>Nick Hoecker</option>
+            <option>Nihura Montiel</option>
+            <option>Timo Fahler</option>
+            <option>Tristan Unrau</option>
+                </select></div>
+              <div class="field"><label>Title</label><input type="text" id="ship-title-new" placeholder="Artwork title"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- From -->
+        <div class="field">
+          <label>From *</label>
+          <div class="ship-loc-row" id="ship-from-btns">
+            <button class="ship-loc-btn" onclick="setShipLoc('from','SGNY',this)">SGNY</button>
+            <button class="ship-loc-btn" onclick="setShipLoc('from','SGLA',this)">SGLA</button>
+            <button class="ship-loc-btn" onclick="setShipLoc('from','5523',this)">5523</button>
+            <button class="ship-loc-btn" onclick="setShipLoc('from','HangmanNY',this)">HangmanNY</button>
+            <button class="ship-loc-btn" onclick="setShipLoc('from','Private Collection',this)">Private Collection</button>
+            <button class="ship-loc-btn" onclick="setShipLoc('from','Framer',this)">Framer</button>
+            <button class="ship-loc-btn" onclick="setShipLoc('from','Artist',this)">Artist</button>
+            <button class="ship-loc-btn" onclick="setShipLoc('from','other',this)">Other…</button>
+          </div>
+          <input type="text" id="ship-from-other" class="ship-other-input" placeholder="Type location…" style="display:none" oninput="shipLocCustom('from',this.value)">
+        </div>
+
+        <!-- Via -->
+        <div class="field">
+          <label>Via *</label>
+          <select id="ship-via">
+            <option value="">Select carrier / handler…</option>
+            <optgroup label="Carriers">
+              <option>Hangman</option><option>Art Handlers Ltd</option>
+              <option>Crozier</option><option>Atelier 4</option>
+              <option>CRCS</option><option>YSDS</option>
+              <option>UPS</option><option>DHL</option>
+              <option>Private Courier</option><option>Will Call</option>
+            </optgroup>
+            <optgroup label="Art Handlers">
+              <option>Chase Wolcott</option><option>Sydney Busic</option>
+              <option>Steven NYC</option><option>Kial Hocker</option>
+            </optgroup>
+            <optgroup label="SG Staff">
+              <option>Sebastian Gladstone</option><option>Dylan Varner</option>
+              <option>Stevie Soares</option>
+            </optgroup>
+            <optgroup label="Other">
+              <option>Mendel</option><option>Other</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <!-- To -->
+        <div class="field">
+          <label>To *</label>
+          <div class="ship-loc-row" id="ship-to-btns">
+            <button class="ship-loc-btn" onclick="setShipLoc('to','SGNY',this)">SGNY</button>
+            <button class="ship-loc-btn" onclick="setShipLoc('to','SGLA',this)">SGLA</button>
+            <button class="ship-loc-btn" onclick="setShipLoc('to','5523',this)">5523</button>
+            <button class="ship-loc-btn" onclick="setShipLoc('to','HangmanNY',this)">HangmanNY</button>
+            <button class="ship-loc-btn" onclick="setShipLoc('to','Private Collection',this)">Private Collection</button>
+            <button class="ship-loc-btn" onclick="setShipLoc('to','Framer',this)">Framer</button>
+            <button class="ship-loc-btn" onclick="setShipLoc('to','Artist',this)">Artist</button>
+            <button class="ship-loc-btn" onclick="setShipLoc('to','other',this)">Other…</button>
+          </div>
+          <input type="text" id="ship-to-other" class="ship-other-input" placeholder="Type destination…" style="display:none" oninput="shipLocCustom('to',this.value)">
+        </div>
+
+        <!-- Notes -->
+        <div class="form-full field">
+          <label>Notes</label>
+          <input type="text" id="ship-notes" placeholder="Optional notes">
+        </div>
+
+        <div class="error-msg" id="ship-error"></div>
+        <button class="submit-btn" onclick="submitShippingLog()">Log Shipment →</button>
+      </div>
+
+      <div class="loading-overlay" id="ship-loading">
+        <div class="spinner"></div><p>Logging shipment…</p>
+      </div>
+
+      <div class="success-overlay" id="ship-success">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Shipment logged!</div>
+        <div class="success-detail" id="ship-success-detail"></div>
+        <a class="success-link" id="ship-success-link" href="#" target="_blank">View photo in Drive ↗</a><br>
+        <button class="again-btn" onclick="resetShipForm()">+ Log Another</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- BOL TRACKER -->
+  <section id="mod-bol" class="module">
+    <div class="module-header">
+      <div class="module-title">BOL Tracker</div>
+      <div class="module-subtitle">Upload a Bill of Lading — AI extracts the fields automatically</div>
+    </div>
+    <div style="max-width:560px;margin:28px auto 0;padding:0 24px 60px;">
+
+      <!-- UPLOAD -->
+      <div id="bol-upload">
+        <div id="bol-dropZone" class="drop-zone">
+          <input type="file" id="bol-fileInput" accept=".pdf,application/pdf" style="display:none">
+          <div class="dz-icon" id="bol-dzIcon">📄</div>
+          <div class="dz-label" id="bol-dzLabel">Drop PDF here or click to upload</div>
+          <div class="dz-name" id="bol-dzName"></div>
+        </div>
+        <div id="bol-error" class="error-msg" style="display:none"></div>
+        <button class="submit-btn" onclick="parseBOL()">🤖 Parse with AI</button>
+      </div>
+
+      <!-- PARSING LOADING -->
+      <div id="bol-parsing" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Reading BOL with Claude AI…</p>
+      </div>
+
+      <!-- REVIEW FORM -->
+      <div id="bol-review" style="display:none">
+        <p style="font-size:12px;color:#888;margin-bottom:18px;margin-top:4px;">Review and correct the extracted fields, then save.</p>
+        <div class="field-group">
+          <label class="field-label">BOL #</label>
+          <input type="text" id="bol-number" class="field-input" placeholder="BOL / PRO number">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Date</label>
+          <input type="date" id="bol-date" class="field-input">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Artist</label>
+          <input type="text" id="bol-artist" class="field-input" placeholder="Artist name">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Artwork</label>
+          <input type="text" id="bol-artwork" class="field-input" placeholder="Artwork title">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Carrier</label>
+          <input type="text" id="bol-carrier" class="field-input" placeholder="Carrier / shipper">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Origin</label>
+          <input type="text" id="bol-origin" class="field-input" placeholder="Origin address or location">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Destination</label>
+          <input type="text" id="bol-destination" class="field-input" placeholder="Destination address or location">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Pieces</label>
+          <input type="number" id="bol-pieces" class="field-input" placeholder="Number of pieces" min="1">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Notes</label>
+          <textarea id="bol-notes" class="field-input" rows="2" placeholder="Any additional notes" style="resize:vertical;font-family:inherit;font-size:13px;"></textarea>
+        </div>
+        <div id="bol-review-error" class="error-msg" style="display:none"></div>
+        <div style="display:flex;gap:10px;margin-top:6px;">
+          <button class="loc-btn" style="flex:0 0 auto;padding:10px 16px;" onclick="resetBOLForm()">← Back</button>
+          <button class="submit-btn" style="flex:1;margin-top:0;" onclick="saveBOL()">💾 Confirm &amp; Save</button>
+        </div>
+      </div>
+
+      <!-- SAVING LOADING -->
+      <div id="bol-saving" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Saving to Drive and logging…</p>
+      </div>
+
+      <!-- SUCCESS -->
+      <div id="bol-success" class="success-overlay">
+        <div class="success-icon">✅</div>
+        <div class="success-title">BOL Saved!</div>
+        <div class="success-detail" id="bol-success-detail"></div>
+        <a class="success-link" id="bol-success-link" href="#" target="_blank">View BOL in Drive ↗</a><br>
+        <button class="again-btn" onclick="resetBOLForm()">+ Log Another BOL</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- BOOKS -->
+  <section id="mod-books" class="module">
+    <div class="module-header">
+      <div class="module-title">Books</div>
+      <div class="module-subtitle">Log book sales and gifts — updates inventory</div>
+    </div>
+    <div class="form-card">
+      <div id="book-form">
+        <div class="loc-row">
+          <button class="loc-btn" id="book-btn-nyc" onclick="setBookLoc('NYC')">🗽 NYC</button>
+          <button class="loc-btn" id="book-btn-la"  onclick="setBookLoc('LA')">🌴 LA</button>
+        </div>
+        <div class="form-full field">
+          <label>Book</label>
+          <select id="book-select" onchange="updateBookStockBadge()">
+            <option value="">— select a location first —</option>
+          </select>
+        </div>
+        <div id="book-stock-badge" style="display:none;padding:9px 13px;background:#f0fdf4;border:1.5px solid #22c55e;border-radius:9px;font-size:13px;color:#16a34a;font-weight:600;margin-bottom:14px;"></div>
+        <div class="loc-row" style="margin-bottom:20px;">
+          <button class="loc-btn" id="book-btn-given" onclick="setBookTx('Given')">🎁 Given</button>
+          <button class="loc-btn" id="book-btn-sale"  onclick="setBookTx('Sale')">💰 Sale</button>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label>Client Name</label><input type="text" id="book-client" placeholder="Recipient or buyer"></div>
+          <div class="field"><label>Quantity</label><input type="number" id="book-qty" value="1" min="1"></div>
+        </div>
+        <div id="book-price-wrap" style="display:none">
+          <div class="form-full field"><label>Sale Price ($)</label><input type="number" id="book-price" step="0.01" placeholder="0.00"></div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label>Date</label><input type="date" id="book-date"></div>
+          <div class="field"><label>Notes</label><input type="text" id="book-notes" placeholder="Optional"></div>
+        </div>
+        <div class="error-msg" id="book-error"></div>
+        <button class="submit-btn" onclick="submitBookLog()">Log Book</button>
+      </div>
+      <div class="loading-overlay" id="book-loading"><div class="spinner"></div><p>Logging book transaction…</p></div>
+      <div class="success-overlay" id="book-success">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Book Logged</div>
+        <div class="success-detail" id="book-success-detail"></div>
+        <button class="again-btn" onclick="resetBookForm()">Log Another</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- BACK TAGS -->
+  <section id="mod-backtag" class="module">
+    <div class="module-header">
+      <div class="module-title">Back Tags</div>
+      <div class="module-subtitle">Drop an artwork checklist PDF — generates Avery 8163 label sheets</div>
+    </div>
+    <div style="max-width:520px;margin:28px auto 0;padding:0 24px 60px;">
+
+      <!-- DROP -->
+      <div id="bt-upload">
+        <div id="bt-dropZone" class="drop-zone" onclick="document.getElementById('bt-fileInput').click()"
+             ondragover="event.preventDefault();this.classList.add('dz-over')"
+             ondragleave="this.classList.remove('dz-over')"
+             ondrop="btHandleDrop(event)">
+          <input type="file" id="bt-fileInput" accept=".pdf,application/pdf" style="display:none"
+                 onchange="btSetFile(this.files[0])">
+          <div class="dz-icon" id="bt-dzIcon">📄</div>
+          <div class="dz-label" id="bt-dzLabel">Drop artwork PDF here or click to browse</div>
+          <div class="dz-name" id="bt-dzName" style="font-size:12px;color:#888;margin-top:4px;"></div>
+        </div>
+        <div id="bt-error" class="error-msg" style="display:none"></div>
+        <button class="submit-btn" onclick="btGenerate()">🏷 Generate Back Tags</button>
+      </div>
+
+      <!-- RUNNING -->
+      <div id="bt-running" class="loading-overlay" style="display:none">
+        <div class="spinner"></div>
+        <p id="bt-running-msg">Parsing PDF and building label sheets…</p>
+      </div>
+
+      <!-- SUCCESS -->
+      <div id="bt-success" class="success-overlay" style="display:none">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Back Tags Ready</div>
+        <div class="success-detail" id="bt-success-detail"></div>
+        <div id="bt-svg-links" style="margin:14px 0 6px;display:flex;flex-direction:column;gap:8px;"></div>
+        <button class="again-btn" onclick="btReset()">+ Generate Another</button>
+      </div>
+
+      <!-- PRINT INSTRUCTIONS -->
+      <div style="margin-top:40px;padding-top:24px;border-top:1px solid #e5e7eb;">
+        <p style="font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#9ca3af;margin:0 0 14px;">How to print</p>
+        <ol style="font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;font-size:13px;color:#6b7280;line-height:1.8;margin:0;padding-left:18px;">
+          <li>Drop your artwork checklist PDF into the upload area</li>
+          <li>Click <span style="color:#374151;font-weight:500;">Generate Back Tags</span></li>
+          <li>Click <span style="color:#374151;font-weight:500;">Show PDF in Finder</span></li>
+          <li>Open the file with <span style="color:#374151;font-weight:500;">Preview</span></li>
+          <li>Print — confirm scale is set to <span style="color:#374151;font-weight:500;">Actual Size</span></li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- BENNET SCHLESINGER -->
+  <section id="mod-bennet" class="module">
+    <div class="module-header">
+      <div class="module-title">Bennet Schlesinger</div>
+      <div class="module-subtitle">Commission pipeline &amp; inquiry log</div>
+    </div>
+
+    <!-- Status filters -->
+    <div class="bn-filters" id="bn-filters">
+      <button class="bn-filter-btn active" data-filter="all" onclick="bnSetFilter('all',this)">All</button>
+      <button class="bn-filter-btn" data-filter="Pre-Production" onclick="bnSetFilter('Pre-Production',this)">Pre-Production</button>
+      <button class="bn-filter-btn" data-filter="In Production" onclick="bnSetFilter('In Production',this)">In Production</button>
+      <button class="bn-filter-btn" data-filter="Ready-to-Ship" onclick="bnSetFilter('Ready-to-Ship',this)">Ready-to-Ship</button>
+      <button class="bn-filter-btn" data-filter="Will Call" onclick="bnSetFilter('Will Call',this)">Will Call</button>
+      <button class="bn-filter-btn" data-filter="Delivered" onclick="bnSetFilter('Delivered',this)">Delivered</button>
+      <button class="bn-filter-btn" data-filter="Inquiry" onclick="bnSetFilter('Inquiry',this)">Inquiry</button>
+    </div>
+
+    <!-- Commission cards -->
+    <div class="bn-grid" id="bn-grid">
+      <div class="bn-loading">Loading commissions…</div>
+    </div>
+
+    <!-- Inquiry panel -->
+    <div class="bn-inq-wrap">
+      <div class="bn-inq-header">Recent Inquiries</div>
+      <div class="bn-inq-scroll" id="bn-inq-scroll">
+        <div id="bn-inq-body">
+          <div class="bn-loading">Loading inquiries…</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bennet drawer overlay -->
+  <div class="bn-overlay" id="bn-overlay" onclick="bnCloseDrawer()"></div>
+  <div class="bn-drawer" id="bn-drawer">
+    <div class="bn-drawer-head">
+      <div>
+        <div class="bn-drawer-client" id="bnd-client">—</div>
+        <div class="bn-drawer-sub" id="bnd-title-year">—</div>
+      </div>
+      <button class="bn-close-btn" onclick="bnCloseDrawer()">✕</button>
+    </div>
+    <div class="bn-drawer-body">
+      <!-- Artwork -->
+      <div class="bn-section-label">Artwork</div>
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>Title</label>
+          <input type="text" id="bnd-title" placeholder="Title">
+        </div>
+        <div class="bn-field">
+          <label>Year</label>
+          <input type="text" id="bnd-year" placeholder="2024">
+        </div>
+        <div class="bn-field">
+          <label>Dimensions</label>
+          <input type="text" id="bnd-dimensions" placeholder='e.g. 24" × 36"'>
+        </div>
+        <div class="bn-field">
+          <label>Material</label>
+          <input type="text" id="bnd-material" placeholder="Oil on canvas">
+        </div>
+      </div>
+      <div class="bn-field-grid single" style="margin-top:10px;">
+        <div class="bn-field">
+          <label>Description</label>
+          <textarea id="bnd-description" placeholder="Brief description…"></textarea>
+        </div>
+      </div>
+
+      <!-- Financial -->
+      <div class="bn-section-label">Financial</div>
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>Price ($)</label>
+          <input type="text" id="bnd-price" placeholder="0.00">
+        </div>
+        <div class="bn-field">
+          <label>Sale Price ($)</label>
+          <input type="text" id="bnd-salePrice" placeholder="0.00">
+        </div>
+        <div class="bn-field">
+          <label>Bennet Payout ($)</label>
+          <input type="text" id="bnd-bennetPayout" placeholder="0.00">
+        </div>
+        <div class="bn-field">
+          <label>SG Invoice #</label>
+          <input type="text" id="bnd-sgInvoice" placeholder="INV-">
+        </div>
+        <div class="bn-field">
+          <label>Artist Paid</label>
+          <select id="bnd-artistPaid">
+            <option value="">—</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Partial">Partial</option>
+          </select>
+        </div>
+        <div class="bn-field">
+          <label>Gallery Paid</label>
+          <select id="bnd-galleryPaid">
+            <option value="">—</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Partial">Partial</option>
+          </select>
+        </div>
+      </div>
+      <div class="bn-field-grid single" style="margin-top:10px;">
+        <div class="bn-field">
+          <label>Payment Notes</label>
+          <input type="text" id="bnd-paymentNotes" placeholder="e.g. 50% deposit received">
+        </div>
+      </div>
+
+      <!-- Production -->
+      <div class="bn-section-label">Production</div>
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>Status</label>
+          <select id="bnd-status">
+            <option value="">—</option>
+            <option value="Inquiry">Inquiry</option>
+            <option value="Pre-Production">Pre-Production</option>
+            <option value="In Production">In Production</option>
+            <option value="Ready-to-Ship">Ready-to-Ship</option>
+            <option value="Will Call">Will Call</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        </div>
+        <div class="bn-field">
+          <label>Due Date</label>
+          <input type="date" id="bnd-dueDate">
+        </div>
+      </div>
+      <div class="bn-field-grid single" style="margin-top:10px;">
+        <div class="bn-field">
+          <label>Notes</label>
+          <textarea id="bnd-notes" placeholder="Production notes…"></textarea>
+        </div>
+      </div>
+
+      <!-- Shipping -->
+      <div class="bn-section-label">Shipping</div>
+      <div class="bn-field-grid single">
+        <div class="bn-field">
+          <label>Ship-to Address</label>
+          <textarea id="bnd-shipAddress" placeholder="Full shipping address…" style="min-height:56px;"></textarea>
+        </div>
+      </div>
+      <div class="bn-field-grid" style="margin-top:10px;">
+        <div class="bn-field">
+          <label>Shipper</label>
+          <input type="text" id="bnd-shipper" placeholder="FedEx / UPS / Hand-deliver">
+        </div>
+        <div class="bn-field">
+          <label>Shipping Ref</label>
+          <input type="text" id="bnd-shipRef" placeholder="">
+        </div>
+        <div class="bn-field">
+          <label>Tracking #</label>
+          <input type="text" id="bnd-tracking" placeholder="">
+        </div>
+        <div class="bn-field">
+          <label>Tracking Sent</label>
+          <select id="bnd-trackingSent">
+            <option value="">—</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="bn-section-label">Contact &amp; Files</div>
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>POC (email/phone)</label>
+          <input type="text" id="bnd-poc" placeholder="contact@email.com">
+        </div>
+        <div class="bn-field">
+          <label>File Reference</label>
+          <input type="text" id="bnd-fileRef" placeholder="Drive link or filename">
+        </div>
+      </div>
+    </div>
+    <div class="bn-drawer-foot">
+      <button class="bn-cancel-btn" onclick="bnCloseDrawer()">Cancel</button>
+      <button class="bn-save-btn" id="bn-save-btn" onclick="bnSave()">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- COMPANY HANDBOOK -->
+  <section id="mod-handbook" class="module">
+    <div class="hb-topbar">
+      <div class="hb-topbar-inner">
+        <div class="hb-title">📖 Company Handbook</div>
+        <input class="hb-search" id="hb-search" type="text" placeholder="Search handbook…" oninput="searchHandbook(this.value)">
+        <button class="again-btn" onclick="refreshHandbook()" style="flex-shrink:0;padding:7px 12px;font-size:12px;">↺ Refresh</button>
+      </div>
+    </div>
+    <div class="hb-body">
+      <div class="hb-toc" id="hb-toc"></div>
+      <div class="hb-content" id="hb-content">
+        <div class="hb-loading" id="hb-loading">
+          <div class="spinner"></div>
+          <span>Loading handbook…</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz1P-npzwQOt29cRu-uSh6VyZitHD8vWaCQnXtlnSDbUU44t47Y4pU-wbZqdKNyzaSl5g/exec';
+  const BENNET_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbylMvS8Qa60eKGe0kAooy96wKZkCvTy_4c75l3B7VdR9Q7xO-UF6BAjD5Z58f2IG4PR/exec';
+
+  const state = {
+    exp: { files: [], loc: null },
+    inv: { files: [], loc: null }
+  };
+  const shipState = { files: [], direction: null, from: null, to: null, artworkMode: 'new' };
+  const bookState = { loc: null, txType: null, loaded: false, books: [] };
+
+  // Set today's date on all forms
+  (function() {
+    const d = new Date();
+    const v = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    document.getElementById('exp-date').value  = v;
+    document.getElementById('inv-date').value  = v;
+    document.getElementById('ship-date').value = v;
+    document.getElementById('book-date').value = v;
+  })();
+
+  // Module switching
+  function showModule(name, el) {
+    document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('mod-' + name).classList.add('active');
+    el.classList.add('active');
+    if (name === 'gallery')  { loadGallery(); startGalleryAutoRefresh(); } else { stopGalleryAutoRefresh(); }
+    if (name === 'handbook') { loadHandbook(); }
+    if (name === 'bennet')   { bnLoad(); }
+  }
+
+  // ── Gallery ──
+  let _galleryRefreshTimer = null;
+  function startGalleryAutoRefresh() {
+    stopGalleryAutoRefresh();
+    _galleryRefreshTimer = setInterval(() => { galleryCache[THIS_YEAR] = null; galleryCache[NEXT_YEAR] = null; loadGallery(); }, 5 * 60 * 1000);
+  }
+  function stopGalleryAutoRefresh() {
+    if (_galleryRefreshTimer) { clearInterval(_galleryRefreshTimer); _galleryRefreshTimer = null; }
+  }
+  const galleryCache = {};
+  const galleryCacheTime = {};
+  const GALLERY_TTL = 5 * 60 * 1000; // 5 minutes
+  const THIS_YEAR = new Date().getFullYear();
+  const NEXT_YEAR = THIS_YEAR + 1;
+  // Inject dynamic years into year toggle buttons
+  document.getElementById('yr-THIS').textContent = THIS_YEAR;
+  document.getElementById('yr-THIS').setAttribute('onclick', 'setGalleryYear(' + THIS_YEAR + ', this)');
+  document.getElementById('yr-NEXT').textContent = NEXT_YEAR;
+  document.getElementById('yr-NEXT').setAttribute('onclick', 'setGalleryYear(' + NEXT_YEAR + ', this)');
+  let currentGalleryYear = THIS_YEAR;
+
+  function setGalleryYear(year, btn) {
+    currentGalleryYear = year;
+    document.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderGallery(year);
+  }
+
+  function refreshGallery() {
+    galleryCache[2026] = null;
+    galleryCache[2027] = null;
+    document.getElementById('gallery-body').innerHTML = '<div class="gallery-loading"><div class="spinner" style="margin:0 auto 10px;width:30px;height:30px;border-width:2px;"></div>Loading…</div>';
+    loadGallery();
+  }
+
+  function loadGallery() {
+    [2026, 2027].forEach(yr => {
+      const fresh = galleryCache[yr] && (Date.now() - (galleryCacheTime[yr] || 0) < GALLERY_TTL);
+      if (fresh) { if (yr === currentGalleryYear) renderGallery(yr); return; }
+      fetch(SCRIPT_URL + '?action=gallery&year=' + yr + '&t=' + Date.now())
+        .then(r => r.json())
+        .then(data => {
+          galleryCache[yr] = data; galleryCacheTime[yr] = Date.now();
+          if (yr === currentGalleryYear) renderGallery(yr);
+        })
+        .catch(() => {
+          galleryCache[yr] = { error: 'Could not load schedule.' }; galleryCacheTime[yr] = Date.now();
+          if (yr === currentGalleryYear) renderGallery(yr);
+        });
+    });
+  }
+
+  function renderGallery(year) {
+    const el   = document.getElementById('gallery-body');
+    const data = galleryCache[year];
+    if (!data) { return; }
+    if (data.error) { el.innerHTML = '<div class="gallery-empty">' + escHtml(data.error) + '</div>'; return; }
+
+    const nyc = (data.nyc || []).filter(s => s.artist || s.show);
+    const la  = (data.la  || []).filter(s => s.artist || s.show);
+
+    const renderList = shows => {
+      if (!shows.length) return '<div class="gallery-empty">No shows scheduled.</div>';
+      return shows.map(s => {
+        const name   = s.artist || s.show || '';
+        const cls    = s.active ? 'show-row is-active' : s.upcoming ? 'show-row is-upcoming' : 'show-row';
+        const dot    = s.active ? '<span class="show-now-dot"></span>' : '';
+        const dates  = s.start && s.end ? s.start + ' – ' + s.end : s.start || s.end || s.dates || '';
+        return `<div class="${cls}">
+          <span class="show-name-text">${dot}${escHtml(name)}</span>
+          <span class="show-dates-text">${escHtml(dates)}</span>
+        </div>`;
+      }).join('');
+    };
+
+    el.innerHTML = `<div class="schedule-grid">
+      <div><div class="loc-col-header">🗽 NY Gallery</div>${renderList(nyc)}</div>
+      <div><div class="loc-col-header">🌴 LA Gallery</div>${renderList(la)}</div>
+    </div>`;
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // Ship drop zone (photo optional)
+  (function() {
+    const dz = document.getElementById('ship-dropZone');
+    const fi = document.getElementById('ship-fileInput');
+    dz.addEventListener('click', () => fi.click());
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); if (e.dataTransfer.files.length) setShipFile(e.dataTransfer.files); });
+    fi.addEventListener('change', e => { if (e.target.files.length) setShipFile(e.target.files); });
+  })();
+
+  function setShipFile(fileList) {
+    shipState.files = Array.from(fileList);
+    document.getElementById('ship-dropZone').classList.add('has-file');
+    document.getElementById('ship-dzIcon').textContent  = '📷';
+    const n = shipState.files.length;
+    document.getElementById('ship-dzLabel').textContent = n + ' photo' + (n > 1 ? 's' : '') + ' selected';
+    document.getElementById('ship-dzName').textContent  = n > 1 ? shipState.files[0].name + ' + ' + (n-1) + ' more' : shipState.files[0].name;
+  }
+
+  function setShipDir(dir) {
+    shipState.direction = dir;
+    document.getElementById('ship-btn-out').className      = 'loc-btn' + (dir === 'OUT'      ? ' sel-nyc' : '');
+    document.getElementById('ship-btn-in').className       = 'loc-btn' + (dir === 'IN'       ? ' sel-la'  : '');
+    document.getElementById('ship-btn-transfer').className = 'loc-btn' + (dir === 'TRANSFER' ? ' sel-nyc' : '');
+  }
+
+  function setArtworkMode(mode) {
+    shipState.artworkMode = mode;
+    document.getElementById('ship-art-new').style.display     = mode === 'new' ? 'block' : 'none';
+    document.getElementById('ship-art-exist').style.display   = mode === 'existing' ? 'block' : 'none';
+    document.getElementById('ship-art-new-btn').className     = 'year-btn' + (mode === 'new' ? ' active' : '');
+    document.getElementById('ship-art-exist-btn').className   = 'year-btn' + (mode === 'existing' ? ' active' : '');
+  }
+
+  function setShipLoc(side, val, btn) {
+    document.getElementById('ship-' + side + '-btns').querySelectorAll('.ship-loc-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const otherEl = document.getElementById('ship-' + side + '-other');
+    if (val === 'other') { otherEl.style.display = 'block'; otherEl.focus(); shipState[side] = null; }
+    else { otherEl.style.display = 'none'; otherEl.value = ''; shipState[side] = val; }
+  }
+
+  function shipLocCustom(side, val) { shipState[side] = val || null; }
+
+  function submitShippingLog() {
+    hideError('ship');
+    if (!shipState.direction)  { showError('ship', 'Please select IN, OUT, or Transfer.'); return; }
+    if (!document.getElementById('ship-date').value) { showError('ship', 'Date is required.'); return; }
+    if (!shipState.from)       { showError('ship', 'Please set the From location.'); return; }
+    if (!shipState.to)         { showError('ship', 'Please set the To destination.'); return; }
+
+    const artwork = shipState.artworkMode === 'new'
+      ? document.getElementById('ship-title-new').value.trim()
+      : document.getElementById('ship-title-exist').value.trim();
+
+    const basePayload = {
+      type: 'shipping', direction: shipState.direction,
+      date: document.getElementById('ship-date').value,
+      artist: document.getElementById('ship-artist').value.trim(),
+      artwork: artwork,
+      from: shipState.from, via: document.getElementById('ship-via').value,
+      to: shipState.to, notes: document.getElementById('ship-notes').value.trim(),
+      fileName: '', mimeType: '', fileData: ''
+    };
+
+    const dirLabel = shipState.direction === 'OUT' ? '📤 OUT' : shipState.direction === 'IN' ? '📥 IN' : '🔄 Transfer';
+
+    const onDone = result => {
+      if (result.success) {
+        document.getElementById('ship-success-detail').textContent =
+          dirLabel + ' · ' + (basePayload.artwork || 'Artwork') + ' · ' + basePayload.from + ' → ' + basePayload.to;
+        const link = document.getElementById('ship-success-link');
+        if (result.fileUrl) { link.href = result.fileUrl; link.style.display = 'inline'; }
+        else link.style.display = 'none';
+        showState('ship', 'success');
+      } else { showState('ship', 'form'); showError('ship', result.error || 'Something went wrong.'); }
+    };
+
+    showState('ship', 'loading');
+
+    if (shipState.files.length > 0) {
+      // Submit first file as main log entry, then submit remaining photos sequentially
+      const sendFile = (idx, isFirst) => {
+        const f = shipState.files[idx];
+        const reader = new FileReader();
+        reader.onload = e => {
+          const p = Object.assign({}, basePayload, {
+            fileData: e.target.result.split(',')[1],
+            fileName: f.name,
+            mimeType: f.type || 'image/jpeg',
+            // Additional photos: same log entry but no duplicate sheet row
+            additionalPhoto: !isFirst
+          });
+          sendToServer(p, result => {
+            if (!result.success && isFirst) { showState('ship', 'form'); showError('ship', result.error || 'Something went wrong.'); return; }
+            if (idx + 1 < shipState.files.length) sendFile(idx + 1, false);
+            else if (isFirst || result.success) onDone(result);
+          });
+        };
+        reader.readAsDataURL(f);
+      };
+      sendFile(0, true);
+    } else {
+      sendToServer(basePayload, onDone);
+    }
+  }
+
+  function resetShipForm() {
+    shipState.files = []; shipState.direction = null; shipState.from = null; shipState.to = null; shipState.artworkMode = 'new';
+    document.getElementById('ship-dropZone').className = 'drop-zone';
+    document.getElementById('ship-dzIcon').textContent = '📷';
+    document.getElementById('ship-dzLabel').textContent = 'Photos (optional) — drop or click, select multiple';
+    document.getElementById('ship-dzName').textContent = '';
+    document.getElementById('ship-fileInput').value = '';
+    document.getElementById('ship-btn-out').className      = 'loc-btn';
+    document.getElementById('ship-btn-in').className       = 'loc-btn';
+    document.getElementById('ship-btn-transfer').className = 'loc-btn';
+    document.getElementById('ship-from-other').style.display = 'none';
+    document.getElementById('ship-to-other').style.display   = 'none';
+    document.getElementById('ship-from-btns').querySelectorAll('.ship-loc-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('ship-to-btns').querySelectorAll('.ship-loc-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('ship-via').value = '';
+    document.getElementById('ship-notes').value = '';
+    document.getElementById('ship-artist').value = '';
+    document.getElementById('ship-title-new').value = '';
+    document.getElementById('ship-title-exist').value = '';
+
+    showState('ship', 'form');
+    // set today's date
+    const d = new Date();
+    document.getElementById('ship-date').value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  // File drag & drop (multi-file)
+  ['exp', 'inv'].forEach(p => {
+    const dz = document.getElementById(p + '-dropZone');
+    const fi = document.getElementById(p + '-fileInput');
+    dz.addEventListener('click', () => fi.click());
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+    dz.addEventListener('drop', e => {
+      e.preventDefault();
+      dz.classList.remove('drag-over');
+      if (e.dataTransfer.files.length) setFile(p, e.dataTransfer.files);
+    });
+    fi.addEventListener('change', e => { if (e.target.files.length) setFile(p, e.target.files); });
+  });
+
+  function setFile(p, fileList) {
+    state[p].files = Array.from(fileList);
+    document.getElementById(p + '-dropZone').classList.add('has-file');
+    document.getElementById(p + '-dzIcon').textContent  = '📄';
+    const n = state[p].files.length;
+    document.getElementById(p + '-dzLabel').textContent = n + ' file' + (n > 1 ? 's' : '') + ' selected';
+    document.getElementById(p + '-dzName').textContent  = n > 1 ? state[p].files[0].name + ' + ' + (n-1) + ' more' : state[p].files[0].name;
+  }
+
+  function setLoc(p, loc) {
+    state[p].loc = loc;
+    document.getElementById(p + '-btn-nyc').className = 'loc-btn' + (loc === 'NYC' ? ' sel-nyc' : '');
+    document.getElementById(p + '-btn-la').className  = 'loc-btn' + (loc === 'LA'  ? ' sel-la'  : '');
+  }
+
+  // Submit expense (loops through multiple files)
+  function submitExpense() {
+    const p = 'exp';
+    hideError(p);
+    if (!state[p].files.length) { showError(p, 'Please attach a receipt.'); return; }
+    if (!state[p].loc)          { showError(p, 'Please select NYC or LA.'); return; }
+    if (!document.getElementById('exp-date').value) { showError(p, 'Date is required.'); return; }
+
+    showState(p, 'loading');
+    const files   = state[p].files;
+    let submitted = 0;
+    let lastResult = null;
+
+    const submitOne = idx => {
+      const f = files[idx];
+      const reader = new FileReader();
+      reader.onload = e => {
+        const payload = {
+          type:     'expense',
+          fileData: e.target.result.split(',')[1],
+          fileName: f.name,
+          mimeType: f.type || 'image/jpeg',
+          location: state[p].loc,
+          date:     document.getElementById('exp-date').value,
+          vendor:   document.getElementById('exp-vendor').value.trim(),
+          amount:   document.getElementById('exp-amount').value,
+          category: document.getElementById('exp-category').value,
+          account:  document.getElementById('exp-account').value,
+          note:     document.getElementById('exp-note').value.trim()
+        };
+        sendToServer(payload, result => {
+          if (!result.success) { showState(p, 'form'); showError(p, result.error || 'Something went wrong.'); return; }
+          submitted++;
+          lastResult = result;
+          if (idx + 1 < files.length) { submitOne(idx + 1); return; }
+          const plural = files.length > 1 ? files.length + ' receipts' : 'Receipt';
+          document.getElementById('exp-success-detail').textContent =
+            plural + ' · ' + payload.location + ' · ' + getMonthYear(payload.date);
+          const link = document.getElementById('exp-success-link');
+          if (lastResult.fileUrl) { link.href = lastResult.fileUrl; link.style.display = 'inline'; }
+          else { link.style.display = 'none'; }
+          showState(p, 'success');
+        });
+      };
+      reader.readAsDataURL(f);
+    };
+    submitOne(0);
+  }
+
+  // Submit invoice
+  function submitInvoice() {
+    const p = 'inv';
+    hideError(p);
+    if (!state[p].files.length)                                   { showError(p, 'Please attach an invoice.'); return; }
+    if (!state[p].loc)                                            { showError(p, 'Please select NYC or LA.'); return; }
+    if (!document.getElementById('inv-contractor').value)        { showError(p, 'Please select a contractor.'); return; }
+    if (!document.getElementById('inv-date').value)              { showError(p, 'Date is required.'); return; }
+
+    const invFile = state[p].files[0];
+    const reader = new FileReader();
+    reader.onload = e => {
+      const payload = {
+        type:        'invoice',
+        fileData:    e.target.result.split(',')[1],
+        fileName:    invFile.name,
+        mimeType:    invFile.type || 'image/jpeg',
+        location:    state[p].loc,
+        date:        document.getElementById('inv-date').value,
+        contractor:  document.getElementById('inv-contractor').value,
+        invoiceNum:  document.getElementById('inv-invoiceNum').value.trim(),
+        amount:      document.getElementById('inv-amount').value,
+        note:        document.getElementById('inv-note').value.trim()
+      };
+      showState(p, 'loading');
+      sendToServer(payload, result => {
+        if (result.success) {
+          document.getElementById('inv-success-detail').textContent =
+            payload.contractor + ' · ' + payload.location + ' · ' + getMonthYear(payload.date);
+          const link = document.getElementById('inv-success-link');
+          if (result.fileUrl) { link.href = result.fileUrl; link.style.display = 'inline'; }
+          else { link.style.display = 'none'; }
+          showState(p, 'success');
+        } else {
+          showState(p, 'form');
+          showError(p, result.error || 'Something went wrong.');
+        }
+      });
+    };
+    reader.readAsDataURL(invFile);
+  }
+
+  function sendToServer(payload, callback) {
+    fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+      .then(r => r.text())
+      .then(text => {
+        try { callback(JSON.parse(text)); }
+        catch { callback({ success: true }); }
+      })
+      .catch(err => callback({ success: false, error: err.message }));
+  }
+
+  function showState(p, s) {
+    const map = { form: p+'-form', loading: p+'-loading', success: p+'-success' };
+    Object.entries(map).forEach(([k, id]) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = k === s ? 'block' : 'none';
+    });
+  }
+
+  function showError(p, msg) {
+    const el = document.getElementById(p + '-error');
+    el.textContent = msg; el.style.display = 'block';
+  }
+  function hideError(p) { document.getElementById(p + '-error').style.display = 'none'; }
+
+  function getMonthYear(dateStr) {
+    const pts = dateStr.split('-');
+    const d = new Date(parseInt(pts[0]), parseInt(pts[1])-1, parseInt(pts[2]));
+    return ['January','February','March','April','May','June','July','August','September','October','November','December'][d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  // ── Books ──
+  function setBookLoc(l) {
+    bookState.loc = l;
+    document.getElementById('book-btn-nyc').className = 'loc-btn' + (l === 'NYC' ? ' sel-nyc' : '');
+    document.getElementById('book-btn-la').className  = 'loc-btn' + (l === 'LA'  ? ' sel-la'  : '');
+    if (!bookState.loaded) loadBookInventory();
+    else updateBookStockBadge();
+  }
+
+  function setBookTx(t) {
+    bookState.txType = t;
+    document.getElementById('book-btn-given').className = 'loc-btn' + (t === 'Given' ? ' sel-la'  : '');
+    document.getElementById('book-btn-sale').className  = 'loc-btn' + (t === 'Sale'  ? ' sel-nyc' : '');
+    document.getElementById('book-price-wrap').style.display = t === 'Sale' ? 'block' : 'none';
+  }
+
+  function loadBookInventory() {
+    const sel = document.getElementById('book-select');
+    sel.innerHTML = '<option value="">— loading… —</option>';
+    fetch(SCRIPT_URL + '?action=books&t=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        bookState.books  = data.books || [];
+        bookState.loaded = true;
+        sel.innerHTML = '<option value="">Select a book…</option>';
+        bookState.books.forEach(b => {
+          const opt = document.createElement('option');
+          opt.value = b.title; opt.textContent = b.title;
+          sel.appendChild(opt);
+        });
+        updateBookStockBadge();
+      })
+      .catch(() => { sel.innerHTML = '<option value="">— failed to load —</option>'; });
+  }
+
+  function updateBookStockBadge() {
+    const badge = document.getElementById('book-stock-badge');
+    const title = document.getElementById('book-select').value;
+    if (!title || !bookState.books.length) { badge.style.display = 'none'; return; }
+    const book = bookState.books.find(b => b.title === title);
+    if (!book) { badge.style.display = 'none'; return; }
+    const locStock = bookState.loc === 'LA' ? book.la : book.nyc;
+    badge.style.display = 'block';
+    badge.textContent = (bookState.loc || '?') + ' stock: ' + locStock + '  ·  Total: ' + (book.nyc + book.la);
+  }
+
+  function bookShowState(id) {
+    ['book-form','book-loading','book-success'].forEach(s =>
+      document.getElementById(s).style.display = s === id ? 'block' : 'none');
+  }
+
+  function submitBookLog() {
+    hideError('book');
+    if (!bookState.loc)    { showError('book', 'Please select a location.'); return; }
+    if (!document.getElementById('book-select').value) { showError('book', 'Please select a book.'); return; }
+    if (!bookState.txType) { showError('book', 'Please select Given or Sale.'); return; }
+
+    const payload = {
+      type:     'book_log',
+      location: bookState.loc,
+      book:     document.getElementById('book-select').value,
+      txType:   bookState.txType,
+      client:   document.getElementById('book-client').value.trim(),
+      qty:      document.getElementById('book-qty').value || 1,
+      price:    document.getElementById('book-price').value,
+      date:     document.getElementById('book-date').value,
+      notes:    document.getElementById('book-notes').value.trim(),
+    };
+
+    bookShowState('book-loading');
+    sendToServer(payload, result => {
+      if (result.success) {
+        document.getElementById('book-success-detail').textContent =
+          payload.book + ' · ' + payload.txType + ' · ' + bookState.loc + ' · Stock now: ' + (result.newStock ?? '—');
+        const book = bookState.books.find(b => b.title === payload.book);
+        if (book) { if (bookState.loc === 'LA') book.la = result.newStock; else book.nyc = result.newStock; }
+        bookShowState('book-success');
+      } else {
+        bookShowState('book-form');
+        showError('book', result.error || 'Something went wrong.');
+      }
+    });
+  }
+
+  function resetBookForm() {
+    bookState.txType = null;
+    document.getElementById('book-btn-given').className = 'loc-btn';
+    document.getElementById('book-btn-sale').className  = 'loc-btn';
+    document.getElementById('book-client').value = '';
+    document.getElementById('book-qty').value    = '1';
+    document.getElementById('book-price').value  = '';
+    document.getElementById('book-notes').value  = '';
+    document.getElementById('book-price-wrap').style.display = 'none';
+    hideError('book');
+    const d = new Date();
+    document.getElementById('book-date').value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    loadBookInventory();
+    bookShowState('book-form');
+  }
+
+  // ── Company Handbook ──
+  let hbData = null;
+  let hbLoaded = false;
+
+  function loadHandbook() {
+    if (hbLoaded) return;
+    document.getElementById('hb-loading').style.display = 'flex';
+    document.getElementById('hb-toc').innerHTML = '';
+    fetch(SCRIPT_URL + '?action=handbook&t=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) throw new Error(data.error);
+        hbData = data.items || [];
+        hbLoaded = true;
+        renderHandbook(hbData);
+      })
+      .catch(err => {
+        document.getElementById('hb-content').innerHTML =
+          '<p style="color:#ef4444;padding:20px;">Failed to load: ' + escHtml(err.message) + '</p>';
+        document.getElementById('hb-loading').style.display = 'none';
+      });
+  }
+
+  function refreshHandbook() {
+    hbLoaded = false;
+    hbData = null;
+    document.getElementById('hb-search').value = '';
+    document.getElementById('hb-content').innerHTML = '<div class="hb-loading" id="hb-loading" style="display:flex"><div class="spinner"></div><span>Loading handbook…</span></div>';
+    document.getElementById('hb-toc').innerHTML = '';
+    loadHandbook();
+  }
+
+  function renderHandbook(items) {
+    const toc     = document.getElementById('hb-toc');
+    const content = document.getElementById('hb-content');
+    const tocHtml = [];
+    const bodyHtml = [];
+    let   ulOpen   = false;
+
+    items.forEach(item => {
+      if (item.tag === 'h1') {
+        if (ulOpen) { bodyHtml.push('</ul>'); ulOpen = false; }
+        tocHtml.push(`<div class="hb-toc-item toc-h1" onclick="hbScrollTo('${item.id}')">${escHtml(item.text)}</div>`);
+        bodyHtml.push(`<h1 id="${item.id}">${escHtml(item.text)}</h1>`);
+      } else if (item.tag === 'h2') {
+        if (ulOpen) { bodyHtml.push('</ul>'); ulOpen = false; }
+        tocHtml.push(`<div class="hb-toc-item toc-h2" onclick="hbScrollTo('${item.id}')">${escHtml(item.text)}</div>`);
+        bodyHtml.push(`<h2 id="${item.id}">${escHtml(item.text)}</h2>`);
+      } else if (item.tag === 'h3') {
+        if (ulOpen) { bodyHtml.push('</ul>'); ulOpen = false; }
+        tocHtml.push(`<div class="hb-toc-item toc-h3" onclick="hbScrollTo('${item.id}')">${escHtml(item.text)}</div>`);
+        bodyHtml.push(`<h3 id="${item.id}">${escHtml(item.text)}</h3>`);
+      } else if (item.tag === 'li') {
+        if (!ulOpen) { bodyHtml.push('<ul>'); ulOpen = true; }
+        bodyHtml.push(`<li>${item.html}</li>`);
+      } else if (item.tag === 'p') {
+        if (ulOpen) { bodyHtml.push('</ul>'); ulOpen = false; }
+        bodyHtml.push(`<p>${item.html}</p>`);
+      }
+    });
+    if (ulOpen) bodyHtml.push('</ul>');
+
+    toc.innerHTML = tocHtml.join('');
+    content.innerHTML = bodyHtml.join('');
+
+    // Highlight active TOC item on scroll
+    const contentEl = content;
+    contentEl.addEventListener('scroll', hbUpdateActiveToc, { passive: true });
+  }
+
+  function hbScrollTo(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      document.getElementById('hb-content').scrollTo({ top: el.offsetTop - 20, behavior: 'smooth' });
+    }
+    document.querySelectorAll('.hb-toc-item').forEach(t => t.classList.remove('active'));
+    const tocItem = document.querySelector(`.hb-toc-item[onclick*="${id}"]`);
+    if (tocItem) tocItem.classList.add('active');
+  }
+
+  function hbUpdateActiveToc() {
+    const contentEl = document.getElementById('hb-content');
+    const headings  = contentEl.querySelectorAll('h1[id], h2[id], h3[id]');
+    let   active    = null;
+    headings.forEach(h => {
+      if (h.offsetTop - 60 <= contentEl.scrollTop) active = h.id;
+    });
+    if (active) {
+      document.querySelectorAll('.hb-toc-item').forEach(t => {
+        t.classList.toggle('active', t.getAttribute('onclick') && t.getAttribute('onclick').includes(active));
+      });
+    }
+  }
+
+  function searchHandbook(query) {
+    if (!hbData) return;
+    query = query.trim();
+    if (!query) { renderHandbook(hbData); return; }
+
+    const q   = query.toLowerCase();
+    const contentEl = document.getElementById('hb-content');
+    // Walk existing content and highlight/hide
+    const allEls = contentEl.querySelectorAll('h1,h2,h3,p,li');
+    let any = false;
+    allEls.forEach(el => {
+      const text = el.textContent.toLowerCase();
+      if (text.includes(q)) {
+        el.style.display = '';
+        // Highlight match
+        el.innerHTML = el.innerHTML.replace(/<mark>/g,'').replace(/<\/mark>/g,'');
+        el.innerHTML = hbHighlight(el.innerHTML, query);
+        any = true;
+      } else if (el.tagName.match(/^H[123]$/)) {
+        el.style.display = 'none';
+      } else {
+        el.style.display = 'none';
+      }
+    });
+    if (!any) contentEl.innerHTML += '<p style="color:#9ca3af;padding:20px 0;">No results for "' + escHtml(query) + '"</p>';
+  }
+
+  function hbHighlight(html, query) {
+    // Simple text-only highlight (avoids breaking HTML tags)
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    return html.replace(new RegExp('(?![^<]*>)(' + escaped + ')', 'gi'), '<mark>$1</mark>');
+  }
+
+  // ── BOL Tracker ──
+  const bolState = { fileData: null, fileName: null, mimeType: null };
+
+  (function() {
+    const dz = document.getElementById('bol-dropZone');
+    const fi = document.getElementById('bol-fileInput');
+    dz.addEventListener('click', () => fi.click());
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+    dz.addEventListener('drop', e => {
+      e.preventDefault(); dz.classList.remove('drag-over');
+      if (e.dataTransfer.files.length) setBOLFile(e.dataTransfer.files[0]);
+    });
+    fi.addEventListener('change', e => { if (e.target.files.length) setBOLFile(e.target.files[0]); });
+  })();
+
+  function setBOLFile(f) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      bolState.fileData = e.target.result.split(',')[1];
+      bolState.fileName = f.name;
+      bolState.mimeType = f.type || 'application/pdf';
+      document.getElementById('bol-dropZone').classList.add('has-file');
+      document.getElementById('bol-dzIcon').textContent  = '📄';
+      document.getElementById('bol-dzLabel').textContent = 'PDF ready';
+      document.getElementById('bol-dzName').textContent  = f.name;
+    };
+    reader.readAsDataURL(f);
+  }
+
+  function bolShowState(id) {
+    ['bol-upload','bol-parsing','bol-review','bol-saving','bol-success'].forEach(s => {
+      const el = document.getElementById(s);
+      el.style.display = s === id ? (s === 'bol-parsing' || s === 'bol-saving' ? 'block' : 'block') : 'none';
+    });
+  }
+
+  function parseBOL() {
+    const errEl = document.getElementById('bol-error');
+    errEl.style.display = 'none';
+    if (!bolState.fileData) {
+      errEl.textContent = 'Please attach a PDF first.';
+      errEl.style.display = 'block'; return;
+    }
+    bolShowState('bol-parsing');
+    sendToServer({ type: 'parse_bol', fileData: bolState.fileData, fileName: bolState.fileName, mimeType: bolState.mimeType }, result => {
+      if (!result.success) {
+        bolShowState('bol-upload');
+        errEl.textContent = result.error || 'Parse failed — try again.';
+        errEl.style.display = 'block'; return;
+      }
+      const f = result.fields || {};
+      // Populate review form
+      if (f.date) {
+        try {
+          const d = new Date(f.date);
+          if (!isNaN(d.getTime())) {
+            document.getElementById('bol-date').value =
+              d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+          }
+        } catch(e) { document.getElementById('bol-date').value = ''; }
+      }
+      document.getElementById('bol-number').value      = f.bol_number  || '';
+      document.getElementById('bol-artist').value      = f.artist      || '';
+      document.getElementById('bol-artwork').value     = f.artwork     || '';
+      document.getElementById('bol-carrier').value     = f.carrier     || '';
+      document.getElementById('bol-origin').value      = f.origin      || '';
+      document.getElementById('bol-destination').value = f.destination || '';
+      document.getElementById('bol-pieces').value      = f.pieces      || '';
+      document.getElementById('bol-notes').value       = f.notes       || '';
+      bolShowState('bol-review');
+    });
+  }
+
+  function saveBOL() {
+    const errEl = document.getElementById('bol-review-error');
+    errEl.style.display = 'none';
+    const artist  = document.getElementById('bol-artist').value.trim();
+    const artwork = document.getElementById('bol-artwork').value.trim();
+    if (!artist)  { errEl.textContent = 'Artist is required.'; errEl.style.display = 'block'; return; }
+    if (!artwork) { errEl.textContent = 'Artwork is required.'; errEl.style.display = 'block'; return; }
+    bolShowState('bol-saving');
+    const dateVal = document.getElementById('bol-date').value;
+    sendToServer({
+      type:        'save_bol',
+      fileData:    bolState.fileData,
+      fileName:    bolState.fileName,
+      mimeType:    bolState.mimeType,
+      bol_number:  document.getElementById('bol-number').value.trim(),
+      date:        dateVal,
+      artist:      artist,
+      artwork:     artwork,
+      carrier:     document.getElementById('bol-carrier').value.trim(),
+      origin:      document.getElementById('bol-origin').value.trim(),
+      destination: document.getElementById('bol-destination').value.trim(),
+      pieces:      document.getElementById('bol-pieces').value,
+      notes:       document.getElementById('bol-notes').value.trim()
+    }, result => {
+      if (result.success) {
+        document.getElementById('bol-success-detail').textContent =
+          artist + ' · ' + artwork + (dateVal ? ' · ' + dateVal : '');
+        const link = document.getElementById('bol-success-link');
+        if (result.fileUrl) { link.href = result.fileUrl; link.style.display = 'inline'; }
+        else link.style.display = 'none';
+        bolShowState('bol-success');
+      } else {
+        bolShowState('bol-review');
+        errEl.textContent = result.error || 'Something went wrong.';
+        errEl.style.display = 'block';
+      }
+    });
+  }
+
+  function resetBOLForm() {
+    bolState.fileData = null; bolState.fileName = null; bolState.mimeType = null;
+    document.getElementById('bol-dropZone').className = 'drop-zone';
+    document.getElementById('bol-dzIcon').textContent  = '📄';
+    document.getElementById('bol-dzLabel').textContent = 'Drop PDF here or click to upload';
+    document.getElementById('bol-dzName').textContent  = '';
+    document.getElementById('bol-fileInput').value     = '';
+    document.getElementById('bol-error').style.display = 'none';
+    document.getElementById('bol-review-error').style.display = 'none';
+    bolShowState('bol-upload');
+  }
+
+  function resetForm(p) {
+    state[p] = { files: [], loc: null };
+    const dz = document.getElementById(p + '-dropZone');
+    dz.className = 'drop-zone';
+    document.getElementById(p + '-dzIcon').textContent  = '📎';
+    document.getElementById(p + '-dzLabel').textContent = p === 'exp' ? 'Drop receipts here or click — select multiple' : 'Drop invoice here or click to upload';
+    document.getElementById(p + '-dzName').textContent  = '';
+    document.getElementById(p + '-fileInput').value     = '';
+    document.getElementById(p + '-btn-nyc').className   = 'loc-btn';
+    document.getElementById(p + '-btn-la').className    = 'loc-btn';
+
+    if (p === 'exp') {
+      ['vendor','amount','note'].forEach(id => document.getElementById('exp-'+id).value = '');
+      document.getElementById('exp-category').value = '';
+      document.getElementById('exp-account').value  = '';
+    } else {
+      ['invoiceNum','amount','note'].forEach(id => document.getElementById('inv-'+id).value = '');
+      document.getElementById('inv-contractor').value = '';
+    }
+
+    const d = new Date();
+    const v = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    document.getElementById(p + '-date').value = v;
+    showState(p, 'form');
+  }
+
+  // ── Back Tags ──
+  let _btFile = null;
+
+  function btHandleDrop(e) {
+    e.preventDefault();
+    document.getElementById('bt-dropZone').classList.remove('dz-over');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type === 'application/pdf') btSetFile(f);
+    else { document.getElementById('bt-error').textContent = 'Please drop a PDF file.'; document.getElementById('bt-error').style.display = 'block'; }
+  }
+
+  function btSetFile(f) {
+    _btFile = f;
+    document.getElementById('bt-dzIcon').textContent = '📋';
+    document.getElementById('bt-dzLabel').textContent = 'PDF selected';
+    document.getElementById('bt-dzName').textContent = f.name;
+    document.getElementById('bt-error').style.display = 'none';
+  }
+
+  function btShow(id) {
+    ['bt-upload','bt-running','bt-success'].forEach(s =>
+      document.getElementById(s).style.display = s === id ? 'block' : 'none'
+    );
+  }
+
+  async function btGenerate() {
+    if (!_btFile) {
+      document.getElementById('bt-error').textContent = 'Please select a PDF first.';
+      document.getElementById('bt-error').style.display = 'block';
+      return;
+    }
+    const pdfPath = _btFile.path;
+    if (!pdfPath) {
+      document.getElementById('bt-error').textContent = 'Could not read file path. Try using the browse button instead of drag-and-drop.';
+      document.getElementById('bt-error').style.display = 'block';
+      return;
+    }
+
+    document.getElementById('bt-error').style.display = 'none';
+    btShow('bt-running');
+
+    try {
+      const result = await window.sgg.runBacktag(pdfPath);
+
+      btShow('bt-success');
+      document.getElementById('bt-success-detail').textContent =
+        'Ready to print on Avery 8163';
+
+      const linksEl = document.getElementById('bt-svg-links');
+      linksEl.innerHTML = '';
+      const btn = document.createElement('button');
+      btn.className = 'again-btn';
+      btn.style.cssText = 'width:100%;text-align:left;padding:10px 14px;font-size:13px;';
+      btn.textContent = '📂 Show PDF in Finder';
+      btn.onclick = () => window.sgg.showInFinder(result.pdfPath);
+      linksEl.appendChild(btn);
+    } catch(err) {
+      btShow('bt-upload');
+      document.getElementById('bt-error').textContent = 'Error: ' + err.message;
+      document.getElementById('bt-error').style.display = 'block';
+    }
+  }
+
+  function btReset() {
+    _btFile = null;
+    document.getElementById('bt-dzIcon').textContent = '📄';
+    document.getElementById('bt-dzLabel').textContent = 'Drop artwork PDF here or click to browse';
+    document.getElementById('bt-dzName').textContent = '';
+    document.getElementById('bt-error').style.display = 'none';
+    document.getElementById('bt-fileInput').value = '';
+    document.getElementById('bt-svg-links').innerHTML = '';
+    btShow('bt-upload');
+  }
+
+  // ─────────────────────────────────────────
+  // BENNET SCHLESINGER MODULE
+  // ─────────────────────────────────────────
+  let _bnCommissions = [];
+  let _bnFilter      = 'all';
+  let _bnActiveRow   = null;
+
+  function bnLoad() {
+    if (!BENNET_SCRIPT_URL || BENNET_SCRIPT_URL === 'PASTE_BENNET_SCRIPT_URL_HERE') {
+      document.getElementById('bn-grid').innerHTML =
+        '<div class="bn-empty">Script URL not configured — see BENNET_SCRIPT_URL in code.</div>';
+      return;
+    }
+    document.getElementById('bn-grid').innerHTML = '<div class="bn-loading">Loading commissions…</div>';
+    document.getElementById('bn-inq-body').innerHTML = '<div class="bn-loading">Loading inquiries…</div>';
+
+    fetch(BENNET_SCRIPT_URL + '?action=commissions')
+      .then(r => r.json())
+      .then(d => { _bnCommissions = d.commissions || []; bnRenderGrid(); })
+      .catch(() => {
+        document.getElementById('bn-grid').innerHTML = '<div class="bn-empty">Failed to load commissions.</div>';
+      });
+
+    fetch(BENNET_SCRIPT_URL + '?action=inquiries')
+      .then(r => r.json())
+      .then(d => bnRenderInquiries(d.inquiries || []))
+      .catch(() => {
+        document.getElementById('bn-inq-body').innerHTML = '<div class="bn-empty">Failed to load inquiries.</div>';
+      });
+  }
+
+  function bnSetFilter(val, btn) {
+    _bnFilter = val;
+    document.querySelectorAll('.bn-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    bnRenderGrid();
+  }
+
+  function bnRenderGrid() {
+    const grid = document.getElementById('bn-grid');
+    let list = _bnCommissions;
+    if (_bnFilter !== 'all') list = list.filter(c => (c.status || '').toLowerCase().trim() === _bnFilter.toLowerCase().trim());
+    if (!list.length) {
+      grid.innerHTML = '<div class="bn-empty">No commissions' + (_bnFilter !== 'all' ? ' with status "' + _bnFilter + '"' : '') + '.</div>';
+      return;
+    }
+    grid.innerHTML = list.map(c => bnCardHtml(c)).join('');
+  }
+
+  function bnStatusPillClass(status) {
+    const s = (status || '').toLowerCase().trim();
+    if (s === 'inquiry')        return 'bn-pill-inquiry';
+    if (s === 'pre-production') return 'bn-pill-preprod';
+    if (s === 'in production')  return 'bn-pill-inprod';
+    if (s === 'ready-to-ship')  return 'bn-pill-ready';
+    if (s === 'will call')      return 'bn-pill-willcall';
+    if (s === 'delivered')      return 'bn-pill-delivered';
+    return 'bn-pill-inquiry';
+  }
+
+  function bnCardColorClass(status) {
+    const s = (status || '').toLowerCase().trim();
+    if (s === 'in production')  return 'bn-card-inprod';
+    if (s === 'delivered')      return 'bn-card-delivered';
+    if (s === 'will call' || s === 'ready-to-ship') return 'bn-card-cornflower';
+    if (s === 'pre-production') return 'bn-card-preprod';
+    return '';
+  }
+
+  function bnCardHtml(c) {
+    const initials  = (c.client || '?').split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
+    const pillCls   = bnStatusPillClass(c.status);
+    const colorCls  = bnCardColorClass(c.status);
+    const price    = c.salePrice ? '$' + c.salePrice : (c.price ? '$' + c.price : '—');
+    const days     = parseInt(c.daysTilDue);
+    const delivered = (c.status || '').toLowerCase().trim() === 'delivered';
+    const dueLabel = delivered || isNaN(days) ? '' : (days < 0 ? 'Overdue ' + Math.abs(days) + 'd' : days + 'd left');
+    const dueUrgent = !delivered && !isNaN(days) && days <= 7;
+    return `<div class="bn-card ${colorCls}" onclick="bnOpenDrawer(${c.rowIndex})">
+      <div class="bn-card-header">
+        <div class="bn-initials">${initials}</div>
+        <div class="bn-card-meta">
+          <div class="bn-card-client">${c.client || '—'}</div>
+          <div class="bn-card-title">${c.title || '—'}${c.year ? ' · ' + c.year : ''}</div>
+        </div>
+      </div>
+      <span class="bn-pill ${pillCls}">${c.status || 'Unknown'}</span>
+      <div class="bn-card-footer">
+        <div class="bn-card-price">${price}</div>
+        ${dueLabel ? `<div class="bn-card-due${dueUrgent ? ' urgent' : ''}">${dueLabel}</div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  function bnOpenDrawer(rowIndex) {
+    const c = _bnCommissions.find(x => x.rowIndex === rowIndex);
+    if (!c) return;
+    _bnActiveRow = rowIndex;
+
+    // Header
+    document.getElementById('bnd-client').textContent    = c.client || '—';
+    document.getElementById('bnd-title-year').textContent = [c.title, c.year].filter(Boolean).join(' · ') || '—';
+
+    // Fields
+    const toInputDate = val => {
+      if (!val) return '';
+      // Already yyyy-MM-dd
+      if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
+      // Try parsing M/d/yyyy or M/d/yy etc.
+      const d = new Date(val);
+      if (!isNaN(d)) return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      return '';
+    };
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    set('bnd-title',        c.title);
+    set('bnd-year',         c.year);
+    set('bnd-dimensions',   c.dimensions);
+    set('bnd-material',     c.material);
+    set('bnd-description',  c.description);
+    set('bnd-price',        c.price);
+    set('bnd-salePrice',    c.salePrice);
+    set('bnd-bennetPayout', c.bennetPayout);
+    set('bnd-sgInvoice',    c.sgInvoice);
+    set('bnd-artistPaid',   c.artistPaid);
+    set('bnd-galleryPaid',  c.galleryPaid);
+    set('bnd-paymentNotes', c.paymentNotes);
+    set('bnd-status',       c.status);
+    document.getElementById('bnd-dueDate').value = toInputDate(c.dueDate);
+    set('bnd-notes',        c.notes);
+    set('bnd-shipAddress',  c.shipAddress);
+    set('bnd-shipper',      c.shipper);
+    set('bnd-shipRef',      c.shipRef);
+    set('bnd-tracking',     c.tracking);
+    set('bnd-trackingSent', c.trackingSent);
+    set('bnd-poc',          c.poc);
+    set('bnd-fileRef',      c.fileRef);
+
+    document.getElementById('bn-overlay').classList.add('open');
+    document.getElementById('bn-drawer').classList.add('open');
+    document.getElementById('bn-save-btn').disabled = false;
+    document.getElementById('bn-save-btn').textContent = 'Save Changes';
+  }
+
+  function bnCloseDrawer() {
+    document.getElementById('bn-overlay').classList.remove('open');
+    document.getElementById('bn-drawer').classList.remove('open');
+    _bnActiveRow = null;
+  }
+
+  function bnSave() {
+    if (!_bnActiveRow) return;
+    const btn = document.getElementById('bn-save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    const get = id => document.getElementById(id).value;
+    const updates = {
+      title:        get('bnd-title'),
+      year:         get('bnd-year'),
+      dimensions:   get('bnd-dimensions'),
+      material:     get('bnd-material'),
+      description:  get('bnd-description'),
+      price:        get('bnd-price'),
+      salePrice:    get('bnd-salePrice'),
+      bennetPayout: get('bnd-bennetPayout'),
+      sgInvoice:    get('bnd-sgInvoice'),
+      artistPaid:   get('bnd-artistPaid'),
+      galleryPaid:  get('bnd-galleryPaid'),
+      paymentNotes: get('bnd-paymentNotes'),
+      status:       get('bnd-status'),
+      dueDate:      get('bnd-dueDate'),
+      notes:        get('bnd-notes'),
+      shipAddress:  get('bnd-shipAddress'),
+      shipper:      get('bnd-shipper'),
+      shipRef:      get('bnd-shipRef'),
+      tracking:     get('bnd-tracking'),
+      trackingSent: get('bnd-trackingSent'),
+      poc:          get('bnd-poc'),
+      fileRef:      get('bnd-fileRef'),
+    };
+
+    fetch(BENNET_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ type: 'update_commission', rowIndex: _bnActiveRow, updates })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        // Update local cache
+        const idx = _bnCommissions.findIndex(x => x.rowIndex === _bnActiveRow);
+        if (idx !== -1) Object.assign(_bnCommissions[idx], updates);
+        bnRenderGrid();
+        btn.textContent = 'Saved ✓';
+        setTimeout(() => bnCloseDrawer(), 700);
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Save Changes';
+        alert('Save failed: ' + (d.error || 'Unknown error'));
+      }
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.textContent = 'Save Changes';
+      alert('Network error: ' + err);
+    });
+  }
+
+  function bnRenderInquiries(inquiries) {
+    const wrap   = document.getElementById('bn-inq-body');
+    const scroll = document.getElementById('bn-inq-scroll');
+    if (!inquiries.length) {
+      wrap.innerHTML = '<div class="bn-empty" style="padding:24px 0;">No inquiries yet.</div>';
+      return;
+    }
+
+    // Flexible column finder
+    const col = (row, ...keys) => {
+      for (const k of keys) {
+        const found = Object.keys(row).find(h => h.toLowerCase().includes(k.toLowerCase()));
+        if (found) return row[found] || '';
+      }
+      return '';
+    };
+
+    // Rows come in chronological order (oldest first), newest at bottom
+    const tiles = inquiries.map(inq => {
+      const date    = col(inq, 'timestamp', 'date', 'time');
+      const name    = col(inq, 'name', 'first');
+      const org     = col(inq, 'org', 'gallery', 'company');
+      const artwork = col(inq, 'artwork', 'title', 'piece');
+      const notes   = col(inq, 'notes', 'message', 'comment', 'inquiry');
+      const email   = col(inq, 'email', 'mail');
+      const dateStr = date ? date.split(' ')[0] : '—';
+      return `<div class="bn-inq-tile">
+        <div class="bn-inq-date">${dateStr}</div>
+        <div>
+          <div class="bn-inq-name">${name || '—'}</div>
+          ${org    ? `<div class="bn-inq-org">${org}</div>`         : ''}
+          ${artwork? `<div class="bn-inq-artwork">${artwork}</div>` : ''}
+          ${notes  ? `<div class="bn-inq-notes">${notes}</div>`     : ''}
+        </div>
+        <div>${email ? `<a class="bn-mailto" href="mailto:${email}">${email}</a>` : ''}</div>
+      </div>`;
+    }).join('');
+
+    wrap.innerHTML = tiles;
+
+    // Scroll to bottom so newest entries are visible first
+    requestAnimationFrame(() => { scroll.scrollTop = scroll.scrollHeight; });
+  }
+
+  // ESC closes drawer
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') bnCloseDrawer(); });
+</script>
+</body>
+</html>

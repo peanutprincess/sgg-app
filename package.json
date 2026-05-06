@@ -1,0 +1,29 @@
+{
+  "name": "sgg-app",
+  "version": "1.0.0",
+  "description": "Sebastian Gladstone — Internal Tools",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.sebastiangladstone.app",
+    "productName": "SG",
+    "mac": {
+      "category": "public.app-category.business",
+      "target": "dmg",
+      "icon": "assets/icon.icns"
+    },
+    "extraResources": [
+      {
+        "from": "assets/backtag_gen.py",
+        "to": "assets/backtag_gen.py"
+      }
+    ]
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  }
+}
