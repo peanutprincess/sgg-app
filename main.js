@@ -1,6 +1,7 @@
 const { app, BrowserWindow, shell, nativeImage, ipcMain } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
+const { autoUpdater } = require('electron-updater');
 
 app.name = 'SG';
 
@@ -161,6 +162,7 @@ ipcMain.handle('show-in-finder', (event, filePath) => {
 
 app.whenReady().then(() => {
   createWindow();
+  if (app.isPackaged) autoUpdater.checkForUpdatesAndNotify();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });

@@ -1308,9 +1308,12 @@
 
   <!-- BENNET SCHLESINGER -->
   <section id="mod-bennet" class="module">
-    <div class="module-header">
-      <div class="module-title">Bennet Schlesinger</div>
-      <div class="module-subtitle">Commission pipeline &amp; inquiry log</div>
+    <div class="module-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="module-title">Bennet Schlesinger</div>
+        <div class="module-subtitle">Commission pipeline &amp; inquiry log</div>
+      </div>
+      <button onclick="bnNewCommission()" style="background:#c9a84c;color:#000;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0.02em;-webkit-app-region:no-drag;">+ New Commission</button>
     </div>
 
     <!-- Status filters -->
@@ -1331,7 +1334,10 @@
 
     <!-- Inquiry panel -->
     <div class="bn-inq-wrap">
-      <div class="bn-inq-header">Recent Inquiries</div>
+      <div class="bn-inq-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Recent Inquiries</span>
+        <button onclick="bnNewInquiry()" style="background:#c9a84c;color:#000;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;-webkit-app-region:no-drag;">+ New Inquiry</button>
+      </div>
       <div class="bn-inq-scroll" id="bn-inq-scroll">
         <div id="bn-inq-body">
           <div class="bn-loading">Loading inquiries…</div>
@@ -1497,6 +1503,54 @@
     <div class="bn-drawer-foot">
       <button class="bn-cancel-btn" onclick="bnCloseDrawer()">Cancel</button>
       <button class="bn-save-btn" id="bn-save-btn" onclick="bnSave()">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- New Inquiry drawer -->
+  <div class="bn-overlay" id="bni-overlay" onclick="bniClose()"></div>
+  <div class="bn-drawer" id="bni-drawer">
+    <div class="bn-drawer-head">
+      <div>
+        <div class="bn-drawer-client">New Inquiry</div>
+        <div class="bn-drawer-sub">Add to Bennet Schlesinger Inquiry Log</div>
+      </div>
+      <button class="bn-close-btn" onclick="bniClose()">✕</button>
+    </div>
+    <div class="bn-drawer-body">
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>Date</label>
+          <input type="date" id="bni-date">
+        </div>
+        <div class="bn-field">
+          <label>Name</label>
+          <input type="text" id="bni-name" placeholder="Full name">
+        </div>
+        <div class="bn-field">
+          <label>Organization</label>
+          <input type="text" id="bni-org" placeholder="Gallery or company">
+        </div>
+        <div class="bn-field">
+          <label>Email</label>
+          <input type="text" id="bni-email" placeholder="email@example.com">
+        </div>
+      </div>
+      <div class="bn-field-grid single" style="margin-top:10px;">
+        <div class="bn-field">
+          <label>Artwork Inquired About</label>
+          <input type="text" id="bni-artwork" placeholder="Artwork title">
+        </div>
+      </div>
+      <div class="bn-field-grid single" style="margin-top:10px;">
+        <div class="bn-field">
+          <label>Notes</label>
+          <textarea id="bni-notes" placeholder="Notes or message…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="bn-drawer-foot">
+      <button class="bn-cancel-btn" onclick="bniClose()">Cancel</button>
+      <button class="bn-save-btn" id="bni-save-btn" onclick="bniSave()">Add Inquiry</button>
     </div>
   </div>
 
@@ -2383,6 +2437,87 @@
   let _bnFilter      = 'all';
   let _bnActiveRow   = null;
 
+  function bnNewCommission() {
+    _bnActiveRow = null;
+    // Clear header
+    document.getElementById('bnd-client').textContent     = 'New Commission';
+    document.getElementById('bnd-title-year').textContent = 'Fill in the details below';
+    // Clear all fields
+    ['bnd-title','bnd-year','bnd-dimensions','bnd-material','bnd-description',
+     'bnd-price','bnd-salePrice','bnd-bennetPayout','bnd-sgInvoice',
+     'bnd-artistPaid','bnd-galleryPaid','bnd-paymentNotes','bnd-status',
+     'bnd-dueDate','bnd-notes','bnd-shipAddress','bnd-shipper','bnd-shipRef',
+     'bnd-tracking','bnd-trackingSent','bnd-poc','bnd-fileRef'
+    ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    // Update save button
+    const btn = document.getElementById('bn-save-btn');
+    btn.disabled = false;
+    btn.textContent = 'Create Commission';
+    btn.onclick = bnCreate;
+    // Open drawer
+    document.getElementById('bn-overlay').classList.add('open');
+    document.getElementById('bn-drawer').classList.add('open');
+  }
+
+  function bnCreate() {
+    const btn = document.getElementById('bn-save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Creating…';
+
+    const get = id => document.getElementById(id).value;
+    const data = {
+      client:       get('bnd-client') === 'New Commission' ? '' : get('bnd-client'),
+      title:        get('bnd-title'),
+      year:         get('bnd-year'),
+      dimensions:   get('bnd-dimensions'),
+      material:     get('bnd-material'),
+      description:  get('bnd-description'),
+      price:        get('bnd-price'),
+      salePrice:    get('bnd-salePrice'),
+      bennetPayout: get('bnd-bennetPayout'),
+      sgInvoice:    get('bnd-sgInvoice'),
+      artistPaid:   get('bnd-artistPaid'),
+      galleryPaid:  get('bnd-galleryPaid'),
+      paymentNotes: get('bnd-paymentNotes'),
+      status:       get('bnd-status') || 'Inquiry',
+      dueDate:      get('bnd-dueDate'),
+      notes:        get('bnd-notes'),
+      shipAddress:  get('bnd-shipAddress'),
+      shipper:      get('bnd-shipper'),
+      shipRef:      get('bnd-shipRef'),
+      tracking:     get('bnd-tracking'),
+      trackingSent: get('bnd-trackingSent'),
+      poc:          get('bnd-poc'),
+      fileRef:      get('bnd-fileRef'),
+    };
+
+    fetch(BENNET_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ type: 'create_commission', data })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        btn.textContent = 'Created ✓';
+        setTimeout(() => {
+          bnCloseDrawer();
+          document.getElementById('bn-save-btn').onclick = bnSave;
+          bnLoad();
+        }, 700);
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Create Commission';
+        alert('Failed to create: ' + (d.error || 'Unknown error'));
+      }
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.textContent = 'Create Commission';
+      alert('Network error: ' + err);
+    });
+  }
+
   function bnLoad() {
     if (!BENNET_SCRIPT_URL || BENNET_SCRIPT_URL === 'PASTE_BENNET_SCRIPT_URL_HERE') {
       document.getElementById('bn-grid').innerHTML =
@@ -2523,6 +2658,10 @@
     document.getElementById('bn-overlay').classList.remove('open');
     document.getElementById('bn-drawer').classList.remove('open');
     _bnActiveRow = null;
+    const btn = document.getElementById('bn-save-btn');
+    btn.onclick = bnSave;
+    btn.textContent = 'Save Changes';
+    btn.disabled = false;
   }
 
   function bnSave() {
@@ -2601,8 +2740,8 @@
       return '';
     };
 
-    // Rows come in chronological order (oldest first), newest at bottom
-    const tiles = inquiries.map(inq => {
+    // Show newest first
+    const tiles = [...inquiries].reverse().map(inq => {
       const date    = col(inq, 'timestamp', 'date', 'time');
       const name    = col(inq, 'name', 'first');
       const org     = col(inq, 'org', 'gallery', 'company');
@@ -2628,8 +2767,67 @@
     requestAnimationFrame(() => { scroll.scrollTop = scroll.scrollHeight; });
   }
 
+  // ── New Inquiry ──
+  function bnNewInquiry() {
+    const today = new Date();
+    const v = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+    document.getElementById('bni-date').value    = v;
+    document.getElementById('bni-name').value    = '';
+    document.getElementById('bni-org').value     = '';
+    document.getElementById('bni-email').value   = '';
+    document.getElementById('bni-artwork').value = '';
+    document.getElementById('bni-notes').value   = '';
+    const btn = document.getElementById('bni-save-btn');
+    btn.disabled = false;
+    btn.textContent = 'Add Inquiry';
+    document.getElementById('bni-overlay').classList.add('open');
+    document.getElementById('bni-drawer').classList.add('open');
+  }
+
+  function bniClose() {
+    document.getElementById('bni-overlay').classList.remove('open');
+    document.getElementById('bni-drawer').classList.remove('open');
+  }
+
+  function bniSave() {
+    const btn = document.getElementById('bni-save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    const data = {
+      date:    document.getElementById('bni-date').value,
+      name:    document.getElementById('bni-name').value,
+      org:     document.getElementById('bni-org').value,
+      email:   document.getElementById('bni-email').value,
+      artwork: document.getElementById('bni-artwork').value,
+      notes:   document.getElementById('bni-notes').value,
+    };
+
+    fetch(BENNET_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ type: 'create_inquiry', data })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        btn.textContent = 'Added ✓';
+        setTimeout(() => { bniClose(); bnLoad(); }, 700);
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Add Inquiry';
+        alert('Failed: ' + (d.error || 'Unknown error'));
+      }
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.textContent = 'Add Inquiry';
+      alert('Network error: ' + err);
+    });
+  }
+
   // ESC closes drawer
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') bnCloseDrawer(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { bnCloseDrawer(); bniClose(); } });
 </script>
 </body>
 </html>
