@@ -1,6 +1,6 @@
 {
   "name": "sgg-app",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Sebastian Gladstone — Internal Tools",
   "main": "main.js",
   "scripts": {

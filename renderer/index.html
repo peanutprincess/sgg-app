@@ -1261,6 +1261,9 @@
         <button class="again-btn" onclick="resetBookForm()">Log Another</button>
       </div>
     </div>
+    <div style="text-align:center;padding:12px 0 4px;">
+      <a href="https://docs.google.com/spreadsheets/d/1IaEQLuCyzPwvshvqS36sEPqaHuRAw8p4Q-KZ2nsATRM/edit" target="_blank" style="font-size:11px;color:#9ca3af;text-decoration:none;">Book Inventory</a>
+    </div>
   </section>
 
   <!-- BACK TAGS -->
@@ -1635,14 +1638,15 @@
   let _galleryRefreshTimer = null;
   function startGalleryAutoRefresh() {
     stopGalleryAutoRefresh();
-    _galleryRefreshTimer = setInterval(() => { galleryCache[THIS_YEAR] = null; galleryCache[NEXT_YEAR] = null; loadGallery(); }, 5 * 60 * 1000);
+    // Background refresh every 15 min — silent, only re-renders if data changed
+    _galleryRefreshTimer = setInterval(() => loadGallery(), 15 * 60 * 1000);
   }
   function stopGalleryAutoRefresh() {
     if (_galleryRefreshTimer) { clearInterval(_galleryRefreshTimer); _galleryRefreshTimer = null; }
   }
   const galleryCache = {};
   const galleryCacheTime = {};
-  const GALLERY_TTL = 5 * 60 * 1000; // 5 minutes
+  const GALLERY_TTL = 15 * 60 * 1000; // 15 minutes
   const THIS_YEAR = new Date().getFullYear();
   const NEXT_YEAR = THIS_YEAR + 1;
   // Inject dynamic years into year toggle buttons
@@ -1660,25 +1664,37 @@
   }
 
   function refreshGallery() {
-    galleryCache[2026] = null;
-    galleryCache[2027] = null;
+    galleryCache[THIS_YEAR] = null;
+    galleryCache[NEXT_YEAR] = null;
     document.getElementById('gallery-body').innerHTML = '<div class="gallery-loading"><div class="spinner" style="margin:0 auto 10px;width:30px;height:30px;border-width:2px;"></div>Loading…</div>';
     loadGallery();
   }
 
   function loadGallery() {
-    [2026, 2027].forEach(yr => {
+    [THIS_YEAR, NEXT_YEAR].forEach(yr => {
+      // Show whatever is cached immediately — no waiting, no spinner
+      if (galleryCache[yr] && yr === currentGalleryYear) renderGallery(yr);
+
+      // Skip network call if cache is still fresh
       const fresh = galleryCache[yr] && (Date.now() - (galleryCacheTime[yr] || 0) < GALLERY_TTL);
-      if (fresh) { if (yr === currentGalleryYear) renderGallery(yr); return; }
+      if (fresh) return;
+
+      // Background fetch — re-render only if something actually changed
       fetch(SCRIPT_URL + '?action=gallery&year=' + yr + '&t=' + Date.now())
         .then(r => r.json())
         .then(data => {
-          galleryCache[yr] = data; galleryCacheTime[yr] = Date.now();
-          if (yr === currentGalleryYear) renderGallery(yr);
+          const changed = JSON.stringify(data) !== JSON.stringify(galleryCache[yr]);
+          galleryCache[yr] = data;
+          galleryCacheTime[yr] = Date.now();
+          if (yr === currentGalleryYear && changed) renderGallery(yr);
         })
         .catch(() => {
-          galleryCache[yr] = { error: 'Could not load schedule.' }; galleryCacheTime[yr] = Date.now();
-          if (yr === currentGalleryYear) renderGallery(yr);
+          // Only show error if we have nothing cached at all
+          if (!galleryCache[yr]) {
+            galleryCache[yr] = { error: 'Could not load schedule.' };
+            galleryCacheTime[yr] = Date.now();
+            if (yr === currentGalleryYear) renderGallery(yr);
+          }
         });
     });
   }
