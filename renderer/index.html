@@ -500,6 +500,14 @@
       white-space: nowrap; align-self: start;
     }
     .bn-mailto:hover { color: #111; border-color: #9ca3af; }
+    .bn-inq-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+    .bn-inq-convert {
+      background: #111; color: #c9a84c; border: none; border-radius: 6px;
+      padding: 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer;
+      white-space: nowrap; letter-spacing: 0.02em;
+      transition: background 0.12s;
+    }
+    .bn-inq-convert:hover { background: #222; }
     .bn-empty { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 14px; }
     .bn-loading { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 14px; }
 
@@ -1357,8 +1365,20 @@
       <button class="bn-close-btn" onclick="bnCloseDrawer()">✕</button>
     </div>
     <div class="bn-drawer-body">
+      <!-- Client -->
+      <div class="bn-section-label">Client</div>
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>Client Name</label>
+          <input type="text" id="bnd-client-name" placeholder="Full name">
+        </div>
+        <div class="bn-field">
+          <label>Organization</label>
+          <input type="text" id="bnd-client-org" placeholder="Gallery or company">
+        </div>
+      </div>
       <!-- Artwork -->
-      <div class="bn-section-label">Artwork</div>
+      <div class="bn-section-label" style="margin-top:14px;">Artwork</div>
       <div class="bn-field-grid">
         <div class="bn-field">
           <label>Title</label>
@@ -2443,7 +2463,8 @@
     document.getElementById('bnd-client').textContent     = 'New Commission';
     document.getElementById('bnd-title-year').textContent = 'Fill in the details below';
     // Clear all fields
-    ['bnd-title','bnd-year','bnd-dimensions','bnd-material','bnd-description',
+    ['bnd-client-name','bnd-client-org',
+     'bnd-title','bnd-year','bnd-dimensions','bnd-material','bnd-description',
      'bnd-price','bnd-salePrice','bnd-bennetPayout','bnd-sgInvoice',
      'bnd-artistPaid','bnd-galleryPaid','bnd-paymentNotes','bnd-status',
      'bnd-dueDate','bnd-notes','bnd-shipAddress','bnd-shipper','bnd-shipRef',
@@ -2466,7 +2487,7 @@
 
     const get = id => document.getElementById(id).value;
     const data = {
-      client:       get('bnd-client') === 'New Commission' ? '' : get('bnd-client'),
+      client:       get('bnd-client-name'),
       title:        get('bnd-title'),
       year:         get('bnd-year'),
       dimensions:   get('bnd-dimensions'),
@@ -2625,6 +2646,8 @@
       return '';
     };
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    set('bnd-client-name',  c.client);
+    set('bnd-client-org',   c.org || '');
     set('bnd-title',        c.title);
     set('bnd-year',         c.year);
     set('bnd-dimensions',   c.dimensions);
@@ -2672,6 +2695,7 @@
 
     const get = id => document.getElementById(id).value;
     const updates = {
+      client:       get('bnd-client-name'),
       title:        get('bnd-title'),
       year:         get('bnd-year'),
       dimensions:   get('bnd-dimensions'),
@@ -2749,6 +2773,8 @@
       const notes   = col(inq, 'notes', 'message', 'comment', 'inquiry');
       const email   = col(inq, 'email', 'mail');
       const dateStr = date ? date.split(' ')[0] : '—';
+      // Safely escape values for inline onclick
+      const esc = s => (s || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
       return `<div class="bn-inq-tile">
         <div class="bn-inq-date">${dateStr}</div>
         <div>
@@ -2757,7 +2783,10 @@
           ${artwork? `<div class="bn-inq-artwork">${artwork}</div>` : ''}
           ${notes  ? `<div class="bn-inq-notes">${notes}</div>`     : ''}
         </div>
-        <div>${email ? `<a class="bn-mailto" href="mailto:${email}">${email}</a>` : ''}</div>
+        <div class="bn-inq-actions">
+          ${email ? `<a class="bn-mailto" href="mailto:${email}">${email}</a>` : ''}
+          <button class="bn-inq-convert" onclick="bnInquiryToCommission('${esc(name)}','${esc(org)}','${esc(email)}','${esc(artwork)}')">→ Commission</button>
+        </div>
       </div>`;
     }).join('');
 
@@ -2782,6 +2811,17 @@
     btn.textContent = 'Add Inquiry';
     document.getElementById('bni-overlay').classList.add('open');
     document.getElementById('bni-drawer').classList.add('open');
+  }
+
+  function bnInquiryToCommission(name, org, email, artwork) {
+    bnNewCommission(); // clears and opens the commission drawer
+    document.getElementById('bnd-client-name').value = name || '';
+    document.getElementById('bnd-client-org').value  = org  || '';
+    document.getElementById('bnd-poc').value          = email   || '';
+    document.getElementById('bnd-title').value        = artwork || '';
+    document.getElementById('bnd-status').value       = 'Inquiry';
+    // Update the header to show the client name
+    if (name) document.getElementById('bnd-client').textContent = name;
   }
 
   function bniClose() {
