@@ -2285,6 +2285,9 @@
 
   function resetBookForm() {
     bookState.txType = null;
+    bookState.loc    = null;
+    document.getElementById('book-btn-nyc').className   = 'loc-btn';
+    document.getElementById('book-btn-la').className    = 'loc-btn';
     document.getElementById('book-btn-given').className = 'loc-btn';
     document.getElementById('book-btn-sale').className  = 'loc-btn';
     document.getElementById('book-client').value = '';
@@ -2292,6 +2295,7 @@
     document.getElementById('book-price').value  = '';
     document.getElementById('book-notes').value  = '';
     document.getElementById('book-price-wrap').style.display = 'none';
+    document.getElementById('book-stock-badge').style.display = 'none';
     hideError('book');
     const d = new Date();
     document.getElementById('book-date').value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
