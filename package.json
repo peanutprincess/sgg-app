@@ -1,11 +1,11 @@
 {
   "name": "sgg-app",
-  "version": "1.0.6",
+  "version": "1.13.0",
   "description": "Sebastian Gladstone — Internal Tools",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --mac",
+    "build": "electron-builder --mac && open dist/SG.dmg",
     "publish": "electron-builder --mac --publish always -c.publish.releaseType=release"
   },
   "build": {
@@ -24,6 +24,10 @@
       {
         "from": "assets/backtag_gen.py",
         "to": "assets/backtag_gen.py"
+      },
+      {
+        "from": "assets/payable_parse.py",
+        "to": "assets/payable_parse.py"
       }
     ],
     "publish": {

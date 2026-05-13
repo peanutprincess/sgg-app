@@ -79,12 +79,13 @@
     }
     .sidebar-quick-links {
       display: flex;
-      gap: 6px;
+      flex-wrap: wrap;
+      gap: 5px;
       padding: 0 16px 14px;
       -webkit-app-region: no-drag;
     }
     .ql-btn {
-      flex: 1;
+      flex: 0 0 calc(20% - 4px);
       padding: 5px 0;
       background: #1a1a1a;
       border: 1px solid #2e2e2e;
@@ -101,9 +102,11 @@
     .ql-btn:hover { color: #e5e7eb; border-color: #555; }
 
     /* ── Content ── */
-    .content { flex: 1; overflow-y: auto; background: #fafafa; }
+    .content { flex: 1; overflow: hidden; background: #fafafa; display: flex; flex-direction: column; }
     .module { display: none; }
-    .module.active { display: block; }
+    .module.active { display: flex; flex-direction: column; height: 100%; }
+    /* Non-bennet modules scroll normally */
+    .module.active:not(#mod-bennet) { overflow-y: auto; }
 
     .module-header {
       padding: 28px 40px 0;
@@ -149,6 +152,21 @@
     .dz-icon { font-size: 26px; margin-bottom: 5px; }
     .dz-label { font-size: 13px; color: #6b7280; }
     .dz-name { font-size: 12px; font-weight: 600; color: #16a34a; margin-top: 4px; }
+
+    /* ── Payable drop zone (inside drawer) ── */
+    .bnp-dz {
+      border: 2px dashed #d1d5db;
+      border-radius: 10px;
+      padding: 22px 12px;
+      text-align: center;
+      cursor: pointer;
+      background: #fafafa;
+      transition: all 0.15s;
+      margin-bottom: 4px;
+    }
+    .bnp-dz:hover  { border-color: #9ca3af; background: #f3f4f6; }
+    .bnp-dz.bnp-dz-over { border-color: #c9a84c; background: #fdf8ee; }
+    .bnp-dz.has-file    { border-color: #22c55e; background: #f0fdf4; border-style: solid; }
 
     /* ── Location ── */
     .loc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
@@ -328,6 +346,14 @@
     .bn-card-preprod   .bn-card-price,
     .bn-card-preprod   .bn-card-due    { color: #6b7280; }
     .bn-card-preprod   .bn-initials    { background: #e5e7eb; color: #374151; }
+
+    .bn-card-cancelled { background: #fff1f2; border-color: #fecdd3; }
+    .bn-card-cancelled .bn-card-client,
+    .bn-card-cancelled .bn-card-title,
+    .bn-card-cancelled .bn-card-price,
+    .bn-card-cancelled .bn-card-due    { color: #dc2626; }
+    .bn-card-cancelled .bn-initials    { background: #fecdd3; color: #991b1b; }
+    .bn-card-cancelled .bn-pay-pill    { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
     .bn-card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
     .bn-initials {
       width: 40px; height: 40px;
@@ -360,6 +386,43 @@
     .bn-card-price  { font-size: 13px; font-weight: 600; color: #111; }
     .bn-card-due    { font-size: 11px; color: #9ca3af; }
     .bn-card-due.urgent { color: #ef4444; font-weight: 600; }
+    .bn-card-sku {
+      text-align: center; margin-top: 8px;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 10px; font-style: italic; letter-spacing: 0.03em;
+    }
+    /* SKU tones per card type */
+    .bn-card-sku                      { color: #c0c4cc; }
+    .bn-card-inprod    .bn-card-sku   { color: #059669; }
+    .bn-card-delivered .bn-card-sku   { color: #93c5fd; }
+    .bn-card-cornflower .bn-card-sku  { color: #1e40af; }
+    .bn-card-preprod   .bn-card-sku   { color: #9ca3af; }
+    .bn-card-cancelled .bn-card-sku   { color: #dc2626; }
+
+    /* Commission search */
+    .bn-commission-search {
+      padding: 14px 32px 0;
+    }
+    .bn-commission-search input {
+      width: 100%; box-sizing: border-box;
+      border: 1.5px solid #e5e7eb; border-radius: 8px;
+      padding: 7px 12px; font-size: 12px; color: #111;
+      outline: none; background: #fff; font-family: inherit;
+      transition: border-color 0.12s;
+    }
+    .bn-commission-search input:focus { border-color: #c9a84c; }
+
+    /* Payment pills */
+    .bn-pay-row { display: flex; flex-direction: column; gap: 4px; margin-top: 7px; }
+    .bn-pay-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 600;
+      padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+    }
+    .bn-pay-pill.paid   { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .bn-pay-pill.unpaid { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+    .bn-card-delivered .bn-pay-pill.paid   { background: #16a34a; color: #fff; border-color: #15803d; }
+    .bn-card-delivered .bn-pay-pill.unpaid { background: rgba(255,255,255,.12); color: #cbd5e1; border-color: rgba(255,255,255,.2); }
 
     /* Drawer */
     .bn-overlay {
@@ -454,7 +517,18 @@
     .bn-cancel-btn:hover { background: #e5e7eb; }
 
     /* Inquiries panel */
+    #mod-bennet { overflow: hidden; }
+    .bn-scroll-body {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
     .bn-inq-wrap {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
       padding: 0 32px 0;
     }
     .bn-inq-header {
@@ -465,12 +539,10 @@
       margin-top: 8px;
     }
     .bn-inq-scroll {
-      height: 320px;
-      overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      padding-bottom: 48px;
+      padding-bottom: 24px;
     }
     .bn-inq-tile {
       background: #fff;
@@ -676,6 +748,24 @@
 </head>
 <body>
 
+<!-- ══ SPLASH SCREEN ══ -->
+<div id="sg-splash" style="
+  position: fixed; inset: 0; z-index: 9999;
+  background-size: cover; background-position: center;
+  transition: opacity 0.9s ease;
+"></div>
+<script>
+(function() {
+  var splash = document.getElementById('sg-splash');
+  var images = ['cream-linen.jpeg', 'bronze-oxidized.jpeg'];
+  splash.style.backgroundImage = 'url("' + images[Math.floor(Math.random() * images.length)] + '")';
+  setTimeout(function() {
+    splash.style.opacity = '0';
+    setTimeout(function() { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 900);
+  }, 2500);
+})();
+</script>
+
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">
   <div class="sidebar-top">
@@ -730,8 +820,10 @@
     <button class="ql-btn" onclick="window.open('https://app.squareup.com/dashboard/')">SQ</button>
     <button class="ql-btn" onclick="window.open('https://www.fedex.com/secure-login/en-us/#/credentials')">FX</button>
     <button class="ql-btn" onclick="window.open('https://www.dropbox.com/home')">DB</button>
+    <button class="ql-btn" onclick="window.open('https://hangmannyc.quickbase.com/db/bvbjdnvb4/form?a=er&rid=115981&ifv=1&hs=1&accesskey=5e921d791adc3ac3623d4692dae6e34e69f7b4e9169ade4b70de1c2e3e584f06&NextURL=https%3A%2F%2Fhangmannyc.quickbase.com%2Fdb%2Fbvbjdnvb4&page=1')">HB</button>
+    <button class="ql-btn" onclick="window.open('https://auth.alternativepayments.io/login?login_challenge=T_lJlVd-4sZzSkjYjo82VxRiOaNJ9Lq1Df332o1GrCv-2rMFxMCxt0MjoXVXIVMl2mL8L2vsrGzvHX1lYE3iVz8Y45WvsDwYQNsZPyK4gymo6aDeBYvDx2fwFXmAWCPB1lB1oOlu2XStFColvWRd0EYbs7oRyiTNCD73msIp6eEScZ-1nX5p8szx3oKnGty0VQpQTJJpK6zfF_zNhMhMUFuLGqDsV1rNh7Y666gAz0RGgSG3E5_D6dkqQ-TDgvDOOitjrMoEDKASXCSDdwkqrwueZP-aJYDRlrgXdPtGRsVjnbc4oJ71UD1uXl8BvYV1QpHGfMcQmOvvS6PRiEWy80yaKSjczq3uLN3MLSf_wnDfmP606fn3r3gZpVmWBSKAacb9CyAFsc1_sIPbyDnJQj2ha11VxlxctyXQeRE02X-LThjXJ3LhUlS-W2UtYiBRBIK7YIwPg4AxV43AdDcXXIPSxHkpX0ULYe4dYPXkN-tcCou2f0gHTYG8Pzj_LlgUp_pzqT9HbVVljM0kqPtb7ViU2RCm8JDW1ANwmAdcCIUmiPYo4Zfh_7sBqR1SVx34Khz3LaPPf8VNjtgQUF1AkAbyWWbUTb1y0cTTVidn4yKdOAgm280jHPNyolmzfATzJ0QMC06fHZVzF7TVxpTYKFLcJnNCaYBlwWOj2mV-eo3QSryhGGvBW3argShRrjxRNgVZwDiK0V82m19SbPf83hden22dnwFdXTHDhDI8ohg-woEMygBF1V_t5Ydi7ouC3czfaK3tb1u71QB0mrkYY6KeqHUeD1PqN1k4UEt_DyWrBxuA4QWUS8bRm3dE4j78_eAf-k6yE96ZiNh1fKKa1ZQM8sreU-xUs5ETMUaZxmdV_JSQ0fUbzsyRBmY2Yc3FTnZMOF7EN0l3aguyLStmyKFT670jVrZgO1JS6j3909LlU9jSkdo85wmGJW13nK_ShVzDbnW61-3pB9_6DxaSYoge04nqhdOedfk-K9S5GqH4vftDiN-iwakV_uKdN1OKmf4lmYdgRYPoAZyh9WLKKSqN1Tucc27NC0bpmemhsWAW7OMxdoXu66zGNjo0GYbcsDmThmAN4wT_lGTzVfbwu3LaqN_NCmZ2YurfjkCnot2PpFOLehG4eDLTSp1e8tXtnceOULpHV2fOfAfiXOgyTBeyWEB-8g85YDs0ZW21Mt0O4fnLWTY3kac_gUzMJfjIcFBSQGAyeDU7Ms1_ny1w6ElLlCc9b9tYCnZHLSjzneaiw7HQ_Lm2ZQmVWnT7y_gOyKMYvtosEfyPACG7_eLP3MDwM2Y_jwpPMS8RYQ9-gW09quhwF5Zc_XJndJ_UJsxPcvyanzkmL6wpxIpX48YGqw6Nwfd7DA5R37srpB6EeLvj6y-OZyjbeB8MrO_3xWPQkLf8FGcxOHmfS66ttMW_MYvj2bXsThxeZjD9DDfat7k_aymdT_DFXB-6_xBw9jdOoMnknfcURq64wAdiC2ydOfJD1mTNmR2xsGzJH5NgLI7F77amEPj9GC5uQTZeylOkqwDYSii6xGDgtpN6cdwDppnk42FMIPEe')">H$</button>
   </div>
-  <div class="sidebar-footer">v1.0.0</div>
+  <div class="sidebar-footer" id="app-version">v1.0.0</div>
 </aside>
 
 <!-- ══ CONTENT ══ -->
@@ -1117,6 +1209,7 @@
         <div class="success-title">Shipment logged!</div>
         <div class="success-detail" id="ship-success-detail"></div>
         <a class="success-link" id="ship-success-link" href="#" target="_blank">View photo in Drive ↗</a><br>
+        <a href="https://app.arternal.com/inventory/artist/allinventory" target="_blank" style="display:inline-block;margin:10px 0 4px;background:#f0f9ff;color:#0369a1;border:1.5px solid #bae6fd;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;text-decoration:none;-webkit-app-region:no-drag;">Update location in Arternal ↗</a><br>
         <button class="again-btn" onclick="resetShipForm()">+ Log Another</button>
       </div>
 
@@ -1323,11 +1416,22 @@
   <!-- BENNET SCHLESINGER -->
   <section id="mod-bennet" class="module">
     <div class="module-header" style="display:flex;align-items:center;justify-content:space-between;">
-      <div>
+      <div style="-webkit-app-region:no-drag;">
         <div class="module-title">Bennet Schlesinger</div>
         <div class="module-subtitle">Commission pipeline &amp; inquiry log</div>
       </div>
-      <button onclick="bnNewCommission()" style="background:#c9a84c;color:#000;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0.02em;-webkit-app-region:no-drag;">+ New Commission</button>
+      <div style="-webkit-app-region:no-drag;display:flex;gap:8px;">
+        <button onclick="bnpOpen()" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0.02em;">💸 Log Payable</button>
+        <button onclick="bnNewCommission()" style="background:#c9a84c;color:#000;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0.02em;">+ New Commission</button>
+      </div>
+    </div>
+
+    <!-- Scrollable body -->
+    <div class="bn-scroll-body">
+
+    <!-- Commission search -->
+    <div class="bn-commission-search">
+      <input type="text" id="bn-commission-search" placeholder="Search commissions…" oninput="bnCommissionSearch()">
     </div>
 
     <!-- Status filters -->
@@ -1352,12 +1456,17 @@
         <span>Recent Inquiries</span>
         <button onclick="bnNewInquiry()" style="background:#c9a84c;color:#000;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;-webkit-app-region:no-drag;">+ New Inquiry</button>
       </div>
+      <div style="padding:0 0 10px;">
+        <input id="bn-inq-search" type="text" placeholder="Search inquiries…" oninput="bnFilterInquiries()" style="width:100%;box-sizing:border-box;border:1.5px solid #e5e7eb;border-radius:8px;padding:7px 12px;font-size:12px;color:#111;outline:none;background:#fff;">
+      </div>
       <div class="bn-inq-scroll" id="bn-inq-scroll">
         <div id="bn-inq-body">
           <div class="bn-loading">Loading inquiries…</div>
         </div>
       </div>
     </div>
+
+    </div><!-- /bn-scroll-body -->
   </section>
 
   <!-- Bennet drawer overlay -->
@@ -1405,8 +1514,8 @@
       </div>
       <div class="bn-field-grid single" style="margin-top:10px;">
         <div class="bn-field">
-          <label>Description</label>
-          <textarea id="bnd-description" placeholder="Brief description…"></textarea>
+          <label>SKU</label>
+          <textarea id="bnd-description" placeholder="e.g. BSC0274"></textarea>
         </div>
       </div>
 
@@ -1430,31 +1539,14 @@
           <input type="text" id="bnd-sgInvoice" placeholder="INV-">
         </div>
         <div class="bn-field">
-          <label>Artist Paid</label>
-          <select id="bnd-artistPaid">
-            <option value="">—</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-            <option value="Partial">Partial</option>
-          </select>
+          <label>Bennet Payment</label>
+          <input type="text" id="bnd-artistPaid" placeholder="e.g. PAID, 50% deposit…">
         </div>
         <div class="bn-field">
-          <label>Gallery Paid</label>
-          <select id="bnd-galleryPaid">
-            <option value="">—</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-            <option value="Partial">Partial</option>
-          </select>
+          <label>Gallery Payment</label>
+          <input type="text" id="bnd-galleryPaid" placeholder="e.g. PAID, Invoice sent…">
         </div>
       </div>
-      <div class="bn-field-grid single" style="margin-top:10px;">
-        <div class="bn-field">
-          <label>Payment Notes</label>
-          <input type="text" id="bnd-paymentNotes" placeholder="e.g. 50% deposit received">
-        </div>
-      </div>
-
       <!-- Production -->
       <div class="bn-section-label">Production</div>
       <div class="bn-field-grid">
@@ -1580,6 +1672,94 @@
     </div>
   </div>
 
+  <!-- Log Payable drawer -->
+  <div class="bn-overlay" id="bnp-overlay" onclick="bnpClose()"></div>
+  <div class="bn-drawer" id="bnp-drawer">
+    <div class="bn-drawer-head">
+      <div>
+        <div class="bn-drawer-client">Log Arternal Payable</div>
+        <div class="bn-drawer-sub">Drop the payable PDF — fields auto-fill from the document</div>
+      </div>
+      <button class="bn-close-btn" onclick="bnpClose()">✕</button>
+    </div>
+    <div class="bn-drawer-body">
+
+      <!-- Drop zone state -->
+      <div id="bnp-upload-state">
+        <div id="bnp-dropZone" class="bnp-dz"
+             onclick="document.getElementById('bnp-fileInput').click()"
+             ondragover="event.preventDefault();this.classList.add('bnp-dz-over')"
+             ondragleave="this.classList.remove('bnp-dz-over')"
+             ondrop="bnpHandleDrop(event)">
+          <input type="file" id="bnp-fileInput" accept=".pdf,application/pdf" style="display:none" onchange="bnpSetFile(this.files[0])">
+          <div class="dz-icon" id="bnp-dzIcon">📄</div>
+          <div class="dz-label" id="bnp-dzLabel">Drop Arternal payable PDF or click to browse</div>
+          <div class="dz-name" id="bnp-dzName"></div>
+        </div>
+        <div id="bnp-parse-msg" style="display:none;text-align:center;padding:14px 0;color:#6b7280;font-size:13px;">
+          <div class="spinner" style="width:24px;height:24px;border-width:2px;margin:0 auto 8px;"></div>
+          Reading PDF…
+        </div>
+        <div id="bnp-error" style="display:none;background:#fef2f2;color:#dc2626;border-radius:8px;padding:10px 13px;font-size:13px;margin-top:10px;"></div>
+      </div>
+
+      <!-- Review fields (shown after parse) -->
+      <div id="bnp-review-state" style="display:none;">
+        <div class="bn-section-label">Payable Details</div>
+        <div class="bn-field-grid">
+          <div class="bn-field">
+            <label>PAY Number</label>
+            <input type="text" id="bnp-payNumber" placeholder="PAY-XXXXX">
+          </div>
+          <div class="bn-field">
+            <label>Date</label>
+            <input type="text" id="bnp-date" placeholder="Month D, YYYY">
+          </div>
+          <div class="bn-field">
+            <label>BSC / SKU Number</label>
+            <input type="text" id="bnp-bscNumber" placeholder="BSC0274">
+          </div>
+          <div class="bn-field">
+            <label>Amount ($)</label>
+            <input type="text" id="bnp-amount" placeholder="0.00">
+          </div>
+        </div>
+        <div class="bn-field-grid single" style="margin-top:10px;">
+          <div class="bn-field">
+            <label>Notes / Description</label>
+            <textarea id="bnp-notes" placeholder="Based on…" style="min-height:60px;"></textarea>
+          </div>
+        </div>
+        <div id="bnp-bsc-warn" style="display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 13px;font-size:12px;color:#92400e;margin-top:10px;">
+          ⚠️ BSC number not found — make sure the SKU is correct so the sheet row can be matched.
+        </div>
+        <div id="bnp-review-error" style="display:none;background:#fef2f2;color:#dc2626;border-radius:8px;padding:10px 13px;font-size:13px;margin-top:10px;"></div>
+        <div style="margin-top:14px;">
+          <button onclick="bnpReset()" style="background:none;border:none;color:#6b7280;font-size:12px;cursor:pointer;text-decoration:underline;padding:0;">← Choose a different PDF</button>
+        </div>
+      </div>
+
+      <!-- Saving state -->
+      <div id="bnp-saving-state" style="display:none;text-align:center;padding:40px 0;">
+        <div class="spinner" style="margin:0 auto 14px;"></div>
+        <p style="color:#6b7280;font-size:14px;">Uploading PDF &amp; updating commission sheet…</p>
+      </div>
+
+      <!-- Success state -->
+      <div id="bnp-success-state" style="display:none;text-align:center;padding:40px 0;">
+        <div class="success-icon">✅</div>
+        <div class="success-title" style="font-size:18px;font-weight:700;color:#16a34a;margin-bottom:6px;">Payable Logged</div>
+        <div id="bnp-success-detail" style="color:#6b7280;font-size:13px;margin-bottom:16px;"></div>
+        <a id="bnp-drive-link" href="#" target="_blank" style="display:none;color:#3b82f6;font-size:13px;font-weight:600;text-decoration:none;margin-bottom:20px;display:inline-block;">View PDF in Drive ↗</a>
+      </div>
+
+    </div>
+    <div class="bn-drawer-foot" id="bnp-footer">
+      <button class="bn-cancel-btn" onclick="bnpClose()">Cancel</button>
+      <button class="bn-save-btn" id="bnp-confirm-btn" onclick="bnpConfirm()" style="display:none;">Log Payable</button>
+    </div>
+  </div>
+
   <!-- COMPANY HANDBOOK -->
   <section id="mod-handbook" class="module">
     <div class="hb-topbar">
@@ -1603,6 +1783,8 @@
 </main>
 
 <script>
+  try { document.getElementById('app-version').textContent = 'SG v' + (window.sgg.version || '').replace(/\.0$/, ''); } catch(e) {}
+
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz1P-npzwQOt29cRu-uSh6VyZitHD8vWaCQnXtlnSDbUU44t47Y4pU-wbZqdKNyzaSl5g/exec';
   const BENNET_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbylMvS8Qa60eKGe0kAooy96wKZkCvTy_4c75l3B7VdR9Q7xO-UF6BAjD5Z58f2IG4PR/exec';
 
@@ -2474,6 +2656,7 @@
   // ─────────────────────────────────────────
   let _bnCommissions = [];
   let _bnFilter      = 'all';
+  let _bnSearch      = '';
   let _bnActiveRow   = null;
 
   function bnNewCommission() {
@@ -2485,7 +2668,7 @@
     ['bnd-client-name','bnd-client-org',
      'bnd-title','bnd-year','bnd-dimensions','bnd-material','bnd-description',
      'bnd-price','bnd-salePrice','bnd-bennetPayout','bnd-sgInvoice',
-     'bnd-artistPaid','bnd-galleryPaid','bnd-paymentNotes','bnd-status',
+     'bnd-artistPaid','bnd-galleryPaid','bnd-status',
      'bnd-dueDate','bnd-notes','bnd-shipAddress','bnd-shipper','bnd-shipRef',
      'bnd-tracking','bnd-trackingSent','bnd-poc','bnd-fileRef'
     ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -2518,7 +2701,6 @@
       sgInvoice:    get('bnd-sgInvoice'),
       artistPaid:   get('bnd-artistPaid'),
       galleryPaid:  get('bnd-galleryPaid'),
-      paymentNotes: get('bnd-paymentNotes'),
       status:       get('bnd-status') || 'Inquiry',
       dueDate:      get('bnd-dueDate'),
       notes:        get('bnd-notes'),
@@ -2569,7 +2751,12 @@
 
     fetch(BENNET_SCRIPT_URL + '?action=commissions')
       .then(r => r.json())
-      .then(d => { _bnCommissions = d.commissions || []; bnRenderGrid(); })
+      .then(d => {
+        _bnCommissions = d.commissions || [];
+        bnRenderGrid();
+        if (d.version) document.getElementById('app-version').textContent =
+          'SG v' + window.sgg.version.replace(/\.0$/, '') + ' | B v' + d.version;
+      })
       .catch(() => {
         document.getElementById('bn-grid').innerHTML = '<div class="bn-empty">Failed to load commissions.</div>';
       });
@@ -2589,10 +2776,27 @@
     bnRenderGrid();
   }
 
+  const BN_STATUS_ORDER = ['pre-production','in production','ready-to-ship','will call','inquiry','delivered','cancelled'];
+  function bnStatusRank(c) {
+    const s = (c.status || '').toLowerCase().trim();
+    const i = BN_STATUS_ORDER.indexOf(s);
+    return i === -1 ? BN_STATUS_ORDER.length : i;
+  }
+
+  function bnCommissionSearch() {
+    _bnSearch = (document.getElementById('bn-commission-search').value || '').toLowerCase();
+    bnRenderGrid();
+  }
+
   function bnRenderGrid() {
     const grid = document.getElementById('bn-grid');
     let list = _bnCommissions;
     if (_bnFilter !== 'all') list = list.filter(c => (c.status || '').toLowerCase().trim() === _bnFilter.toLowerCase().trim());
+    if (_bnSearch) list = list.filter(c =>
+      [c.client, c.title, c.year, c.description, c.notes, c.status, c.sgInvoice, c.material, c.dimensions]
+        .some(v => (v || '').toLowerCase().includes(_bnSearch))
+    );
+    list = [...list].sort((a, b) => bnStatusRank(a) - bnStatusRank(b));
     if (!list.length) {
       grid.innerHTML = '<div class="bn-empty">No commissions' + (_bnFilter !== 'all' ? ' with status "' + _bnFilter + '"' : '') + '.</div>';
       return;
@@ -2617,6 +2821,7 @@
     if (s === 'delivered')      return 'bn-card-delivered';
     if (s === 'will call' || s === 'ready-to-ship') return 'bn-card-cornflower';
     if (s === 'pre-production') return 'bn-card-preprod';
+    if (s === 'cancelled')      return 'bn-card-cancelled';
     return '';
   }
 
@@ -2626,9 +2831,16 @@
     const colorCls  = bnCardColorClass(c.status);
     const price    = c.salePrice ? '$' + c.salePrice : (c.price ? '$' + c.price : '—');
     const days     = parseInt(c.daysTilDue);
-    const delivered = (c.status || '').toLowerCase().trim() === 'delivered';
-    const dueLabel = delivered || isNaN(days) ? '' : (days < 0 ? 'Overdue ' + Math.abs(days) + 'd' : days + 'd left');
-    const dueUrgent = !delivered && !isNaN(days) && days <= 7;
+    const s = (c.status || '').toLowerCase().trim();
+    const delivered  = s === 'delivered';
+    const cancelled  = s === 'cancelled';
+    const dueLabel = delivered || cancelled || isNaN(days) ? '' : (days < 0 ? 'Overdue ' + Math.abs(days) + 'd' : days + 'd left');
+    const dueUrgent = !delivered && !cancelled && !isNaN(days) && days <= 7;
+    const payPill = (label, val) => {
+      const isPaid = (val || '').toLowerCase().includes('paid');
+      const txt = val ? val : '—';
+      return `<span class="bn-pay-pill ${isPaid ? 'paid' : 'unpaid'}">${isPaid ? '✓ ' : ''}${label}: ${txt}</span>`;
+    };
     return `<div class="bn-card ${colorCls}" onclick="bnOpenDrawer(${c.rowIndex})">
       <div class="bn-card-header">
         <div class="bn-initials">${initials}</div>
@@ -2638,10 +2850,15 @@
         </div>
       </div>
       <span class="bn-pill ${pillCls}">${c.status || 'Unknown'}</span>
+      <div class="bn-pay-row">
+        ${payPill('Gallery', c.galleryPaid)}
+        ${payPill('Bennet', c.artistPaid)}
+      </div>
       <div class="bn-card-footer">
         <div class="bn-card-price">${price}</div>
         ${dueLabel ? `<div class="bn-card-due${dueUrgent ? ' urgent' : ''}">${dueLabel}</div>` : ''}
       </div>
+      <div class="bn-card-sku">${c.description || 'unassigned'}</div>
     </div>`;
   }
 
@@ -2678,7 +2895,6 @@
     set('bnd-sgInvoice',    c.sgInvoice);
     set('bnd-artistPaid',   c.artistPaid);
     set('bnd-galleryPaid',  c.galleryPaid);
-    set('bnd-paymentNotes', c.paymentNotes);
     set('bnd-status',       c.status);
     document.getElementById('bnd-dueDate').value = toInputDate(c.dueDate);
     set('bnd-notes',        c.notes);
@@ -2726,7 +2942,6 @@
       sgInvoice:    get('bnd-sgInvoice'),
       artistPaid:   get('bnd-artistPaid'),
       galleryPaid:  get('bnd-galleryPaid'),
-      paymentNotes: get('bnd-paymentNotes'),
       status:       get('bnd-status'),
       dueDate:      get('bnd-dueDate'),
       notes:        get('bnd-notes'),
@@ -2783,36 +2998,72 @@
       return '';
     };
 
-    // Show newest first
-    const tiles = [...inquiries].reverse().map(inq => {
+    // Sort newest first by date
+    const sorted = [...inquiries].sort((a, b) => {
+      const da = new Date(col(a, 'timestamp', 'date', 'time') || 0);
+      const db = new Date(col(b, 'timestamp', 'date', 'time') || 0);
+      return db - da;
+    });
+
+    const makeInqTile = (inq, idx) => {
       const date    = col(inq, 'timestamp', 'date', 'time');
       const name    = col(inq, 'name', 'first');
       const org     = col(inq, 'org', 'gallery', 'company');
       const artwork = col(inq, 'artwork', 'title', 'piece');
       const notes   = col(inq, 'notes', 'message', 'comment', 'inquiry');
       const email   = col(inq, 'email', 'mail');
-      const dateStr = date ? date.split(' ')[0] : '—';
-      // Safely escape values for inline onclick
+      const dateStr = (() => {
+        if (!date) return '—';
+        const d = new Date(date);
+        if (isNaN(d)) return date;
+        return (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear();
+      })();
       const esc = s => (s || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      return `<div class="bn-inq-tile">
+      return `<div class="bn-inq-tile" style="cursor:pointer;" onclick="bniEdit(${idx})">
         <div class="bn-inq-date">${dateStr}</div>
-        <div>
+        <div style="flex:1;min-width:0;">
           <div class="bn-inq-name">${name || '—'}</div>
           ${org    ? `<div class="bn-inq-org">${org}</div>`         : ''}
           ${artwork? `<div class="bn-inq-artwork">${artwork}</div>` : ''}
           ${notes  ? `<div class="bn-inq-notes">${notes}</div>`     : ''}
         </div>
-        <div class="bn-inq-actions">
+        <div class="bn-inq-actions" onclick="event.stopPropagation()">
           ${email ? `<a class="bn-mailto" href="mailto:${email}">${email}</a>` : ''}
           <button class="bn-inq-convert" onclick="bnInquiryToCommission('${esc(name)}','${esc(org)}','${esc(email)}','${esc(artwork)}')">→ Commission</button>
         </div>
       </div>`;
-    }).join('');
+    };
 
-    wrap.innerHTML = tiles;
+    // Store sorted list for search filtering
+    window._bnInquiries = sorted;
+    window._bnInqCol    = col;
+    window._bnMakeInqTile = makeInqTile;
 
-    // Scroll to bottom so newest entries are visible first
-    requestAnimationFrame(() => { scroll.scrollTop = scroll.scrollHeight; });
+    wrap.innerHTML = sorted.map((inq, idx) => makeInqTile(inq, idx)).join('');
+    // Newest is at top — no scroll needed
+  }
+
+  function bnFilterInquiries() {
+    const q     = (document.getElementById('bn-inq-search').value || '').toLowerCase();
+    const wrap  = document.getElementById('bn-inq-body');
+    const list  = window._bnInquiries || [];
+    const col   = window._bnInqCol   || (() => '');
+    const make  = window._bnMakeInqTile || (() => '');
+    if (!q) { wrap.innerHTML = list.map((inq, idx) => make(inq, idx)).join(''); return; }
+    const filtered = list.map((inq, idx) => ({ inq, idx })).filter(({ inq }) => {
+      const fields = [
+        col(inq, 'name', 'first'),
+        col(inq, 'org', 'gallery', 'company'),
+        col(inq, 'email', 'mail'),
+        col(inq, 'artwork', 'title', 'piece'),
+        col(inq, 'notes', 'message', 'comment', 'inquiry'),
+        col(inq, 'timestamp', 'date', 'time'),
+      ];
+      return fields.some(f => f.toLowerCase().includes(q));
+    });
+    wrap.innerHTML = filtered.length
+      ? filtered.map(({ inq, idx }) => make(inq, idx)).join('')
+      : '<div class="bn-empty" style="padding:24px 0;">No results.</div>';
   }
 
   // ── New Inquiry ──
@@ -2846,6 +3097,44 @@
   function bniClose() {
     document.getElementById('bni-overlay').classList.remove('open');
     document.getElementById('bni-drawer').classList.remove('open');
+    window._bniEditRowIndex = null;
+    document.querySelector('#bni-drawer .bn-drawer-client').textContent = 'New Inquiry';
+    document.querySelector('#bni-drawer .bn-drawer-sub').textContent    = 'Add to Bennet Schlesinger Inquiry Log';
+    const btn = document.getElementById('bni-save-btn');
+    btn.disabled = false;
+    btn.textContent = 'Add Inquiry';
+  }
+
+  function bniEdit(idx) {
+    const inq = (window._bnInquiries || [])[idx];
+    const col = window._bnInqCol;
+    if (!inq || !col) return;
+
+    window._bniEditRowIndex = inq.rowIndex;
+
+    // Pre-fill fields
+    const dateRaw = col(inq, 'timestamp', 'date', 'time');
+    const d = dateRaw ? new Date(dateRaw) : null;
+    const dateISO = d && !isNaN(d)
+      ? d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0')
+      : '';
+
+    document.getElementById('bni-date').value    = dateISO;
+    document.getElementById('bni-name').value    = col(inq, 'name', 'first') || '';
+    document.getElementById('bni-org').value     = col(inq, 'org', 'gallery', 'company') || '';
+    document.getElementById('bni-email').value   = col(inq, 'email', 'mail') || '';
+    document.getElementById('bni-artwork').value = col(inq, 'artwork', 'title', 'piece') || '';
+    document.getElementById('bni-notes').value   = col(inq, 'notes', 'message', 'comment', 'inquiry') || '';
+
+    const name = col(inq, 'name', 'first');
+    document.querySelector('#bni-drawer .bn-drawer-client').textContent = name || 'Edit Inquiry';
+    document.querySelector('#bni-drawer .bn-drawer-sub').textContent    = 'Edit inquiry record';
+    const btn = document.getElementById('bni-save-btn');
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+
+    document.getElementById('bni-overlay').classList.add('open');
+    document.getElementById('bni-drawer').classList.add('open');
   }
 
   function bniSave() {
@@ -2853,7 +3142,8 @@
     btn.disabled = true;
     btn.textContent = 'Saving…';
 
-    const data = {
+    const isEdit = !!window._bniEditRowIndex;
+    const fields = {
       date:    document.getElementById('bni-date').value,
       name:    document.getElementById('bni-name').value,
       org:     document.getElementById('bni-org').value,
@@ -2862,31 +3152,208 @@
       notes:   document.getElementById('bni-notes').value,
     };
 
+    const body = isEdit
+      ? { type: 'update_inquiry', rowIndex: window._bniEditRowIndex, updates: fields }
+      : { type: 'create_inquiry', data: fields };
+
     fetch(BENNET_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ type: 'create_inquiry', data })
+      body: JSON.stringify(body)
     })
     .then(r => r.json())
     .then(d => {
       if (d.success) {
-        btn.textContent = 'Added ✓';
+        btn.textContent = isEdit ? 'Saved ✓' : 'Added ✓';
         setTimeout(() => { bniClose(); bnLoad(); }, 700);
       } else {
         btn.disabled = false;
-        btn.textContent = 'Add Inquiry';
+        btn.textContent = isEdit ? 'Save Changes' : 'Add Inquiry';
         alert('Failed: ' + (d.error || 'Unknown error'));
       }
     })
     .catch(err => {
       btn.disabled = false;
-      btn.textContent = 'Add Inquiry';
+      btn.textContent = isEdit ? 'Save Changes' : 'Add Inquiry';
       alert('Network error: ' + err);
     });
   }
 
   // ESC closes drawer
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { bnCloseDrawer(); bniClose(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { bnCloseDrawer(); bniClose(); bnpClose(); } });
+
+  // ─────────────────────────────────────────
+  // LOG PAYABLE PANEL
+  // ─────────────────────────────────────────
+  const _bnp = { file: null, filePath: null, parsed: null };
+
+  function bnpOpen() {
+    bnpReset();
+    document.getElementById('bnp-overlay').classList.add('open');
+    document.getElementById('bnp-drawer').classList.add('open');
+  }
+
+  function bnpClose() {
+    document.getElementById('bnp-overlay').classList.remove('open');
+    document.getElementById('bnp-drawer').classList.remove('open');
+  }
+
+  function bnpHandleDrop(e) {
+    e.preventDefault();
+    document.getElementById('bnp-dropZone').classList.remove('bnp-dz-over');
+    const f = e.dataTransfer.files[0];
+    if (f && (f.type === 'application/pdf' || f.name.endsWith('.pdf'))) bnpSetFile(f);
+    else {
+      document.getElementById('bnp-error').textContent = 'Please drop a PDF file.';
+      document.getElementById('bnp-error').style.display = 'block';
+    }
+  }
+
+  async function bnpSetFile(f) {
+    _bnp.file     = f;
+    _bnp.filePath = f.path;
+    _bnp.parsed   = null;
+
+    // Update drop zone UI
+    const dz = document.getElementById('bnp-dropZone');
+    dz.classList.add('has-file');
+    document.getElementById('bnp-dzIcon').textContent  = '📋';
+    document.getElementById('bnp-dzLabel').textContent = 'PDF selected — parsing…';
+    document.getElementById('bnp-dzName').textContent  = f.name;
+    document.getElementById('bnp-error').style.display = 'none';
+
+    // Show parse spinner
+    document.getElementById('bnp-parse-msg').style.display = 'block';
+
+    try {
+      const result = await window.sgg.parsePayable(f.path);
+      _bnp.parsed = result;
+      document.getElementById('bnp-parse-msg').style.display = 'none';
+
+      if (result.error) {
+        document.getElementById('bnp-error').textContent = result.error;
+        document.getElementById('bnp-error').style.display = 'block';
+        dz.classList.remove('has-file');
+        document.getElementById('bnp-dzIcon').textContent  = '📄';
+        document.getElementById('bnp-dzLabel').textContent = 'Drop Arternal payable PDF or click to browse';
+        document.getElementById('bnp-dzName').textContent  = '';
+        return;
+      }
+
+      // Populate review fields
+      document.getElementById('bnp-payNumber').value = result.payNumber || '';
+      document.getElementById('bnp-date').value      = result.date      || '';
+      document.getElementById('bnp-bscNumber').value = result.bscNumber || '';
+      document.getElementById('bnp-amount').value    = result.amount    || '';
+      document.getElementById('bnp-notes').value     = result.notes     || '';
+
+      // Warn if no BSC found
+      document.getElementById('bnp-bsc-warn').style.display = result.bscNumber ? 'none' : 'block';
+
+      // Show review
+      document.getElementById('bnp-upload-state').style.display = 'none';
+      document.getElementById('bnp-review-state').style.display = 'block';
+      document.getElementById('bnp-confirm-btn').style.display  = 'block';
+      document.getElementById('bnp-dzLabel').textContent = 'PDF ready';
+
+    } catch (err) {
+      document.getElementById('bnp-parse-msg').style.display = 'none';
+      document.getElementById('bnp-error').textContent = 'Could not parse PDF: ' + err.message;
+      document.getElementById('bnp-error').style.display = 'block';
+      dz.classList.remove('has-file');
+      document.getElementById('bnp-dzIcon').textContent  = '📄';
+      document.getElementById('bnp-dzLabel').textContent = 'Drop Arternal payable PDF or click to browse';
+      document.getElementById('bnp-dzName').textContent  = '';
+    }
+  }
+
+  function bnpReset() {
+    _bnp.file = null; _bnp.filePath = null; _bnp.parsed = null;
+    const dz = document.getElementById('bnp-dropZone');
+    dz.className = 'bnp-dz';
+    document.getElementById('bnp-dzIcon').textContent   = '📄';
+    document.getElementById('bnp-dzLabel').textContent  = 'Drop Arternal payable PDF or click to browse';
+    document.getElementById('bnp-dzName').textContent   = '';
+    document.getElementById('bnp-fileInput').value      = '';
+    document.getElementById('bnp-error').style.display  = 'none';
+    document.getElementById('bnp-parse-msg').style.display = 'none';
+    document.getElementById('bnp-upload-state').style.display  = 'block';
+    document.getElementById('bnp-review-state').style.display  = 'none';
+    document.getElementById('bnp-saving-state').style.display  = 'none';
+    document.getElementById('bnp-success-state').style.display = 'none';
+    document.getElementById('bnp-confirm-btn').style.display   = 'none';
+    document.getElementById('bnp-confirm-btn').disabled = false;
+    document.getElementById('bnp-confirm-btn').textContent = 'Log Payable';
+    document.getElementById('bnp-bsc-warn').style.display = 'none';
+    document.getElementById('bnp-review-error').style.display = 'none';
+    document.getElementById('bnp-footer').style.display = 'flex';
+  }
+
+  function bnpConfirm() {
+    const payNumber = document.getElementById('bnp-payNumber').value.trim();
+    const bscNumber = document.getElementById('bnp-bscNumber').value.trim();
+    const amount    = document.getElementById('bnp-amount').value.trim();
+    const date      = document.getElementById('bnp-date').value.trim();
+    const notes     = document.getElementById('bnp-notes').value.trim();
+    const errEl     = document.getElementById('bnp-review-error');
+    errEl.style.display = 'none';
+
+    if (!bscNumber) { errEl.textContent = 'BSC number is required to match the commission row.'; errEl.style.display = 'block'; return; }
+    if (!amount)    { errEl.textContent = 'Amount is required.'; errEl.style.display = 'block'; return; }
+    if (!_bnp.file) { errEl.textContent = 'No PDF file loaded.'; errEl.style.display = 'block'; return; }
+
+    // Disable button, show saving state
+    document.getElementById('bnp-confirm-btn').disabled = true;
+    document.getElementById('bnp-confirm-btn').textContent = 'Logging…';
+    document.getElementById('bnp-review-state').style.display  = 'none';
+    document.getElementById('bnp-upload-state').style.display  = 'none';
+    document.getElementById('bnp-saving-state').style.display  = 'block';
+    document.getElementById('bnp-footer').style.display = 'none';
+
+    // Read file as base64
+    const reader = new FileReader();
+    reader.onload = e => {
+      const base64 = e.target.result.split(',')[1];
+      fetch(BENNET_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          type: 'log_payable',
+          data: { payNumber, date, notes, bscNumber, amount, pdfBase64: base64, filename: _bnp.file.name }
+        })
+      })
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById('bnp-saving-state').style.display  = 'none';
+        if (d.success) {
+          document.getElementById('bnp-success-detail').textContent =
+            (payNumber || 'Payable') + ' · ' + bscNumber + ' · $' + amount;
+          const link = document.getElementById('bnp-drive-link');
+          if (d.driveLink) { link.href = d.driveLink; link.style.display = 'inline-block'; }
+          else link.style.display = 'none';
+          document.getElementById('bnp-success-state').style.display = 'block';
+          bnLoad(); // refresh commission cards
+        } else {
+          document.getElementById('bnp-review-state').style.display = 'block';
+          document.getElementById('bnp-footer').style.display = 'flex';
+          document.getElementById('bnp-confirm-btn').disabled = false;
+          document.getElementById('bnp-confirm-btn').textContent = 'Log Payable';
+          document.getElementById('bnp-review-error').textContent = d.error || 'Something went wrong.';
+          document.getElementById('bnp-review-error').style.display = 'block';
+        }
+      })
+      .catch(err => {
+        document.getElementById('bnp-saving-state').style.display  = 'none';
+        document.getElementById('bnp-review-state').style.display  = 'block';
+        document.getElementById('bnp-footer').style.display = 'flex';
+        document.getElementById('bnp-confirm-btn').disabled = false;
+        document.getElementById('bnp-confirm-btn').textContent = 'Log Payable';
+        document.getElementById('bnp-review-error').textContent = 'Network error: ' + err.message;
+        document.getElementById('bnp-review-error').style.display = 'block';
+      });
+    };
+    reader.readAsDataURL(_bnp.file);
+  }
 </script>
 </body>
 </html>

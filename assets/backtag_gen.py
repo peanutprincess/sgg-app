@@ -5,7 +5,7 @@ Usage: python3 backtag_gen.py artworks.pdf
 Output: <name>_backtags_s1.svg, _s2.svg … (collected and merged to PDF by the caller)
 """
 
-import sys, re, subprocess, textwrap, math, base64, tempfile, shutil
+import sys, re, textwrap, math, base64, tempfile, shutil, zlib
 from pathlib import Path
 
 # ── Sheet / label geometry — Avery 8163 (US Letter, 2×5, 4"×2") ──
@@ -34,20 +34,236 @@ TEXT_W     = LABEL_W - IMG_W    # remaining width for text
 TEXT_CX    = [COL_X[c] + IMG_W + TEXT_W / 2 for c in range(COLS)]
 
 
-# ── 1. Parse PDF ──────────────────────────────────────────────
+# ── 1. Parse PDF — pure Python, zero external dependencies ───────────────────
+
+def _inflate(raw):
+    """Decompress zlib/deflate. Tries zlib, raw deflate, and gzip wbits."""
+    for wbits in (15, -15, 47):
+        try:
+            return zlib.decompress(raw, wbits)
+        except Exception:
+            pass
+    return b''
+
+def _decode_pdf_string(s):
+    """Decode a PDF literal string (…) or hex string <…> to a Python str."""
+    s = s.strip()
+    if not s:
+        return ''
+    if s.startswith('<'):
+        hex_str = re.sub(r'\s', '', s[1:-1])
+        if len(hex_str) % 2:
+            hex_str += '0'
+        try:
+            raw = bytes.fromhex(hex_str)
+            if raw[:2] == b'\xfe\xff':
+                return raw.decode('utf-16', errors='replace')
+            if len(raw) > 1 and all(b == 0 for b in raw[::2]):
+                return raw.decode('utf-16-be', errors='replace')
+            return raw.decode('latin-1', errors='replace')
+        except Exception:
+            return ''
+    # Literal string
+    s = s[1:-1]
+    escape_map = {'n': '\n', 'r': '\r', 't': '\t', 'b': '\b',
+                  'f': '\f', '(': '(', ')': ')', '\\': '\\'}
+    result, i = [], 0
+    while i < len(s):
+        if s[i] == '\\' and i + 1 < len(s):
+            c = s[i + 1]
+            if c in escape_map:
+                result.append(escape_map[c]); i += 2
+            elif c.isdigit():
+                j = 1
+                while j < 3 and i + 1 + j < len(s) and s[i + 1 + j].isdigit():
+                    j += 1
+                try:
+                    result.append(chr(int(s[i + 1:i + 1 + j], 8)))
+                except Exception:
+                    pass
+                i += 1 + j
+            else:
+                result.append(c); i += 2
+        else:
+            result.append(s[i]); i += 1
+    return ''.join(result)
+
+def _parse_cmap(cmap_text):
+    """Build glyph_id → unicode char mapping from a ToUnicode CMap."""
+    mapping = {}
+    for block in re.finditer(r'beginbfchar(.*?)endbfchar', cmap_text, re.DOTALL):
+        for m in re.finditer(r'<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>', block.group(1)):
+            dst = int(m.group(2), 16)
+            if dst > 0:
+                mapping[int(m.group(1), 16)] = chr(dst)
+    for block in re.finditer(r'beginbfrange(.*?)endbfrange', cmap_text, re.DOTALL):
+        for m in re.finditer(r'<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>', block.group(1)):
+            start, end, u = int(m.group(1), 16), int(m.group(2), 16), int(m.group(3), 16)
+            for g in range(start, end + 1):
+                if u > 0:
+                    mapping[g] = chr(u + (g - start))
+    return mapping
+
+def _decode_hex_cmap(hex_str, cmap):
+    """Decode a 2-byte-per-glyph hex string using a ToUnicode CMap."""
+    hex_str = re.sub(r'\s', '', hex_str.strip('<>'))
+    if not hex_str:
+        return ''
+    result = []
+    step = 4 if len(hex_str) >= 4 and len(hex_str) % 4 == 0 else 2
+    for j in range(0, len(hex_str), step):
+        glyph = int(hex_str[j:j + step], 16)
+        result.append(cmap.get(glyph, ''))
+    return ''.join(result)
+
+def _text_from_content_stream(text, cmap):
+    """
+    Pull visible text from a decoded PDF content stream.
+    Handles ActualText spans (for ligatures & unmapped glyphs),
+    ToUnicode CMap decoding, and Td/T*/Tm line breaks.
+    """
+    lines, current = [], []
+
+    # Substitute ActualText spans: /Span<</ActualText (X)>> BDC ... EMC
+    # Replace the whole marked-content block with a fake literal Tj
+    def _sub_actual(m):
+        return '(' + m.group(1).replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)') + ') Tj '
+    text = re.sub(
+        r'/Span\s*<<[^>]*?/ActualText\s*\(([^)]*)\)[^>]*?>>\s*BDC.*?EMC\s*',
+        _sub_actual, text, flags=re.DOTALL
+    )
+
+    for bt in re.finditer(r'BT\b(.*?)\bET\b', text, re.DOTALL):
+        block = bt.group(1)
+        pos = 0
+        while pos < len(block):
+            remaining = block[pos:]
+
+            # Td / TD — new line if y ≠ 0
+            m = re.match(r'\s*([-\d.]+)\s+([-\d.]+)\s+T[dD]\b', remaining)
+            if m:
+                if float(m.group(2)) != 0 and current:
+                    lines.append(''.join(current)); current = []
+                pos += m.end(); continue
+
+            # T* — always new line
+            m = re.match(r'\s*T\*\b', remaining)
+            if m:
+                if current: lines.append(''.join(current)); current = []
+                pos += m.end(); continue
+
+            # Tm — text matrix, treat as new line
+            m = re.match(r'\s*[-\d.\s]+Tm\b', remaining)
+            if m:
+                if current: lines.append(''.join(current)); current = []
+                pos += m.end(); continue
+
+            # Literal Tj: (string) Tj
+            m = re.match(r'\s*(\((?:[^\\()]|\\.)*\))\s+Tj\b', remaining)
+            if m:
+                current.append(_decode_pdf_string(m.group(1)))
+                pos += m.end(); continue
+
+            # Hex Tj: <hex> Tj
+            m = re.match(r'\s*(<[0-9A-Fa-f\s]+>)\s+Tj\b', remaining)
+            if m:
+                current.append(_decode_hex_cmap(m.group(1), cmap))
+                pos += m.end(); continue
+
+            # TJ array
+            m = re.match(r'\s*\[(.*?)\]\s*TJ\b', remaining, re.DOTALL)
+            if m:
+                chunk = []
+                for s in re.finditer(r'<([0-9A-Fa-f\s]*)>|(\((?:[^\\()]|\\.)*\))', m.group(1)):
+                    if s.group(1) is not None:
+                        chunk.append(_decode_hex_cmap('<' + s.group(1) + '>', cmap))
+                    else:
+                        chunk.append(_decode_pdf_string(s.group(2)))
+                current.append(''.join(chunk))
+                pos += m.end(); continue
+
+            pos += 1  # advance past unrecognised token
+
+        if current:
+            lines.append(''.join(current)); current = []
+
+    return '\n'.join(lines)
 
 def extract_text(pdf_path):
-    r = subprocess.run(['pdftotext', str(pdf_path), '-'], capture_output=True, text=True)
-    return r.stdout
+    """
+    Pure-Python PDF text extraction.
+    Handles ToUnicode CMaps + ActualText spans (ligatures, unmapped glyphs).
+    No external tools — works on every Mac with Python 3.
+    """
+    data = Path(pdf_path).read_bytes()
+
+    # ── Pass 1: collect all ToUnicode CMaps ──────────────────────────────────
+    cmap, i = {}, 0
+    while True:
+        pos = data.find(b'stream', i)
+        if pos == -1: break
+        nl = data.find(b'\n', pos + 6)
+        if nl == -1: i = pos + 6; continue
+        s_end = data.find(b'endstream', nl + 1)
+        if s_end == -1: i = nl + 1; continue
+        raw = data[nl + 1:s_end]
+        dict_start = data.rfind(b'<<', max(0, pos - 2000), pos)
+        chunk = data[dict_start:pos] if dict_start != -1 else b''
+        content = _inflate(raw) if (b'FlateDecode' in chunk or b'/Fl ' in chunk) else raw
+        if b'beginbfchar' in content or b'beginbfrange' in content:
+            cmap.update(_parse_cmap(content.decode('latin-1', errors='replace')))
+        i = s_end + 9
+
+    # ── Pass 2: extract text from content streams ─────────────────────────────
+    parts, i = [], 0
+    while True:
+        pos = data.find(b'stream', i)
+        if pos == -1: break
+        nl = data.find(b'\n', pos + 6)
+        if nl == -1: i = pos + 6; continue
+        s_end = data.find(b'endstream', nl + 1)
+        if s_end == -1: i = nl + 1; continue
+        raw = data[nl + 1:s_end]
+        dict_start = data.rfind(b'<<', max(0, pos - 2000), pos)
+        chunk = data[dict_start:pos] if dict_start != -1 else b''
+        sub_m = re.search(rb'/Subtype\s*/(\w+)', chunk)
+        if sub_m and sub_m.group(1) == b'Image':
+            i = s_end + 9; continue
+        content = _inflate(raw) if (b'FlateDecode' in chunk or b'/Fl ' in chunk) else raw
+        if b'BT' in content and b'ET' in content:
+            try:
+                parts.append(_text_from_content_stream(
+                    content.decode('latin-1', errors='replace'), cmap))
+            except Exception:
+                pass
+        i = s_end + 9
+
+    return '\n'.join(parts)
 
 def extract_images(pdf_path, tmp_dir):
-    """Extract embedded images from PDF in order. Returns sorted list of paths."""
-    subprocess.run(
-        ['pdfimages', '-all', str(pdf_path), str(tmp_dir / 'img')],
-        capture_output=True
-    )
-    imgs = sorted(tmp_dir.glob('img-*.jpg')) + sorted(tmp_dir.glob('img-*.png'))
-    return sorted(imgs)
+    """
+    Pure-Python JPEG extraction — finds embedded photos in the PDF.
+    No external tools — works on every Mac with Python 3.
+    Falls back to empty list if no images found (back-tags still render fine).
+    """
+    data = Path(pdf_path).read_bytes()
+    imgs, i, n = [], 0, 0
+    while True:
+        j = data.find(b'\xff\xd8\xff', i)   # JPEG SOI marker
+        if j == -1:
+            break
+        end = data.find(b'\xff\xd9', j + 3) # JPEG EOI marker
+        if end == -1:
+            i = j + 3; continue
+        end += 2
+        jpeg = data[j:end]
+        if len(jpeg) >= 5000:               # skip thumbnails
+            out = tmp_dir / f'img-{n:03d}.jpg'
+            out.write_bytes(jpeg)
+            imgs.append(out)
+            n += 1
+        i = end
+    return imgs
 
 def img_data_uri(path):
     """Base64-encode an image for SVG embedding."""
