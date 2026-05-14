@@ -199,6 +199,24 @@
     .loc-btn.sel-nyc { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
     .loc-btn.sel-la  { border-color: #f59e0b; background: #fffbeb; color: #92400e; }
 
+    /* ── Contractor multi-select pills ── */
+    .contractor-grid { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+    .contractor-pill {
+      padding: 6px 13px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 20px;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      color: #374151;
+      font-family: inherit;
+      transition: all 0.12s;
+      white-space: nowrap;
+    }
+    .contractor-pill:hover { border-color: #9ca3af; }
+    .contractor-pill.selected { border-color: #6366f1; background: #eef2ff; color: #4338ca; }
+
     /* ── Fields ── */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
     .form-full { margin-bottom: 14px; }
@@ -955,18 +973,17 @@
 
         <div class="form-full field">
           <label>Contractor</label>
-          <select id="inv-contractor">
-            <option value="">Select contractor…</option>
-            <option>Chasen Wolcott</option>
-            <option>Jesus Cardenas</option>
-            <option>Jonathan Austin</option>
-            <option>Kial Hocker</option>
-            <option>Matthew Debbaudt</option>
-            <option>Sheila Alcibar</option>
-            <option>Stevie Soares</option>
-            <option>Sydney Busic</option>
-            <option>Yatta</option>
-          </select>
+          <div class="contractor-grid" id="inv-contractor-grid">
+            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Chasen Wolcott</button>
+            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Jesus Cardenas</button>
+            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Jonathan Austin</button>
+            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Kial Hocker</button>
+            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Matthew Debbaudt</button>
+            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Sheila Alcibar</button>
+            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Stevie Soares</button>
+            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Sydney Busic</button>
+            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Yatta</button>
+          </div>
         </div>
 
         <div class="form-grid">
@@ -2123,14 +2140,24 @@
     submitOne(0);
   }
 
+  function toggleContractor(btn) {
+    btn.classList.toggle('selected');
+  }
+
+  function getSelectedContractors() {
+    return Array.from(document.querySelectorAll('#inv-contractor-grid .contractor-pill.selected'))
+      .map(b => b.textContent.trim());
+  }
+
   // Submit invoice
   function submitInvoice() {
     const p = 'inv';
     hideError(p);
-    if (!state[p].files.length)                                   { showError(p, 'Please attach an invoice.'); return; }
-    if (!state[p].loc)                                            { showError(p, 'Please select NYC or LA.'); return; }
-    if (!document.getElementById('inv-contractor').value)        { showError(p, 'Please select a contractor.'); return; }
-    if (!document.getElementById('inv-date').value)              { showError(p, 'Date is required.'); return; }
+    const contractors = getSelectedContractors();
+    if (!state[p].files.length)   { showError(p, 'Please attach an invoice.'); return; }
+    if (!state[p].loc)            { showError(p, 'Please select NYC or LA.'); return; }
+    if (!contractors.length)      { showError(p, 'Please select at least one contractor.'); return; }
+    if (!document.getElementById('inv-date').value) { showError(p, 'Date is required.'); return; }
 
     const invFile = state[p].files[0];
     const reader = new FileReader();
@@ -2142,7 +2169,7 @@
         mimeType:    invFile.type || 'image/jpeg',
         location:    state[p].loc,
         date:        document.getElementById('inv-date').value,
-        contractor:  document.getElementById('inv-contractor').value,
+        contractor:  contractors.join(', '),
         invoiceNum:  document.getElementById('inv-invoiceNum').value.trim(),
         amount:      document.getElementById('inv-amount').value,
         note:        document.getElementById('inv-note').value.trim()
@@ -2568,7 +2595,7 @@
       document.getElementById('exp-account').value  = '';
     } else {
       ['invoiceNum','amount','note'].forEach(id => document.getElementById('inv-'+id).value = '');
-      document.getElementById('inv-contractor').value = '';
+      document.querySelectorAll('#inv-contractor-grid .contractor-pill').forEach(b => b.classList.remove('selected'));
     }
 
     const d = new Date();
