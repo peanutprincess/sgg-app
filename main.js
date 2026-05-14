@@ -4,6 +4,7 @@ const { spawn } = require('child_process');
 const { autoUpdater } = require('electron-updater');
 
 app.name = 'SG';
+const launchTime = Date.now();
 
 function createWindow() {
   // Set dock icon from SVG logo
@@ -182,7 +183,20 @@ ipcMain.handle('show-in-finder', (event, filePath) => {
 
 app.whenReady().then(() => {
   createWindow();
-  if (app.isPackaged) autoUpdater.checkForUpdatesAndNotify();
+  if (app.isPackaged) {
+    autoUpdater.autoDownload        = true;
+    autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.on('error', () => {}); // swallow silently — don't surface to user
+    autoUpdater.on('update-downloaded', () => {
+      // If update arrives within 8s of launch the user hasn't done anything yet —
+      // restart immediately so they open straight into the new version.
+      if (Date.now() - launchTime < 8000) {
+        autoUpdater.quitAndInstall(true /* silent */, true /* restartAfterInstall */);
+      }
+      // Otherwise it installs automatically on next quit (autoInstallOnAppQuit).
+    });
+    autoUpdater.checkForUpdates();
+  }
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
