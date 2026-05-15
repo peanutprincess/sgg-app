@@ -118,8 +118,8 @@
     .content { flex: 1; overflow: hidden; background: #fafafa; display: flex; flex-direction: column; }
     .module { display: none; }
     .module.active { display: flex; flex-direction: column; height: 100%; }
-    /* Non-bennet modules scroll normally */
-    .module.active:not(#mod-bennet) { overflow-y: auto; }
+    /* Non-bennet/logistics modules scroll normally */
+    .module.active:not(#mod-bennet):not(#mod-logistics) { overflow-y: auto; }
 
     .module-header {
       padding: 28px 40px 0;
@@ -812,6 +812,176 @@
     .cr-photo-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .cr-photo-slot-label { font-size: 10px; color: #9ca3af; margin-top: 4px; text-align: center; padding: 0 4px; }
     .cr-photo-slot-name { font-size: 10px; color: #6366f1; margin-top: 4px; text-align: center; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+    /* ── Logistics Module ── */
+    #mod-logistics { overflow: hidden; }
+    .log-scroll-body {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .log-header-bar {
+      padding: 20px 32px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+      -webkit-app-region: no-drag;
+    }
+    .log-loc-pills {
+      display: flex;
+      gap: 6px;
+    }
+    .log-loc-pill {
+      padding: 5px 18px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 999px;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      color: #374151;
+      transition: all 0.12s;
+    }
+    .log-loc-pill:hover { border-color: #9ca3af; }
+    .log-loc-pill.active-la  { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
+    .log-loc-pill.active-ny  { background: #eff6ff; border-color: #3b82f6; color: #1d4ed8; }
+    .log-add-btn {
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: 0.02em;
+      transition: background 0.12s;
+      white-space: nowrap;
+    }
+    .log-add-btn:hover { background: #333; }
+    .log-list-wrap { padding: 16px 32px 40px; display: flex; flex-direction: column; gap: 10px; }
+    .log-card {
+      background: #fff;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: border-color 0.12s, box-shadow 0.12s;
+    }
+    .log-card:hover { border-color: #9ca3af; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .log-thumb {
+      width: 60px; height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #f3f4f6;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      overflow: hidden;
+    }
+    .log-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 8px; }
+    .log-card-center { flex: 1; min-width: 0; }
+    .log-card-client { font-size: 14px; font-weight: 700; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .log-card-artwork { font-size: 12px; color: #6b7280; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .log-card-stock { font-size: 11px; color: #9ca3af; margin-top: 2px; font-style: italic; }
+    .log-card-fin { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+    .log-card-right { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; flex-shrink: 0; }
+    .log-status-pill {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 10px; font-weight: 600;
+      padding: 3px 9px; border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      border: 1px solid transparent;
+      transition: opacity 0.12s;
+      user-select: none;
+    }
+    .log-status-pill:hover { opacity: 0.8; }
+    .log-status-paid   { background: #dcfce7; color: #15803d; border-color: #86efac; }
+    .log-status-unpaid { background: #f3f4f6; color: #6b7280; border-color: #e5e7eb; }
+    .log-status-blank  { background: #f9fafb; color: #9ca3af; border-color: #e5e7eb; }
+    .log-empty { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 14px; }
+    .log-loading { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 14px; }
+
+    /* Logistics drawer — reuses .bn-overlay / .bn-drawer patterns */
+    .log-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 200;
+    }
+    .log-overlay.open { display: block; }
+    .log-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 500px;
+      background: #fff;
+      box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+      z-index: 201;
+      transform: translateX(100%);
+      transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+      display: flex; flex-direction: column;
+    }
+    .log-drawer.open { transform: translateX(0); }
+    .log-drawer-head {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid #f3f4f6;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      flex-shrink: 0;
+    }
+    .log-drawer-title { font-size: 18px; font-weight: 700; color: #111; }
+    .log-drawer-sub   { font-size: 13px; color: #6b7280; margin-top: 2px; }
+    .log-drawer-body  { flex: 1; overflow-y: auto; padding: 20px 24px; }
+    .log-drawer-foot  { padding: 14px 24px; border-top: 1px solid #f3f4f6; display: flex; gap: 10px; flex-shrink: 0; }
+    .log-dz {
+      border: 2px dashed #d1d5db;
+      border-radius: 10px;
+      padding: 18px 12px;
+      text-align: center;
+      cursor: pointer;
+      background: #fafafa;
+      transition: all 0.15s;
+      margin-bottom: 14px;
+    }
+    .log-dz:hover { border-color: #9ca3af; background: #f3f4f6; }
+    .log-dz.drag-over { border-color: #c9a84c; background: #fdf8ee; }
+    .log-dz.has-file  { border-color: #22c55e; background: #f0fdf4; border-style: solid; }
+    .log-dz-preview {
+      width: 80px; height: 80px;
+      border-radius: 8px;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 8px;
+    }
+    .log-paid-toggle {
+      display: flex; gap: 6px; margin-top: 4px;
+    }
+    .log-paid-btn {
+      flex: 1;
+      padding: 6px 0;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      color: #6b7280;
+      transition: all 0.12s;
+      text-align: center;
+    }
+    .log-paid-btn:hover { border-color: #9ca3af; }
+    .log-paid-btn.sel-paid   { background: #dcfce7; border-color: #86efac; color: #15803d; }
+    .log-paid-btn.sel-unpaid { background: #f3f4f6; border-color: #d1d5db; color: #374151; }
+    .log-paid-btn.sel-blank  { background: #f9fafb; border-color: #e5e7eb; color: #9ca3af; }
   </style>
 </head>
 <body>
@@ -856,6 +1026,9 @@
     <div class="nav-label">Artists</div>
     <div class="nav-item" onclick="showModule('bennet', this)">
       <span class="nav-icon">🎨</span> Bennet Schlesinger
+    </div>
+    <div class="nav-item" onclick="showModule('logistics', this)">
+      <span class="nav-icon">📦</span> Logistics
     </div>
 
     <div class="nav-label">Records</div>
@@ -1538,6 +1711,21 @@
       <button class="bn-close-btn" onclick="bnCloseDrawer()">✕</button>
     </div>
     <div class="bn-drawer-body">
+      <!-- Artwork Photo -->
+      <div class="bn-section-label">Artwork Photo</div>
+      <div class="log-dz" id="bnd-photo-dz"
+           onclick="document.getElementById('bnd-photo-input').click()"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="bndHandlePhotoDrop(event)"
+           style="margin-bottom:14px;">
+        <input type="file" id="bnd-photo-input" accept="image/*" style="display:none" onchange="bndSetPhoto(this.files[0])">
+        <div id="bnd-photo-dz-inner">
+          <div class="dz-icon">🖼️</div>
+          <div class="dz-label" style="font-size:12px;color:#6b7280;">Drop artwork photo or click to upload</div>
+        </div>
+      </div>
+
       <!-- Client -->
       <div class="bn-section-label">Client</div>
       <div class="bn-field-grid">
@@ -1978,6 +2166,162 @@
     </div>
   </section>
 
+  <!-- LOGISTICS -->
+  <section id="mod-logistics" class="module">
+    <div class="module-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="-webkit-app-region:no-drag;">
+        <div class="module-title">Logistics</div>
+        <div class="module-subtitle">Sebastian Gladstone Logistics Sheet</div>
+      </div>
+      <div class="log-header-bar" style="padding:0;">
+        <div class="log-loc-pills">
+          <button class="log-loc-pill active-la" id="log-pill-la" onclick="logSetLoc('LA')">🌴 LA</button>
+          <button class="log-loc-pill" id="log-pill-ny" onclick="logSetLoc('NY')">🗽 NY</button>
+        </div>
+        <button class="log-add-btn" onclick="logOpenNewDrawer()">＋ Add Entry</button>
+      </div>
+    </div>
+    <div class="log-scroll-body">
+      <div id="log-list" class="log-list-wrap">
+        <div class="log-loading">Loading…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Logistics drawer overlay -->
+  <div class="log-overlay" id="log-overlay" onclick="logCloseDrawer()"></div>
+  <div class="log-drawer" id="log-drawer">
+    <div class="log-drawer-head">
+      <div>
+        <div class="log-drawer-title" id="logd-title">New Entry</div>
+        <div class="log-drawer-sub" id="logd-sub">Fill in the details below</div>
+      </div>
+      <button class="bn-close-btn" onclick="logCloseDrawer()">✕</button>
+    </div>
+    <div class="log-drawer-body">
+
+      <!-- Location (shown only on new entry) -->
+      <div id="logd-loc-section">
+        <div class="bn-section-label">Location</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <button class="log-paid-btn sel-paid" id="logd-loc-la" onclick="logdSetLoc('LA')">🌴 LA</button>
+          <button class="log-paid-btn" id="logd-loc-ny" onclick="logdSetLoc('NY')">🗽 NY</button>
+        </div>
+      </div>
+
+      <!-- Photo upload -->
+      <div class="bn-section-label">Artwork Photo</div>
+      <div class="log-dz" id="logd-dz"
+           onclick="document.getElementById('logd-fileInput').click()"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="logHandleDrop(event)">
+        <input type="file" id="logd-fileInput" accept="image/*" style="display:none" onchange="logSetPhoto(this.files[0])">
+        <div id="logd-dz-inner">
+          <div class="dz-icon">🖼️</div>
+          <div class="dz-label" style="font-size:12px;color:#6b7280;">Drop artwork photo or click to upload</div>
+        </div>
+      </div>
+
+      <!-- Client / Collector -->
+      <div class="bn-section-label">Client / Collector</div>
+      <div class="bn-field-grid single">
+        <div class="bn-field">
+          <label>Client / Collector</label>
+          <input type="text" id="logd-client" placeholder="Full name">
+        </div>
+      </div>
+
+      <!-- Artwork Info -->
+      <div class="bn-section-label" style="margin-top:14px;">Artwork</div>
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>Artist</label>
+          <input type="text" id="logd-artist" placeholder="Artist name">
+        </div>
+        <div class="bn-field">
+          <label>Title</label>
+          <input type="text" id="logd-arttitle" placeholder="Artwork title">
+        </div>
+        <div class="bn-field">
+          <label>Year</label>
+          <input type="text" id="logd-year" placeholder="2024">
+        </div>
+        <div class="bn-field">
+          <label>Medium</label>
+          <input type="text" id="logd-medium" placeholder="Oil on canvas">
+        </div>
+        <div class="bn-field">
+          <label>Dimensions (unframed)</label>
+          <input type="text" id="logd-dims" placeholder='24" × 36"'>
+        </div>
+        <div class="bn-field">
+          <label>Dimensions (framed, optional)</label>
+          <input type="text" id="logd-dims-framed" placeholder='26" × 38"'>
+        </div>
+        <div class="bn-field">
+          <label>Stock #</label>
+          <input type="text" id="logd-stock" placeholder="e.g. SG-2025-001">
+        </div>
+      </div>
+
+      <!-- Financial -->
+      <div class="bn-section-label" style="margin-top:14px;">Financial</div>
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>SG Invoice #</label>
+          <input type="text" id="logd-invoice" placeholder="INV-">
+        </div>
+        <div class="bn-field">
+          <label>Price ($)</label>
+          <input type="number" id="logd-price" placeholder="0.00" step="0.01">
+        </div>
+        <div class="bn-field">
+          <label>Sale Price ($)</label>
+          <input type="number" id="logd-saleprice" placeholder="0.00" step="0.01">
+        </div>
+        <div class="bn-field">
+          <label>Salesperson Payout ($)</label>
+          <input type="number" id="logd-payout" placeholder="0.00" step="0.01">
+        </div>
+      </div>
+
+      <!-- Payment Status -->
+      <div class="bn-section-label" style="margin-top:14px;">Payment Status</div>
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>Artist Paid</label>
+          <div class="log-paid-toggle">
+            <button class="log-paid-btn sel-blank" id="logd-ap-blank" onclick="logdSetPaid('artist','')">—</button>
+            <button class="log-paid-btn" id="logd-ap-paid" onclick="logdSetPaid('artist','PAID')">PAID</button>
+            <button class="log-paid-btn" id="logd-ap-unpaid" onclick="logdSetPaid('artist','UNPAID')">UNPAID</button>
+          </div>
+        </div>
+        <div class="bn-field">
+          <label>Gallery Paid</label>
+          <div class="log-paid-toggle">
+            <button class="log-paid-btn sel-blank" id="logd-gp-blank" onclick="logdSetPaid('gallery','')">—</button>
+            <button class="log-paid-btn" id="logd-gp-paid" onclick="logdSetPaid('gallery','PAID')">PAID</button>
+            <button class="log-paid-btn" id="logd-gp-unpaid" onclick="logdSetPaid('gallery','UNPAID')">UNPAID</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="bn-section-label" style="margin-top:14px;">Payment Notes</div>
+      <div class="bn-field-grid single">
+        <div class="bn-field">
+          <textarea id="logd-notes" placeholder="Payment notes…" style="min-height:60px;"></textarea>
+        </div>
+      </div>
+
+    </div>
+    <div class="log-drawer-foot">
+      <button class="bn-cancel-btn" onclick="logCloseDrawer()">Cancel</button>
+      <button class="bn-save-btn" id="log-save-btn" onclick="logSave()">Save Entry</button>
+    </div>
+  </div>
+
   <!-- COMPANY HANDBOOK -->
   <section id="mod-handbook" class="module">
     <div class="hb-topbar">
@@ -2029,9 +2373,10 @@
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('mod-' + name).classList.add('active');
     el.classList.add('active');
-    if (name === 'gallery')  { loadGallery(); startGalleryAutoRefresh(); } else { stopGalleryAutoRefresh(); }
-    if (name === 'handbook') { loadHandbook(); }
-    if (name === 'bennet')   { bnLoad(); }
+    if (name === 'gallery')   { loadGallery(); startGalleryAutoRefresh(); } else { stopGalleryAutoRefresh(); }
+    if (name === 'handbook')  { loadHandbook(); }
+    if (name === 'bennet')    { bnLoad(); }
+    if (name === 'logistics') { logLoad(logState.loc); }
   }
 
   // ── Gallery ──
@@ -2904,6 +3249,8 @@
      'bnd-dueDate','bnd-notes','bnd-shipAddress','bnd-shipper','bnd-shipRef',
      'bnd-tracking','bnd-trackingSent','bnd-poc','bnd-fileRef'
     ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    // Reset photo drop zone
+    if (typeof bndResetPhoto === 'function') bndResetPhoto();
     // Update save button
     const btn = document.getElementById('bn-save-btn');
     btn.disabled = false;
@@ -2944,6 +3291,11 @@
       poc:          get('bnd-poc'),
       fileRef:      get('bnd-fileRef'),
     };
+    // Include photo if one was uploaded
+    if (typeof _bndPhoto !== 'undefined' && _bndPhoto.base64) {
+      data.imageData = _bndPhoto.base64;
+      data.imageMime = _bndPhoto.mimeType;
+    }
 
     fetch(BENNET_SCRIPT_URL, {
       method: 'POST',
@@ -3142,6 +3494,8 @@
     document.getElementById('bn-drawer').classList.add('open');
     document.getElementById('bn-save-btn').disabled = false;
     document.getElementById('bn-save-btn').textContent = 'Save Changes';
+    // Reset photo drop zone for existing records
+    if (typeof bndResetPhoto === 'function') bndResetPhoto();
   }
 
   function bnCloseDrawer() {
@@ -3185,6 +3539,11 @@
       poc:          get('bnd-poc'),
       fileRef:      get('bnd-fileRef'),
     };
+    // Include photo if one was uploaded
+    if (typeof _bndPhoto !== 'undefined' && _bndPhoto.base64) {
+      updates.imageData = _bndPhoto.base64;
+      updates.imageMime = _bndPhoto.mimeType;
+    }
 
     fetch(BENNET_SCRIPT_URL, {
       method: 'POST',
@@ -3412,7 +3771,7 @@
   }
 
   // ESC closes drawer
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { bnCloseDrawer(); bniClose(); bnpClose(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { bnCloseDrawer(); bniClose(); bnpClose(); logCloseDrawer(); } });
 
   // ─────────────────────────────────────────
   // LOG PAYABLE PANEL
@@ -3876,6 +4235,422 @@
     document.getElementById('cr-error').style.display   = 'none';
     document.getElementById('cr-success').style.display = 'none';
     document.getElementById('cr-form').style.display    = 'block';
+  }
+
+  // ─────────────────────────────────────────
+  // BENNET PHOTO UPLOAD (add-on to existing drawer)
+  // ─────────────────────────────────────────
+  const _bndPhoto = { file: null, base64: null, mimeType: null };
+
+  function bndHandlePhotoDrop(e) {
+    e.preventDefault();
+    document.getElementById('bnd-photo-dz').classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) bndSetPhoto(f);
+  }
+
+  function bndSetPhoto(f) {
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      _bndPhoto.file    = f;
+      _bndPhoto.base64  = e.target.result.split(',')[1];
+      _bndPhoto.mimeType = f.type || 'image/jpeg';
+      const dz = document.getElementById('bnd-photo-dz');
+      dz.classList.add('has-file');
+      document.getElementById('bnd-photo-dz-inner').innerHTML =
+        `<img src="${e.target.result}" class="log-dz-preview"><div class="dz-name" style="color:#16a34a;font-size:12px;font-weight:600;">${f.name}</div>`;
+    };
+    reader.readAsDataURL(f);
+  }
+
+  function bndResetPhoto() {
+    _bndPhoto.file = null; _bndPhoto.base64 = null; _bndPhoto.mimeType = null;
+    const dz = document.getElementById('bnd-photo-dz');
+    dz.className = 'log-dz';
+    document.getElementById('bnd-photo-dz-inner').innerHTML =
+      '<div class="dz-icon">🖼️</div><div class="dz-label" style="font-size:12px;color:#6b7280;">Drop artwork photo or click to upload</div>';
+    document.getElementById('bnd-photo-input').value = '';
+  }
+
+
+  // ─────────────────────────────────────────
+  // LOGISTICS MODULE
+  // ─────────────────────────────────────────
+  const logState = {
+    loc:         'LA',
+    rows:        [],
+    editRow:     null,   // row object being edited (null = new)
+    photoFile:   null,
+    photoBase64: null,
+    photoMime:   null,
+    artistPaid:  '',
+    galleryPaid: '',
+    drawerLoc:   'LA',   // loc for new entries
+  };
+
+  function logSetLoc(loc) {
+    logState.loc = loc;
+    document.getElementById('log-pill-la').className = 'log-loc-pill' + (loc === 'LA' ? ' active-la' : '');
+    document.getElementById('log-pill-ny').className = 'log-loc-pill' + (loc === 'NY' ? ' active-ny' : '');
+    logLoad(loc);
+  }
+
+  function logLoad(loc) {
+    document.getElementById('log-list').innerHTML = '<div class="log-loading">Loading…</div>';
+    fetch(SCRIPT_URL + '?action=logistics&loc=' + encodeURIComponent(loc) + '&t=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById('log-list').innerHTML = '<div class="log-empty">Error: ' + escHtml(data.error) + '</div>';
+          return;
+        }
+        logState.rows = data.rows || [];
+        logRenderCards(logState.rows);
+      })
+      .catch(err => {
+        document.getElementById('log-list').innerHTML = '<div class="log-empty">Failed to load. Check connection.</div>';
+      });
+  }
+
+  function logParseTitle(titleStr) {
+    // title column: artist\ntitle, year\nmedium\ndims\n...\nstock#
+    const lines = (titleStr || '').split('\n').map(l => l.trim()).filter(Boolean);
+    return {
+      artist: lines[0] || '',
+      titleYear: lines[1] || '',
+      stock: lines.length > 1 ? lines[lines.length - 1] : '',
+    };
+  }
+
+  function logStatusClass(val) {
+    const v = (val || '').toUpperCase().trim();
+    if (v === 'PAID')   return 'log-status-paid';
+    if (v === 'UNPAID') return 'log-status-unpaid';
+    return 'log-status-blank';
+  }
+
+  function logRenderCards(rows) {
+    const wrap = document.getElementById('log-list');
+    if (!rows.length) {
+      wrap.innerHTML = '<div class="log-empty">No entries yet. Click ＋ Add Entry to get started.</div>';
+      return;
+    }
+    wrap.innerHTML = rows.map(r => {
+      const parsed = logParseTitle(r.title);
+      const thumbHtml = r.imageUrl
+        ? `<div class="log-thumb"><img src="${escHtml(r.imageUrl)}" alt="artwork"></div>`
+        : `<div class="log-thumb">🖼️</div>`;
+      const artistLine = parsed.artist || '';
+      const titleLine  = parsed.titleYear || '';
+      const stockLine  = parsed.stock && parsed.stock !== artistLine && parsed.stock !== titleLine
+        ? parsed.stock : '';
+      const apCls = logStatusClass(r.artistPaid);
+      const gpCls = logStatusClass(r.galleryPaid);
+      const apTxt = r.artistPaid || '—';
+      const gpTxt = r.galleryPaid || '—';
+      const rowIdx = r.row;
+      const finParts = [];
+      if (r.invoice)   finParts.push('INV: ' + r.invoice);
+      if (r.price)     finParts.push('$' + r.price);
+      if (r.salePrice) finParts.push('Sale: $' + r.salePrice);
+      return `<div class="log-card" onclick="logOpenDrawer(${rowIdx})">
+        ${thumbHtml}
+        <div class="log-card-center">
+          <div class="log-card-client">${escHtml(r.client || '—')}</div>
+          ${artistLine || titleLine ? `<div class="log-card-artwork">${escHtml(artistLine)}${artistLine && titleLine ? ' · ' : ''}${escHtml(titleLine)}</div>` : ''}
+          ${stockLine ? `<div class="log-card-stock">${escHtml(stockLine)}</div>` : ''}
+          ${finParts.length ? `<div class="log-card-fin">${escHtml(finParts.join(' · '))}</div>` : ''}
+        </div>
+        <div class="log-card-right" onclick="event.stopPropagation()">
+          <span class="log-status-pill ${apCls}" onclick="logToggleStatus(${rowIdx}, 'artist', '${escHtml(r.artistPaid)}')">Artist: ${escHtml(apTxt)}</span>
+          <span class="log-status-pill ${gpCls}" onclick="logToggleStatus(${rowIdx}, 'gallery', '${escHtml(r.galleryPaid)}')">Gallery: ${escHtml(gpTxt)}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function logToggleStatus(rowIdx, field, currentVal) {
+    // Cycle: '' → 'PAID' → 'UNPAID' → ''
+    const cycle = { '': 'PAID', 'PAID': 'UNPAID', 'UNPAID': '' };
+    const next = cycle[currentVal.toUpperCase()] !== undefined ? cycle[currentVal.toUpperCase()] : 'PAID';
+
+    const row = logState.rows.find(r => r.row === rowIdx);
+    if (!row) return;
+
+    // Optimistic update
+    if (field === 'artist')  row.artistPaid  = next;
+    if (field === 'gallery') row.galleryPaid = next;
+    logRenderCards(logState.rows);
+
+    // Build update payload with all existing data
+    const payload = {
+      type:             'logistics-update',
+      loc:              logState.loc,
+      row:              rowIdx,
+      client:           row.client,
+      existingImageUrl: row.imageUrl,
+      title:            row.title,
+      invoice:          row.invoice,
+      price:            row.price,
+      salePrice:        row.salePrice,
+      salesPayout:      row.salesPayout,
+      artistPaid:       row.artistPaid,
+      galleryPaid:      row.galleryPaid,
+      notes:            row.notes,
+    };
+
+    fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+      .then(r => r.text())
+      .then(text => {
+        try {
+          const d = JSON.parse(text);
+          if (!d.success) console.error('logToggleStatus failed:', d.error);
+        } catch(e) {}
+      })
+      .catch(err => console.error('logToggleStatus network error:', err));
+  }
+
+  function logOpenNewDrawer() {
+    logState.editRow     = null;
+    logState.photoFile   = null;
+    logState.photoBase64 = null;
+    logState.photoMime   = null;
+    logState.artistPaid  = '';
+    logState.galleryPaid = '';
+    logState.drawerLoc   = logState.loc;
+
+    document.getElementById('logd-title').textContent = 'New Entry';
+    document.getElementById('logd-sub').textContent   = 'Add to ' + logState.loc + ' tab';
+    document.getElementById('logd-loc-section').style.display = 'block';
+
+    // Reset photo zone
+    logResetPhotoZone();
+
+    // Reset fields
+    ['logd-client','logd-artist','logd-arttitle','logd-year','logd-medium',
+     'logd-dims','logd-dims-framed','logd-stock','logd-invoice',
+     'logd-price','logd-saleprice','logd-payout','logd-notes'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+
+    // Set location buttons
+    logdSetLoc(logState.loc);
+
+    // Reset paid toggles
+    logdSetPaid('artist',  '');
+    logdSetPaid('gallery', '');
+
+    const btn = document.getElementById('log-save-btn');
+    btn.disabled = false;
+    btn.textContent = 'Save Entry';
+
+    document.getElementById('log-overlay').classList.add('open');
+    document.getElementById('log-drawer').classList.add('open');
+  }
+
+  function logOpenDrawer(rowIdx) {
+    const row = logState.rows.find(r => r.row === rowIdx);
+    if (!row) return;
+    logState.editRow     = row;
+    logState.photoFile   = null;
+    logState.photoBase64 = null;
+    logState.photoMime   = null;
+
+    document.getElementById('logd-title').textContent = row.client || 'Edit Entry';
+    document.getElementById('logd-sub').textContent   = logState.loc + ' · Row ' + rowIdx;
+    document.getElementById('logd-loc-section').style.display = 'none';
+
+    // Reset photo zone — show existing image if any
+    logResetPhotoZone();
+    if (row.imageUrl) {
+      const dz = document.getElementById('logd-dz');
+      dz.classList.add('has-file');
+      document.getElementById('logd-dz-inner').innerHTML =
+        `<img src="${escHtml(row.imageUrl)}" class="log-dz-preview"><div class="dz-label" style="font-size:11px;color:#16a34a;">Existing photo (drop to replace)</div>`;
+    }
+
+    // Parse title column back into fields
+    const lines = (row.title || '').split('\n').map(l => l.trim());
+    const artist     = lines[0] || '';
+    const titleYear  = lines[1] || '';
+    const tySplit    = titleYear.split(',');
+    const artTitle   = tySplit[0] ? tySplit[0].trim() : '';
+    const year       = tySplit[1] ? tySplit[1].trim() : '';
+    const medium     = lines[2] || '';
+    const dims       = lines[3] || '';
+    // framed dims — look for "(framed)" marker
+    let dimsFramed = '', stockLine = '';
+    if (lines.length >= 5) {
+      if (lines[4].endsWith('(framed)')) {
+        dimsFramed = lines[4].replace(/\s*\(framed\)$/, '').trim();
+        stockLine  = lines[5] || '';
+      } else {
+        stockLine = lines[4] || '';
+      }
+    }
+
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    set('logd-client',      row.client);
+    set('logd-artist',      artist);
+    set('logd-arttitle',    artTitle);
+    set('logd-year',        year);
+    set('logd-medium',      medium);
+    set('logd-dims',        dims);
+    set('logd-dims-framed', dimsFramed);
+    set('logd-stock',       stockLine);
+    set('logd-invoice',     row.invoice);
+    set('logd-price',       row.price);
+    set('logd-saleprice',   row.salePrice);
+    set('logd-payout',      row.salesPayout);
+    set('logd-notes',       row.notes);
+
+    logState.artistPaid  = row.artistPaid  || '';
+    logState.galleryPaid = row.galleryPaid || '';
+    logdSetPaid('artist',  logState.artistPaid);
+    logdSetPaid('gallery', logState.galleryPaid);
+
+    const btn = document.getElementById('log-save-btn');
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+
+    document.getElementById('log-overlay').classList.add('open');
+    document.getElementById('log-drawer').classList.add('open');
+  }
+
+  function logCloseDrawer() {
+    document.getElementById('log-overlay').classList.remove('open');
+    document.getElementById('log-drawer').classList.remove('open');
+    logState.editRow     = null;
+    logState.photoFile   = null;
+    logState.photoBase64 = null;
+    logState.photoMime   = null;
+  }
+
+  function logdSetLoc(loc) {
+    logState.drawerLoc = loc;
+    document.getElementById('logd-loc-la').className = 'log-paid-btn' + (loc === 'LA' ? ' sel-paid' : '');
+    document.getElementById('logd-loc-ny').className = 'log-paid-btn' + (loc === 'NY' ? ' sel-paid' : '');
+  }
+
+  function logdSetPaid(field, val) {
+    if (field === 'artist')  logState.artistPaid  = val;
+    if (field === 'gallery') logState.galleryPaid = val;
+
+    const prefix = field === 'artist' ? 'logd-ap' : 'logd-gp';
+    ['blank','paid','unpaid'].forEach(k => {
+      document.getElementById(prefix + '-' + k).className = 'log-paid-btn';
+    });
+    if (val === 'PAID')   document.getElementById(prefix + '-paid').className   = 'log-paid-btn sel-paid';
+    else if (val === 'UNPAID') document.getElementById(prefix + '-unpaid').className = 'log-paid-btn sel-unpaid';
+    else document.getElementById(prefix + '-blank').className = 'log-paid-btn sel-blank';
+  }
+
+  function logHandleDrop(e) {
+    e.preventDefault();
+    document.getElementById('logd-dz').classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) logSetPhoto(f);
+  }
+
+  function logSetPhoto(f) {
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      logState.photoFile   = f;
+      logState.photoBase64 = e.target.result.split(',')[1];
+      logState.photoMime   = f.type || 'image/jpeg';
+      const dz = document.getElementById('logd-dz');
+      dz.classList.add('has-file');
+      document.getElementById('logd-dz-inner').innerHTML =
+        `<img src="${e.target.result}" class="log-dz-preview"><div class="dz-name" style="color:#16a34a;font-size:12px;font-weight:600;">${f.name}</div>`;
+    };
+    reader.readAsDataURL(f);
+  }
+
+  function logResetPhotoZone() {
+    const dz = document.getElementById('logd-dz');
+    dz.className = 'log-dz';
+    document.getElementById('logd-dz-inner').innerHTML =
+      '<div class="dz-icon">🖼️</div><div class="dz-label" style="font-size:12px;color:#6b7280;">Drop artwork photo or click to upload</div>';
+    document.getElementById('logd-fileInput').value = '';
+  }
+
+  function logBuildTitle() {
+    const artist     = (document.getElementById('logd-artist').value || '').trim();
+    const artTitle   = (document.getElementById('logd-arttitle').value || '').trim();
+    const year       = (document.getElementById('logd-year').value || '').trim();
+    const medium     = (document.getElementById('logd-medium').value || '').trim();
+    const dims       = (document.getElementById('logd-dims').value || '').trim();
+    const dimsFramed = (document.getElementById('logd-dims-framed').value || '').trim();
+    const stock      = (document.getElementById('logd-stock').value || '').trim();
+
+    const parts = [];
+    if (artist)                      parts.push(artist);
+    if (artTitle || year)            parts.push([artTitle, year].filter(Boolean).join(', '));
+    if (medium)                      parts.push(medium);
+    if (dims)                        parts.push(dims);
+    if (dimsFramed)                  parts.push(dimsFramed + ' (framed)');
+    if (stock)                       parts.push(stock);
+    return parts.join('\n');
+  }
+
+  function logSave() {
+    const btn = document.getElementById('log-save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    const isEdit = !!logState.editRow;
+    const loc    = isEdit ? logState.loc : logState.drawerLoc;
+    const title  = logBuildTitle();
+
+    const payload = {
+      type:        isEdit ? 'logistics-update' : 'logistics-add',
+      loc:         loc,
+      client:      (document.getElementById('logd-client').value || '').trim(),
+      title:       title,
+      invoice:     (document.getElementById('logd-invoice').value || '').trim(),
+      price:       document.getElementById('logd-price').value || '',
+      salePrice:   document.getElementById('logd-saleprice').value || '',
+      salesPayout: document.getElementById('logd-payout').value || '',
+      artistPaid:  logState.artistPaid,
+      galleryPaid: logState.galleryPaid,
+      notes:       (document.getElementById('logd-notes').value || '').trim(),
+    };
+
+    if (isEdit) {
+      payload.row = logState.editRow.row;
+      payload.existingImageUrl = logState.editRow.imageUrl || '';
+    }
+
+    if (logState.photoBase64) {
+      payload.imageData  = logState.photoBase64;
+      payload.imageMime  = logState.photoMime;
+    }
+
+    fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+      .then(r => r.text())
+      .then(text => {
+        let d;
+        try { d = JSON.parse(text); } catch(e) { d = { success: true }; }
+        if (d.success) {
+          btn.textContent = 'Saved ✓';
+          setTimeout(() => {
+            logCloseDrawer();
+            logLoad(logState.loc);
+          }, 700);
+        } else {
+          btn.disabled = false;
+          btn.textContent = isEdit ? 'Save Changes' : 'Save Entry';
+          alert('Save failed: ' + (d.error || 'Unknown error'));
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        btn.textContent = isEdit ? 'Save Changes' : 'Save Entry';
+        alert('Network error: ' + err);
+      });
   }
 </script>
 </body>
