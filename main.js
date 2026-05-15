@@ -181,6 +181,234 @@ ipcMain.handle('show-in-finder', (event, filePath) => {
   shell.showItemInFolder(filePath);
 });
 
+// ── Condition Report Generator IPC ──
+
+function buildCRHtml(data, photoUrls) {
+  const conditionLabels = ['Excellent', 'Good', 'Fair', 'Poor'];
+  const conditionBoxes  = conditionLabels.map(lbl =>
+    `<span style="margin-right:18px;">${data.condition === lbl ? '&#9745;' : '&#9744;'} ${lbl}</span>`
+  ).join('');
+
+  // Thumbnail (artwork thumbnail slot)
+  const thumbBase64 = data.photoBase64 && data.photoBase64['Artwork Thumbnail'];
+  const thumbMime   = data.photoMime   && data.photoMime['Artwork Thumbnail'] || 'image/jpeg';
+  const thumbHtml   = thumbBase64
+    ? `<img src="data:${thumbMime};base64,${thumbBase64}" style="max-width:90px;max-height:90px;object-fit:contain;float:right;margin-left:12px;">`
+    : '';
+
+  // Photos grid — all labeled slots (skip thumbnail, already shown)
+  const photoSlots = [
+    'Front', 'Back', 'Top-Left Corner', 'Top-Right Corner',
+    'Bottom-Left Corner', 'Bottom-Right Corner', 'Detail 1', 'Detail 2'
+  ];
+  const photoCells = photoSlots.map(lbl => {
+    const b64  = data.photoBase64 && data.photoBase64[lbl];
+    const mime = data.photoMime   && data.photoMime[lbl] || 'image/jpeg';
+    const url  = photoUrls && photoUrls[lbl];
+    if (!b64) return '';
+    const imgTag = `<img src="data:${mime};base64,${b64}" style="width:100%;height:100px;object-fit:cover;display:block;">`;
+    const link   = url ? `<a href="${url}" style="display:block;">${imgTag}</a>` : imgTag;
+    return `<div style="display:flex;flex-direction:column;gap:4px;">${link}<div style="font-size:10px;color:#555;text-align:center;">${lbl}</div></div>`;
+  }).filter(Boolean);
+  const photosGrid = photoCells.length
+    ? `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">${photoCells.join('')}</div>`
+    : '<div style="color:#aaa;font-size:12px;">No photographs attached</div>';
+
+  // Damage diagram SVG — 12-col × 10-row grid with centered ellipse
+  const svgW = 520, svgH = 260, cols = 12, rows = 10;
+  const cx = svgW / 2, cy = svgH / 2, rx = 255, ry = 120;
+  let gridLines = '';
+  for (let c = 0; c <= cols; c++) {
+    const x = c * (svgW / cols);
+    gridLines += `<line x1="${x}" y1="0" x2="${x}" y2="${svgH}" stroke="#ccc" stroke-width="0.5"/>`;
+  }
+  for (let r = 0; r <= rows; r++) {
+    const y = r * (svgH / rows);
+    gridLines += `<line x1="0" y1="${y}" x2="${svgW}" y2="${y}" stroke="#ccc" stroke-width="0.5"/>`;
+  }
+  const damageSvg = `
+    <svg width="${svgW}" height="${svgH}" xmlns="http://www.w3.org/2000/svg" style="border:1px solid #ccc;display:block;">
+      <rect width="${svgW}" height="${svgH}" fill="#fafafa"/>
+      ${gridLines}
+      <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="#888" stroke-width="1.5"/>
+    </svg>`;
+
+  const legend = `
+    <div style="font-size:10px;color:#555;line-height:1.9;white-space:nowrap;">
+      <div>&#9900; Chip &nbsp;&nbsp; &#10003; Dent &nbsp;&nbsp; &#8212; Scratches</div>
+      <div>&#9900; Scuffs &nbsp;&nbsp; //// Cracks &nbsp;&nbsp; = Part missing</div>
+      <div>&#8960; Stains/dirt &nbsp;&nbsp; &#215; Paint loss &nbsp;&nbsp; &#8743; Tear &nbsp;&nbsp; &#8745;&#8745; Crease</div>
+    </div>`;
+
+  const fieldRow = (label, value) =>
+    `<div style="display:flex;border-bottom:1px solid #e0e0e0;padding:7px 0;min-height:32px;">
+       <div style="width:200px;flex-shrink:0;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:12px;color:#555;padding-right:12px;">${label}</div>
+       <div style="flex:1;font-size:12px;color:#111;">${value || ''}</div>
+     </div>`;
+
+  const sectionLabel = (txt) =>
+    `<div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#9ca3af;margin:20px 0 6px;">${txt}</div>`;
+
+  const divider = `<hr style="border:none;border-top:1px solid #ccc;margin:14px 0;">`;
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+    @page { size: 8.5in 11in; margin: 0.75in; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #111; background: #fff; }
+  </style></head><body>
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+    <div style="font-size:16px;font-weight:700;letter-spacing:0.02em;">Sebastian Gladstone</div>
+    <div style="text-align:right;font-size:12px;line-height:1.8;">
+      <div><span style="color:#777;">Date in:</span> ${data.dateIn || ''}</div>
+      <div><span style="color:#777;">Date out:</span> ${data.dateOut || ''}</div>
+    </div>
+  </div>
+  ${divider}
+
+  <!-- Artwork info -->
+  ${fieldRow('Stock number', data.stockNum)}
+  <div style="display:flex;border-bottom:1px solid #e0e0e0;padding:7px 0;min-height:32px;">
+    <div style="width:200px;flex-shrink:0;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:12px;color:#555;padding-right:12px;">Artwork</div>
+    <div style="flex:1;font-size:12px;color:#111;">
+      <strong>${data.artist || ''}</strong><br>
+      ${data.title ? `<em>${data.title}</em>` : ''}${data.year ? `, ${data.year}` : ''}<br>
+      ${data.medium || ''}<br>
+      ${data.dimensions || ''}
+    </div>
+    ${thumbHtml}
+  </div>
+  ${divider}
+
+  <!-- Condition -->
+  ${fieldRow('General condition', conditionBoxes)}
+  ${fieldRow('Comments', (data.comments || '').replace(/\n/g, '<br>'))}
+  ${fieldRow('Inscription information', (data.inscription || '').replace(/\n/g, '<br>'))}
+  ${fieldRow('Frame condition and dimensions', (data.frameCondition || '').replace(/\n/g, '<br>'))}
+  ${divider}
+
+  <!-- Photographs -->
+  ${sectionLabel('Photographs')}
+  ${photosGrid}
+  ${divider}
+
+  <!-- Damage diagram -->
+  ${sectionLabel('Condition diagram')}
+  <div style="display:flex;gap:16px;align-items:flex-start;">
+    ${legend}
+    <div style="flex:1;">${damageSvg}</div>
+  </div>
+  ${divider}
+
+  <!-- Signature -->
+  <div style="display:flex;gap:48px;margin-top:8px;">
+    <div style="flex:1;">
+      <div style="font-size:10px;color:#777;margin-bottom:6px;">Signature</div>
+      <div style="border-bottom:1px solid #555;min-height:28px;padding-bottom:4px;">${data.signedBy || ''}</div>
+    </div>
+    <div style="flex:1;">
+      <div style="font-size:10px;color:#777;margin-bottom:6px;">Date</div>
+      <div style="border-bottom:1px solid #555;min-height:28px;padding-bottom:4px;">${data.sigDate || ''}</div>
+    </div>
+  </div>
+  </body></html>`;
+}
+
+ipcMain.handle('generate-cr', async (event, payload) => {
+  const fs   = require('fs');
+  const os   = require('os');
+  const { net } = require('electron');
+
+  // Choose fetch implementation — electron.net.fetch preferred in packaged builds
+  const doFetch = (typeof net !== 'undefined' && net.fetch)
+    ? (url, opts) => net.fetch(url, opts)
+    : (url, opts) => fetch(url, opts);
+
+  const SCRIPT_URL = payload.scriptUrl; // passed from renderer
+
+  // Step 1: upload photos to GAS
+  let photoUrls = {};
+  if (payload.photos && Object.keys(payload.photos).length > 0) {
+    const photosResp = await doFetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        type:     'cr-photos',
+        stockNum: payload.stockNum,
+        photos:   payload.photos
+      })
+    });
+    const photosResult = await photosResp.json();
+    if (!photosResult.success) throw new Error('Photo upload failed: ' + (photosResult.error || 'unknown'));
+    photoUrls = photosResult.photoUrls || {};
+  }
+
+  // Step 2: build CR HTML and render to PDF
+  const html    = buildCRHtml(payload, photoUrls);
+  const tmpHtml = path.join(os.tmpdir(), `_cr_${Date.now()}.html`);
+  fs.writeFileSync(tmpHtml, html, 'utf8');
+
+  const pdfBuf = await new Promise((resolve, reject) => {
+    const win = new BrowserWindow({
+      show: false, frame: false,
+      width: 816, height: 1056,
+      webPreferences: { nodeIntegration: false, contextIsolation: true, webSecurity: false }
+    });
+    win.loadFile(tmpHtml);
+    win.webContents.once('did-finish-load', () => {
+      setTimeout(async () => {
+        try {
+          const buf = await win.webContents.printToPDF({
+            pageSize: { width: 215900, height: 279400 },
+            preferCSSPageSize: true,
+            margins: { marginType: 'none' },
+            printBackground: true,
+            landscape: false,
+            scaleFactor: 100
+          });
+          win.destroy();
+          try { fs.unlinkSync(tmpHtml); } catch {}
+          resolve(buf);
+        } catch (e) { win.destroy(); reject(e); }
+      }, 1200);
+    });
+    win.webContents.once('did-fail-load', (_, code, desc) => {
+      win.destroy();
+      reject(new Error(`CR page load failed: ${desc}`));
+    });
+  });
+
+  // Step 3: save PDF locally
+  const safeArtist = (payload.artist || 'Artist').replace(/[^a-zA-Z0-9 _-]/g, '_');
+  const localName  = `${payload.stockNum || 'CR'}_${safeArtist}_CR_${payload.dateIn || 'nodate'}.pdf`;
+  const localPath  = path.join(os.tmpdir(), localName);
+  fs.writeFileSync(localPath, pdfBuf);
+
+  // Step 4: upload PDF + log to GAS
+  const pdfBase64  = pdfBuf.toString('base64');
+  const crResp     = await doFetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({
+      type:          'condition-report',
+      stockNum:      payload.stockNum,
+      artist:        payload.artist,
+      title:         payload.title,
+      dateIn:        payload.dateIn,
+      condition:     payload.condition,
+      signedBy:      payload.signedBy,
+      pdfData:       pdfBase64
+    })
+  });
+  const crResult = await crResp.json();
+  if (!crResult.success) throw new Error('CR upload failed: ' + (crResult.error || 'unknown'));
+
+  // Step 5: reveal in Finder
+  shell.showItemInFolder(localPath);
+
+  return { success: true, pdfUrl: crResult.pdfUrl, localPath };
+});
+
 app.whenReady().then(() => {
   createWindow();
   if (app.isPackaged) {

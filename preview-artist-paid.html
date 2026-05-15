@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Payment Pills — Sample Preview</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f3f4f6; padding: 40px; margin: 0; }
+  h2 { font-size: 13px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: .05em; margin: 0 0 16px; }
+
+  /* ── TILE GRID ── */
+  .grid { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 48px; }
+
+  .bn-card {
+    width: 230px; border-radius: 10px; border: 1.5px solid #e5e7eb;
+    background: #fff; padding: 14px; cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .bn-card:hover { border-color: #9ca3af; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+
+  .bn-card-delivered { background: #1e3a8a; border-color: #1e3a8a; }
+  .bn-card-delivered .bn-card-client,
+  .bn-card-delivered .bn-card-title,
+  .bn-card-delivered .bn-card-price { color: #fff; }
+  .bn-card-delivered .bn-initials  { background: #2d4faa; color: #bfdbfe; }
+
+  .bn-card-inprod { background: #d1fae5; border-color: #a7f3d0; }
+  .bn-card-inprod .bn-initials { background: #a7f3d0; color: #065f46; }
+
+  .bn-card-preprod { background: #f3f4f6; border-color: #e5e7eb; }
+  .bn-card-preprod .bn-initials { background: #e5e7eb; color: #374151; }
+
+  .bn-card-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+  .bn-initials {
+    width: 36px; height: 36px; border-radius: 50%; background: #e5e7eb;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #374151; flex-shrink: 0;
+  }
+  .bn-card-meta { flex: 1; min-width: 0; }
+  .bn-card-client { font-size: 13px; font-weight: 700; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bn-card-title  { font-size: 12px; color: #6b7280; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .bn-pill {
+    display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px;
+    border-radius: 999px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px;
+    background: #e5e7eb; color: #374151;
+  }
+  .bn-pill-delivered { background: #1e40af; color: #fff; }
+  .bn-pill-inprod    { background: #065f46; color: #d1fae5; }
+  .bn-pill-preprod   { background: #d1d5db; color: #374151; }
+
+  .bn-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+  .bn-card-price  { font-size: 13px; font-weight: 600; color: #111; }
+  .bn-card-delivered .bn-card-price { color: #fff; }
+  .bn-card-due.urgent { color: #ef4444; font-weight: 600; font-size: 11px; }
+  .bn-card-due { font-size: 11px; color: #9ca3af; }
+
+  /* ── Payment pills stack ── */
+  .bn-pay-row { display: flex; flex-direction: column; gap: 4px; margin-top: 7px; }
+
+  /* base payment pill */
+  .bn-pay-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 600;
+    padding: 2px 8px; border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  /* PAID → bright green */
+  .bn-pay-pill.paid {
+    background: #dcfce7; color: #15803d; border: 1px solid #86efac;
+  }
+  /* on dark (delivered) tile */
+  .bn-card-delivered .bn-pay-pill.paid {
+    background: #16a34a; color: #fff; border-color: #15803d;
+  }
+
+  /* not paid / other value → neutral gray */
+  .bn-pay-pill.unpaid {
+    background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb;
+  }
+  .bn-card-delivered .bn-pay-pill.unpaid {
+    background: rgba(255,255,255,.12); color: #cbd5e1; border-color: rgba(255,255,255,.2);
+  }
+
+  /* ── FORM SECTION ── */
+  .form-wrap { max-width: 480px; }
+  .bn-field { margin-bottom: 14px; }
+  .bn-field label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #6b7280; margin-bottom: 4px; }
+  .bn-field input[type=text] {
+    width: 100%; box-sizing: border-box;
+    border: 1.5px solid #e5e7eb; border-radius: 8px;
+    padding: 8px 10px; font-size: 13px; color: #111;
+    outline: none; transition: border-color .15s; background: #fff;
+  }
+  .bn-field input[type=text]:focus { border-color: #6b7280; }
+  .hint { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<h2>Tiles — both payment pills</h2>
+<div class="grid">
+
+  <!-- Delivered — both paid -->
+  <div class="bn-card bn-card-delivered">
+    <div class="bn-card-header">
+      <div class="bn-initials">HG</div>
+      <div class="bn-card-meta">
+        <div class="bn-card-client">HGTG LLC c/o BFKN</div>
+        <div class="bn-card-title">Sconce 25.38 · 2025</div>
+      </div>
+    </div>
+    <span class="bn-pill bn-pill-delivered">Delivered</span>
+    <div class="bn-pay-row">
+      <span class="bn-pay-pill paid">✓ Bennet: PAID Dec. 4</span>
+      <span class="bn-pay-pill paid">✓ Client: PAID</span>
+    </div>
+    <div class="bn-card-footer">
+      <div class="bn-card-price">$5,500</div>
+    </div>
+  </div>
+
+  <!-- In Production — bennet paid, client not yet -->
+  <div class="bn-card bn-card-inprod">
+    <div class="bn-card-header">
+      <div class="bn-initials">JD</div>
+      <div class="bn-card-meta">
+        <div class="bn-card-client">Jane Doe</div>
+        <div class="bn-card-title">Table Lamp · 2025</div>
+      </div>
+    </div>
+    <span class="bn-pill bn-pill-inprod">In Production</span>
+    <div class="bn-pay-row">
+      <span class="bn-pay-pill paid">✓ Bennet: Paid</span>
+      <span class="bn-pay-pill unpaid">Client: —</span>
+    </div>
+    <div class="bn-card-footer">
+      <div class="bn-card-price">$3,200</div>
+      <div class="bn-card-due">12d left</div>
+    </div>
+  </div>
+
+  <!-- Pre-Production — neither paid -->
+  <div class="bn-card bn-card-preprod">
+    <div class="bn-card-header">
+      <div class="bn-initials">RK</div>
+      <div class="bn-card-meta">
+        <div class="bn-card-client">Robert Klein</div>
+        <div class="bn-card-title">Floor Lamp · 2026</div>
+      </div>
+    </div>
+    <span class="bn-pill bn-pill-preprod">Pre-Production</span>
+    <div class="bn-pay-row">
+      <span class="bn-pay-pill unpaid">Bennet: —</span>
+      <span class="bn-pay-pill unpaid">Client: —</span>
+    </div>
+    <div class="bn-card-footer">
+      <div class="bn-card-price">$7,800</div>
+      <div class="bn-card-due">45d left</div>
+    </div>
+  </div>
+
+  <!-- Pre-Production — partial / deposit text -->
+  <div class="bn-card bn-card-preprod">
+    <div class="bn-card-header">
+      <div class="bn-initials">MR</div>
+      <div class="bn-card-meta">
+        <div class="bn-card-client">Mona Rivera</div>
+        <div class="bn-card-title">Pendant · 2026</div>
+      </div>
+    </div>
+    <span class="bn-pill bn-pill-preprod">Pre-Production</span>
+    <div class="bn-pay-row">
+      <span class="bn-pay-pill unpaid">Bennet: 50% dep.</span>
+      <span class="bn-pay-pill paid">✓ Client: PAID</span>
+    </div>
+    <div class="bn-card-footer">
+      <div class="bn-card-price">$4,100</div>
+      <div class="bn-card-due urgent">Overdue 3d</div>
+    </div>
+  </div>
+
+</div>
+
+<h2>Drawer — Artist Paid (text input)</h2>
+<div class="form-wrap">
+  <div class="bn-field">
+    <label>Artist Paid (Bennet Payment — Col L)</label>
+    <input type="text" value="PAID Dec. 4, 2025" placeholder="e.g. PAID, 50% deposit…">
+    <div class="hint">Free text → saves directly to sheet. Contains "paid" (any case) → green pill on tile.</div>
+  </div>
+</div>
+
+</body>
+</html>

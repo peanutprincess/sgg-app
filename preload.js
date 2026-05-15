@@ -4,4 +4,5 @@ contextBridge.exposeInMainWorld('sgg', {
   runBacktag:    (pdfPath)  => ipcRenderer.invoke('run-backtag', pdfPath),
   parsePayable:  (pdfPath)  => ipcRenderer.invoke('parse-payable', pdfPath),
   showInFinder:  (filePath) => ipcRenderer.invoke('show-in-finder', filePath),
+  generateCR:    (payload)  => ipcRenderer.invoke('generate-cr', payload),
 });

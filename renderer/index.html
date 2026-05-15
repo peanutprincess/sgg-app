@@ -775,6 +775,43 @@
     .hb-content a:hover { text-decoration: underline; }
     .hb-content mark { background: #fef08a; border-radius: 2px; padding: 0 1px; }
     .hb-loading { display: flex; align-items: center; justify-content: center; flex: 1; color: #9ca3af; font-size: 13px; flex-direction: column; gap: 14px; }
+
+    /* Condition Report toggle pills */
+    .cr-cond-btn {
+      padding: 7px 18px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 999px;
+      background: #fff;
+      color: #374151;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s, border-color 0.12s;
+      -webkit-user-select: none;
+    }
+    .cr-cond-btn:hover { border-color: #6366f1; color: #6366f1; }
+    .cr-cond-btn.selected { background: #6366f1; border-color: #6366f1; color: #fff; }
+
+    /* CR photo slot */
+    .cr-photo-slot {
+      border: 1.5px dashed #d1d5db;
+      border-radius: 8px;
+      height: 90px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.12s, background 0.12s;
+      overflow: hidden;
+      position: relative;
+      background: #fafafa;
+    }
+    .cr-photo-slot:hover { border-color: #6366f1; background: #f5f3ff; }
+    .cr-photo-slot.has-photo { border-style: solid; border-color: #6366f1; background: #fff; }
+    .cr-photo-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cr-photo-slot-label { font-size: 10px; color: #9ca3af; margin-top: 4px; text-align: center; padding: 0 4px; }
+    .cr-photo-slot-name { font-size: 10px; color: #6366f1; margin-top: 4px; text-align: center; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   </style>
 </head>
 <body>
@@ -819,6 +856,14 @@
     <div class="nav-label">Artists</div>
     <div class="nav-item" onclick="showModule('bennet', this)">
       <span class="nav-icon">🎨</span> Bennet Schlesinger
+    </div>
+
+    <div class="nav-label">Records</div>
+    <div class="nav-item" onclick="showModule('reseller', this)">
+      <span class="nav-icon">🗂</span> Reseller Certs
+    </div>
+    <div class="nav-item" onclick="showModule('cr', this)">
+      <span class="nav-icon">📋</span> Condition Reports
     </div>
 
     <div class="nav-label">Company</div>
@@ -1772,6 +1817,166 @@
       <button class="bn-save-btn" id="bnp-confirm-btn" onclick="bnpConfirm()" style="display:none;">Log Payable</button>
     </div>
   </div>
+
+  <!-- RESELLER CERTIFICATES -->
+  <section id="mod-reseller" class="module">
+    <div class="module-header">
+      <div class="module-title">Reseller Certificates</div>
+      <div class="module-subtitle">Upload a reseller certificate PDF — saved to Drive &amp; logged to sheet</div>
+    </div>
+    <div style="max-width:520px;margin:28px auto 0;padding:0 24px 60px;">
+
+      <div id="rc-form">
+        <div class="drop-zone" id="rc-dropZone" onclick="document.getElementById('rc-fileInput').click()"
+             ondragover="event.preventDefault();this.classList.add('dz-over')"
+             ondragleave="this.classList.remove('dz-over')"
+             ondrop="rcHandleDrop(event)">
+          <input type="file" id="rc-fileInput" accept=".pdf,application/pdf" style="display:none"
+                 onchange="rcSetFile(this.files[0])">
+          <div class="dz-icon" id="rc-dzIcon">🗂</div>
+          <div class="dz-label" id="rc-dzLabel">Drop certificate PDF here or click to browse</div>
+          <div class="dz-name" id="rc-dzName" style="font-size:12px;color:#888;margin-top:4px;"></div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Client Name</label>
+            <input type="text" id="rc-client" placeholder="e.g. Acme Gallery" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Date</label>
+            <input type="date" id="rc-date" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+        </div>
+
+        <div id="rc-error" class="error-msg" style="display:none;margin-top:10px;"></div>
+        <button class="submit-btn" onclick="rcSubmit()">Save Certificate →</button>
+      </div>
+
+      <div id="rc-loading" class="loading-overlay" style="display:none">
+        <div class="spinner"></div>
+        <p>Uploading certificate…</p>
+      </div>
+
+      <div id="rc-success" class="success-overlay" style="display:none">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Certificate Saved</div>
+        <div class="success-detail" id="rc-success-detail"></div>
+        <button class="again-btn" onclick="rcReset()">+ Add Another</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONDITION REPORTS -->
+  <section id="mod-cr" class="module">
+    <div class="module-header">
+      <div class="module-title">Condition Reports</div>
+      <div class="module-subtitle">Fill in artwork details and photos — generates a PDF condition report</div>
+    </div>
+    <div style="max-width:760px;margin:0 auto;padding:24px 24px 80px;">
+
+      <div id="cr-form">
+
+        <!-- Artwork Details -->
+        <div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#9ca3af;margin-bottom:10px;">Artwork Details</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Stock #</label>
+            <input type="text" id="cr-stock" placeholder="e.g. SG-2025-001" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Artist Name</label>
+            <input type="text" id="cr-artist" placeholder="e.g. Bennet Schlesinger" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Title</label>
+            <input type="text" id="cr-title" placeholder="Artwork title" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Year</label>
+            <input type="text" id="cr-year" placeholder="e.g. 2024" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Medium</label>
+            <input type="text" id="cr-medium" placeholder="e.g. Oil on canvas" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Dimensions</label>
+            <input type="text" id="cr-dimensions" placeholder="e.g. 32 H x 31 W x 1.5 D" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Date In</label>
+            <input type="date" id="cr-datein" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Date Out <span style="color:#9ca3af;font-weight:400;">(optional)</span></label>
+            <input type="date" id="cr-dateout" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+        </div>
+
+        <!-- General Condition -->
+        <div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#9ca3af;margin-bottom:10px;">General Condition</div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;" id="cr-condition-btns">
+          <button class="cr-cond-btn" data-cond="Excellent" onclick="crSetCondition('Excellent', this)">Excellent</button>
+          <button class="cr-cond-btn" data-cond="Good" onclick="crSetCondition('Good', this)">Good</button>
+          <button class="cr-cond-btn" data-cond="Fair" onclick="crSetCondition('Fair', this)">Fair</button>
+          <button class="cr-cond-btn" data-cond="Poor" onclick="crSetCondition('Poor', this)">Poor</button>
+        </div>
+
+        <!-- Text fields -->
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Comments</label>
+            <textarea id="cr-comments" rows="3" placeholder="General condition notes…" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit;"></textarea>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Inscription Information</label>
+            <textarea id="cr-inscription" rows="2" placeholder="Signature, stamps, labels…" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit;"></textarea>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Frame Condition and Dimensions</label>
+            <textarea id="cr-frame" rows="2" placeholder="Frame notes and measurements…" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit;"></textarea>
+          </div>
+        </div>
+
+        <!-- Photo Slots -->
+        <div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#9ca3af;margin-bottom:10px;">Photographs</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;" id="cr-photo-grid">
+          <!-- generated by crBuildPhotoGrid() -->
+        </div>
+
+        <!-- Signature -->
+        <div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#9ca3af;margin-bottom:10px;">Signature</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Signed By</label>
+            <input type="text" id="cr-signedby" placeholder="Name" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Signature Date</label>
+            <input type="date" id="cr-sigdate" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+        </div>
+
+        <div id="cr-error" class="error-msg" style="display:none;margin-bottom:10px;"></div>
+        <button class="submit-btn" onclick="crSubmit()">Generate Condition Report →</button>
+      </div>
+
+      <div id="cr-loading" class="loading-overlay" style="display:none">
+        <div class="spinner"></div>
+        <p id="cr-loading-msg">Generating condition report…</p>
+      </div>
+
+      <div id="cr-success" class="success-overlay" style="display:none">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Condition Report Generated</div>
+        <div class="success-detail" id="cr-success-detail"></div>
+        <button class="again-btn" onclick="crReset()">+ New Report</button>
+      </div>
+
+    </div>
+  </section>
 
   <!-- COMPANY HANDBOOK -->
   <section id="mod-handbook" class="module">
@@ -3380,6 +3585,297 @@
       });
     };
     reader.readAsDataURL(_bnp.file);
+  }
+
+  // ── Reseller Certificates ──────────────────────────────────────────────────
+  const _rc = { file: null };
+
+  (function() {
+    const d = new Date();
+    const v = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    const rcDate = document.getElementById('rc-date');
+    if (rcDate) rcDate.value = v;
+  })();
+
+  function rcHandleDrop(e) {
+    e.preventDefault();
+    document.getElementById('rc-dropZone').classList.remove('dz-over');
+    const f = e.dataTransfer.files[0];
+    if (f && (f.type === 'application/pdf' || f.name.endsWith('.pdf'))) rcSetFile(f);
+    else {
+      document.getElementById('rc-error').textContent = 'Please drop a PDF file.';
+      document.getElementById('rc-error').style.display = 'block';
+    }
+  }
+
+  function rcSetFile(f) {
+    _rc.file = f;
+    document.getElementById('rc-dzIcon').textContent  = '📄';
+    document.getElementById('rc-dzLabel').textContent = 'PDF selected';
+    document.getElementById('rc-dzName').textContent  = f.name;
+    document.getElementById('rc-dropZone').classList.add('has-file');
+    document.getElementById('rc-error').style.display = 'none';
+  }
+
+  function rcSubmit() {
+    const client = document.getElementById('rc-client').value.trim();
+    const date   = document.getElementById('rc-date').value.trim();
+    const errEl  = document.getElementById('rc-error');
+    errEl.style.display = 'none';
+
+    if (!_rc.file) { errEl.textContent = 'Please select a PDF file.'; errEl.style.display = 'block'; return; }
+    if (!client)   { errEl.textContent = 'Client name is required.';  errEl.style.display = 'block'; return; }
+    if (!date)     { errEl.textContent = 'Date is required.';         errEl.style.display = 'block'; return; }
+
+    document.getElementById('rc-form').style.display    = 'none';
+    document.getElementById('rc-loading').style.display = 'flex';
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      const base64 = e.target.result.split(',')[1];
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ type: 'reseller-cert', clientName: client, date: date, fileData: base64 })
+      })
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById('rc-loading').style.display = 'none';
+        if (d.success) {
+          document.getElementById('rc-success-detail').textContent = client + ' · ' + date;
+          document.getElementById('rc-success').style.display = 'flex';
+        } else {
+          document.getElementById('rc-form').style.display = 'block';
+          errEl.textContent = d.error || 'Upload failed.';
+          errEl.style.display = 'block';
+        }
+      })
+      .catch(err => {
+        document.getElementById('rc-loading').style.display = 'none';
+        document.getElementById('rc-form').style.display = 'block';
+        errEl.textContent = 'Network error: ' + err.message;
+        errEl.style.display = 'block';
+      });
+    };
+    reader.readAsDataURL(_rc.file);
+  }
+
+  function rcReset() {
+    _rc.file = null;
+    document.getElementById('rc-fileInput').value      = '';
+    document.getElementById('rc-dzIcon').textContent   = '🗂';
+    document.getElementById('rc-dzLabel').textContent  = 'Drop certificate PDF here or click to browse';
+    document.getElementById('rc-dzName').textContent   = '';
+    document.getElementById('rc-dropZone').classList.remove('has-file');
+    document.getElementById('rc-client').value         = '';
+    document.getElementById('rc-error').style.display  = 'none';
+    document.getElementById('rc-success').style.display = 'none';
+    document.getElementById('rc-form').style.display   = 'block';
+    // reset date to today
+    const d = new Date();
+    document.getElementById('rc-date').value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  // ── Condition Reports ──────────────────────────────────────────────────────
+  const _cr = {
+    condition: null,
+    photos: {} // label -> { file, base64, mimeType }
+  };
+
+  const CR_PHOTO_SLOTS = [
+    'Artwork Thumbnail', 'Front', 'Back',
+    'Top-Left Corner', 'Top-Right Corner',
+    'Bottom-Left Corner', 'Bottom-Right Corner',
+    'Detail 1', 'Detail 2'
+  ];
+
+  // Build photo grid slots
+  (function crBuildPhotoGrid() {
+    const grid = document.getElementById('cr-photo-grid');
+    if (!grid) return;
+    CR_PHOTO_SLOTS.forEach(lbl => {
+      const id = 'cr-photo-' + lbl.replace(/[^a-zA-Z0-9]/g, '-');
+      const inputId = id + '-input';
+      const slot = document.createElement('div');
+      slot.style.display = 'flex';
+      slot.style.flexDirection = 'column';
+      slot.style.alignItems = 'center';
+      slot.innerHTML = `
+        <div class="cr-photo-slot" id="${id}" onclick="document.getElementById('${inputId}').click()">
+          <input type="file" id="${inputId}" accept="image/*" style="display:none" onchange="crSetPhoto('${lbl}', this.files[0])">
+          <span style="font-size:22px;color:#d1d5db;">+</span>
+        </div>
+        <div class="cr-photo-slot-label" id="${id}-label">${lbl}</div>
+      `;
+      // drag-over
+      const slotEl = slot.querySelector('.cr-photo-slot');
+      slotEl.addEventListener('dragover', e => { e.preventDefault(); slotEl.style.borderColor='#6366f1'; });
+      slotEl.addEventListener('dragleave', () => { if (!_cr.photos[lbl]) slotEl.style.borderColor=''; });
+      slotEl.addEventListener('drop', e => {
+        e.preventDefault();
+        slotEl.style.borderColor = '';
+        const f = e.dataTransfer.files[0];
+        if (f && f.type.startsWith('image/')) crSetPhoto(lbl, f);
+      });
+      grid.appendChild(slot);
+    });
+  })();
+
+  // Set today's dates on CR form
+  (function() {
+    const d = new Date();
+    const v = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    const di = document.getElementById('cr-datein');
+    const ds = document.getElementById('cr-sigdate');
+    if (di) di.value = v;
+    if (ds) ds.value = v;
+  })();
+
+  function crSetCondition(val, btn) {
+    _cr.condition = val;
+    document.querySelectorAll('.cr-cond-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function crSetPhoto(label, file) {
+    if (!file) return;
+    const id    = 'cr-photo-' + label.replace(/[^a-zA-Z0-9]/g, '-');
+    const slotEl = document.getElementById(id);
+    const reader = new FileReader();
+    reader.onload = e => {
+      const base64 = e.target.result.split(',')[1];
+      _cr.photos[label] = { file, base64, mimeType: file.type };
+      // show thumbnail in slot
+      slotEl.innerHTML = `<input type="file" id="${id}-input" accept="image/*" style="display:none" onchange="crSetPhoto('${label}', this.files[0])"><img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;display:block;">`;
+      slotEl.classList.add('has-photo');
+      const labelEl = document.getElementById(id + '-label');
+      if (labelEl) labelEl.textContent = file.name.length > 20 ? file.name.substring(0,18) + '…' : file.name;
+      // re-wire the new input
+      document.getElementById(id + '-input').addEventListener('change', function() { crSetPhoto(label, this.files[0]); });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function crSubmit() {
+    const errEl = document.getElementById('cr-error');
+    errEl.style.display = 'none';
+
+    const stockNum    = document.getElementById('cr-stock').value.trim();
+    const artist      = document.getElementById('cr-artist').value.trim();
+    const title       = document.getElementById('cr-title').value.trim();
+    const year        = document.getElementById('cr-year').value.trim();
+    const medium      = document.getElementById('cr-medium').value.trim();
+    const dimensions  = document.getElementById('cr-dimensions').value.trim();
+    const dateIn      = document.getElementById('cr-datein').value.trim();
+    const dateOut     = document.getElementById('cr-dateout').value.trim();
+    const comments    = document.getElementById('cr-comments').value.trim();
+    const inscription = document.getElementById('cr-inscription').value.trim();
+    const frameCondition = document.getElementById('cr-frame').value.trim();
+    const signedBy    = document.getElementById('cr-signedby').value.trim();
+    const sigDate     = document.getElementById('cr-sigdate').value.trim();
+
+    if (!stockNum) { errEl.textContent = 'Stock # is required.';  errEl.style.display = 'block'; return; }
+    if (!artist)   { errEl.textContent = 'Artist name is required.'; errEl.style.display = 'block'; return; }
+
+    document.getElementById('cr-form').style.display    = 'none';
+    document.getElementById('cr-loading').style.display = 'flex';
+    document.getElementById('cr-loading-msg').textContent = 'Uploading photos…';
+
+    try {
+      // Build photos payload: { label: { fileData, mimeType } }
+      const photosPayload = {};
+      const photoBase64   = {};
+      const photoMime     = {};
+      for (const lbl of CR_PHOTO_SLOTS) {
+        if (_cr.photos[lbl]) {
+          photosPayload[lbl] = { fileData: _cr.photos[lbl].base64, mimeType: _cr.photos[lbl].mimeType };
+          photoBase64[lbl]   = _cr.photos[lbl].base64;
+          photoMime[lbl]     = _cr.photos[lbl].mimeType;
+        }
+      }
+
+      document.getElementById('cr-loading-msg').textContent = 'Generating PDF…';
+
+      const payload = {
+        scriptUrl: SCRIPT_URL,
+        stockNum, artist, title, year, medium, dimensions,
+        dateIn, dateOut, comments, inscription, frameCondition,
+        condition: _cr.condition || '',
+        signedBy, sigDate,
+        photos: photosPayload,
+        photoBase64,
+        photoMime
+      };
+
+      const result = await window.sgg.generateCR(payload);
+
+      document.getElementById('cr-loading').style.display = 'none';
+      if (result.success) {
+        document.getElementById('cr-success-detail').textContent =
+          (stockNum || '') + (artist ? ' · ' + artist : '') + (dateIn ? ' · ' + dateIn : '');
+        document.getElementById('cr-success').style.display = 'flex';
+      } else {
+        document.getElementById('cr-form').style.display = 'block';
+        errEl.textContent = result.error || 'Report generation failed.';
+        errEl.style.display = 'block';
+      }
+    } catch (err) {
+      document.getElementById('cr-loading').style.display = 'none';
+      document.getElementById('cr-form').style.display = 'block';
+      errEl.textContent = 'Error: ' + err.message;
+      errEl.style.display = 'block';
+    }
+  }
+
+  function crReset() {
+    _cr.condition = null;
+    _cr.photos    = {};
+
+    // Clear inputs
+    ['cr-stock','cr-artist','cr-title','cr-year','cr-medium','cr-dimensions',
+     'cr-comments','cr-inscription','cr-frame','cr-signedby'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    ['cr-dateout'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    // Reset dates to today
+    const d = new Date();
+    const v = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    document.getElementById('cr-datein').value  = v;
+    document.getElementById('cr-sigdate').value = v;
+
+    // Reset condition buttons
+    document.querySelectorAll('.cr-cond-btn').forEach(b => b.classList.remove('selected'));
+
+    // Rebuild photo grid
+    const grid = document.getElementById('cr-photo-grid');
+    if (grid) {
+      grid.innerHTML = '';
+      CR_PHOTO_SLOTS.forEach(lbl => {
+        const id = 'cr-photo-' + lbl.replace(/[^a-zA-Z0-9]/g, '-');
+        const inputId = id + '-input';
+        const slot = document.createElement('div');
+        slot.style.display = 'flex';
+        slot.style.flexDirection = 'column';
+        slot.style.alignItems = 'center';
+        slot.innerHTML = `
+          <div class="cr-photo-slot" id="${id}" onclick="document.getElementById('${inputId}').click()">
+            <input type="file" id="${inputId}" accept="image/*" style="display:none" onchange="crSetPhoto('${lbl}', this.files[0])">
+            <span style="font-size:22px;color:#d1d5db;">+</span>
+          </div>
+          <div class="cr-photo-slot-label" id="${id}-label">${lbl}</div>
+        `;
+        const slotEl = slot.querySelector('.cr-photo-slot');
+        slotEl.addEventListener('dragover', e => { e.preventDefault(); slotEl.style.borderColor='#6366f1'; });
+        slotEl.addEventListener('dragleave', () => { if (!_cr.photos[lbl]) slotEl.style.borderColor=''; });
+        slotEl.addEventListener('drop', e => { e.preventDefault(); slotEl.style.borderColor=''; const f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('image/')) crSetPhoto(lbl,f); });
+        grid.appendChild(slot);
+      });
+    }
+
+    document.getElementById('cr-error').style.display   = 'none';
+    document.getElementById('cr-success').style.display = 'none';
+    document.getElementById('cr-form').style.display    = 'block';
   }
 </script>
 </body>

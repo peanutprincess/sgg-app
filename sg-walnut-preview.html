@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SG — Dark Walnut Preview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    gap: 40px;
+    padding: 40px;
+  }
+
+  .label {
+    color: #666;
+    font-size: 11px;
+    text-align: center;
+    margin-top: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ── CURRENT (reference) ── */
+  .sidebar-current {
+    width: 220px;
+    height: 720px;
+    background: #111;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  /* ── WALNUT ── */
+  .sidebar-walnut {
+    width: 220px;
+    height: 720px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    position: relative;
+
+    /* Layered walnut grain */
+    background:
+      /* Fine grain overlay */
+      repeating-linear-gradient(
+        92deg,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.06) 3px,
+        rgba(0,0,0,0.06) 4px
+      ),
+      repeating-linear-gradient(
+        88deg,
+        transparent 0px,
+        transparent 8px,
+        rgba(255,200,120,0.03) 8px,
+        rgba(255,200,120,0.03) 9px
+      ),
+      /* Knot/figure variation */
+      radial-gradient(ellipse 180px 60px at 30% 35%, rgba(15,6,2,0.4) 0%, transparent 70%),
+      radial-gradient(ellipse 140px 40px at 70% 70%, rgba(15,6,2,0.3) 0%, transparent 70%),
+      /* Base wood tones */
+      linear-gradient(
+        170deg,
+        #2a1508 0%,
+        #321a0c 15%,
+        #3d2010 30%,
+        #2e1609 45%,
+        #3a1e0e 60%,
+        #2c1508 75%,
+        #381c0d 90%,
+        #2a1508 100%
+      );
+  }
+
+  /* Brass inlay vertical stripe on left edge */
+  .sidebar-walnut::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #c9a84c, #e8c878, #b8860b, #d4a853, #c9a84c);
+    z-index: 10;
+  }
+
+  /* Subtle sheen overlay */
+  .sidebar-walnut::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── Shared sidebar top ── */
+  .sb-top {
+    padding: 28px 20px 16px;
+    position: relative;
+    z-index: 2;
+  }
+  .sb-logo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+  .sb-logo-walnut {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    background: linear-gradient(135deg, #e8c878 0%, #c9a84c 40%, #f0d490 70%, #b8860b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: Georgia, serif;
+    text-shadow: none;
+  }
+
+  /* ── Nav ── */
+  .sb-nav { flex: 1; padding: 4px 0; position: relative; z-index: 2; }
+
+  .sb-section {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 14px 20px 5px;
+  }
+  .sb-section-current { color: #444; }
+  .sb-section-walnut  {
+    color: #c9a84c;
+    letter-spacing: 0.18em;
+    font-size: 8.5px;
+  }
+
+  .sb-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    border-left: 2px solid transparent;
+    cursor: default;
+  }
+  .sb-item-current { color: #666; }
+  .sb-item-current.active { color: #fff; border-left-color: #c9a84c; background: rgba(255,255,255,0.07); }
+
+  .sb-item-walnut { color: #8c6a3a; }
+  .sb-item-walnut.active {
+    color: #e8c878;
+    border-left-color: #c9a84c;
+    background: rgba(201,168,76,0.1);
+    text-shadow: 0 0 12px rgba(201,168,76,0.3);
+  }
+  .sb-item-walnut:not(.active):hover { color: #c9a84c; }
+
+  .sb-icon { font-size: 14px; width: 20px; text-align: center; }
+
+  /* ── Footer links ── */
+  .sb-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 0 16px 10px;
+    position: relative;
+    z-index: 2;
+  }
+  .sb-link {
+    flex: 0 0 calc(20% - 4px);
+    padding: 5px 0;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-align: center;
+    cursor: default;
+  }
+  .sb-link-current {
+    background: #1a1a1a;
+    border: 1px solid #2e2e2e;
+    color: #888;
+  }
+  .sb-link-walnut {
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(201,168,76,0.25);
+    color: #a07840;
+  }
+
+  .sb-version {
+    padding: 8px 20px 16px;
+    font-size: 10px;
+    position: relative;
+    z-index: 2;
+    border-top: 1px solid;
+  }
+  .sb-version-current { color: #333; border-color: #1a1a1a; }
+  .sb-version-walnut  {
+    color: #7a5a28;
+    border-color: rgba(201,168,76,0.2);
+  }
+
+  /* Brass divider between sections for walnut */
+  .brass-rule {
+    height: 1px;
+    margin: 4px 20px 4px 20px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent);
+    position: relative;
+    z-index: 2;
+  }
+</style>
+</head>
+<body>
+
+<!-- CURRENT -->
+<div>
+  <div class="sidebar-current">
+    <div class="sb-top"><div class="sb-logo">Sebastian Gladstone</div></div>
+    <nav class="sb-nav">
+      <div class="sb-section sb-section-current">Finance</div>
+      <div class="sb-item sb-item-current"><span class="sb-icon">💸</span> Expenses</div>
+      <div class="sb-item sb-item-current"><span class="sb-icon">📋</span> Contractor Invoices</div>
+      <div class="sb-section sb-section-current">Logistics</div>
+      <div class="sb-item sb-item-current"><span class="sb-icon">📦</span> Shipping &amp; Movements</div>
+      <div class="sb-item sb-item-current"><span class="sb-icon">📚</span> Books</div>
+      <div class="sb-section sb-section-current">Studio</div>
+      <div class="sb-item sb-item-current active"><span class="sb-icon">🗓</span> Exhibition Schedule</div>
+      <div class="sb-item sb-item-current"><span class="sb-icon">📅</span> Operations</div>
+      <div class="sb-item sb-item-current"><span class="sb-icon">📦</span> BOL Tracker</div>
+      <div class="sb-item sb-item-current"><span class="sb-icon">🏷</span> Back Tags</div>
+      <div class="sb-section sb-section-current">Artists</div>
+      <div class="sb-item sb-item-current"><span class="sb-icon">🎨</span> Bennet Schlesinger</div>
+      <div class="sb-section sb-section-current">Company</div>
+      <div class="sb-item sb-item-current"><span class="sb-icon">📖</span> Company Handbook</div>
+    </nav>
+    <div class="sb-links">
+      <div class="sb-link sb-link-current">G-D</div>
+      <div class="sb-link sb-link-current">W</div>
+      <div class="sb-link sb-link-current">SQ</div>
+      <div class="sb-link sb-link-current">FX</div>
+      <div class="sb-link sb-link-current">DB</div>
+      <div class="sb-link sb-link-current">HB</div>
+      <div class="sb-link sb-link-current">H$</div>
+    </div>
+    <div class="sb-version sb-version-current">SG v1.13</div>
+  </div>
+  <div class="label">Current</div>
+</div>
+
+<!-- WALNUT -->
+<div>
+  <div class="sidebar-walnut">
+    <div class="sb-top"><div class="sb-logo-walnut">Sebastian Gladstone</div></div>
+    <nav class="sb-nav">
+      <div class="sb-section sb-section-walnut">Finance</div>
+      <div class="sb-item sb-item-walnut"><span class="sb-icon">💸</span> Expenses</div>
+      <div class="sb-item sb-item-walnut"><span class="sb-icon">📋</span> Contractor Invoices</div>
+      <div class="brass-rule"></div>
+      <div class="sb-section sb-section-walnut">Logistics</div>
+      <div class="sb-item sb-item-walnut"><span class="sb-icon">📦</span> Shipping &amp; Movements</div>
+      <div class="sb-item sb-item-walnut"><span class="sb-icon">📚</span> Books</div>
+      <div class="brass-rule"></div>
+      <div class="sb-section sb-section-walnut">Studio</div>
+      <div class="sb-item sb-item-walnut active"><span class="sb-icon">🗓</span> Exhibition Schedule</div>
+      <div class="sb-item sb-item-walnut"><span class="sb-icon">📅</span> Operations</div>
+      <div class="sb-item sb-item-walnut"><span class="sb-icon">📦</span> BOL Tracker</div>
+      <div class="sb-item sb-item-walnut"><span class="sb-icon">🏷</span> Back Tags</div>
+      <div class="brass-rule"></div>
+      <div class="sb-section sb-section-walnut">Artists</div>
+      <div class="sb-item sb-item-walnut"><span class="sb-icon">🎨</span> Bennet Schlesinger</div>
+      <div class="brass-rule"></div>
+      <div class="sb-section sb-section-walnut">Company</div>
+      <div class="sb-item sb-item-walnut"><span class="sb-icon">📖</span> Company Handbook</div>
+    </nav>
+    <div class="sb-links">
+      <div class="sb-link sb-link-walnut">G-D</div>
+      <div class="sb-link sb-link-walnut">W</div>
+      <div class="sb-link sb-link-walnut">SQ</div>
+      <div class="sb-link sb-link-walnut">FX</div>
+      <div class="sb-link sb-link-walnut">DB</div>
+      <div class="sb-link sb-link-walnut">HB</div>
+      <div class="sb-link sb-link-walnut">H$</div>
+    </div>
+    <div class="sb-version sb-version-walnut">SG v1.13</div>
+  </div>
+  <div class="label">Dark Walnut + Brass Inlay</div>
+</div>
+
+</body>
+</html>
