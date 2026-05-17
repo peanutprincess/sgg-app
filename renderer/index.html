@@ -4296,6 +4296,18 @@
     logLoad(loc);
   }
 
+  function fixDriveUrl(url) {
+    if (!url) return '';
+    if (url.includes('uc?export=view')) return url;
+    // /file/d/ID/view  →  uc?export=view&id=ID
+    var m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (m) return 'https://drive.google.com/uc?export=view&id=' + m[1];
+    // ?id=ID or &id=ID
+    m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (m) return 'https://drive.google.com/uc?export=view&id=' + m[1];
+    return url;
+  }
+
   function logLoad(loc) {
     document.getElementById('log-list').innerHTML = '<div class="log-loading">Loading…</div>';
     fetch(SCRIPT_URL + '?action=logistics&loc=' + encodeURIComponent(loc) + '&t=' + Date.now())
@@ -4339,7 +4351,7 @@
     wrap.innerHTML = rows.map(r => {
       const parsed = logParseTitle(r.title);
       const thumbHtml = r.imageUrl
-        ? `<div class="log-thumb"><img src="${escHtml(r.imageUrl)}" alt="artwork"></div>`
+        ? `<div class="log-thumb"><img src="${escHtml(fixDriveUrl(r.imageUrl))}" alt="artwork" onerror="this.parentElement.innerHTML='🖼️'"></div>`
         : `<div class="log-thumb">🖼️</div>`;
       const artistLine = parsed.artist || '';
       const titleLine  = parsed.titleYear || '';
