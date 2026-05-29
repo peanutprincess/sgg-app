@@ -10,7 +10,7 @@ function createWindow() {
   // Set dock icon from SVG logo
   if (process.platform === 'darwin') {
     try {
-      const icon = nativeImage.createFromPath(path.join(__dirname, 'assets/logo.png'));
+      const icon = nativeImage.createFromPath(path.join(__dirname, 'assets/icon.icns'));
       if (!icon.isEmpty()) app.dock.setIcon(icon);
     } catch(e) {}
   }
@@ -186,131 +186,123 @@ ipcMain.handle('show-in-finder', (event, filePath) => {
 function buildCRHtml(data, photoUrls) {
   const conditionLabels = ['Excellent', 'Good', 'Fair', 'Poor'];
   const conditionBoxes  = conditionLabels.map(lbl =>
-    `<span style="margin-right:18px;">${data.condition === lbl ? '&#9745;' : '&#9744;'} ${lbl}</span>`
+    `<span style="margin-right:16px;">${data.condition === lbl ? '&#9745;' : '&#9744;'} ${lbl}</span>`
   ).join('');
 
-  // Thumbnail (artwork thumbnail slot)
-  const thumbBase64 = data.photoBase64 && data.photoBase64['Artwork Thumbnail'];
-  const thumbMime   = data.photoMime   && data.photoMime['Artwork Thumbnail'] || 'image/jpeg';
+  // Thumbnail — Front photo used as top-right header image
+  const thumbBase64 = data.photoBase64 && data.photoBase64['Front'];
+  const thumbMime   = (data.photoMime && data.photoMime['Front']) || 'image/jpeg';
   const thumbHtml   = thumbBase64
-    ? `<img src="data:${thumbMime};base64,${thumbBase64}" style="max-width:90px;max-height:90px;object-fit:contain;float:right;margin-left:12px;">`
-    : '';
+    ? `<img src="data:${thumbMime};base64,${thumbBase64}" style="width:190px;height:190px;object-fit:contain;border:1px solid #ccc;display:block;">`
+    : `<div style="width:190px;height:190px;background:#e5e5e5;border:1px solid #ccc;"></div>`;
 
-  // Photos grid — all labeled slots (skip thumbnail, already shown)
+  // Photos grid — 9 slots (3×3): Front + 7 views + Signature
   const photoSlots = [
-    'Front', 'Back', 'Top-Left Corner', 'Top-Right Corner',
-    'Bottom-Left Corner', 'Bottom-Right Corner', 'Detail 1', 'Detail 2'
+    'Front', 'Back', 'Top-Left Corner',
+    'Top-Right Corner', 'Bottom-Left Corner', 'Bottom-Right Corner',
+    'Detail 1', 'Detail 2', 'Signature'
   ];
   const photoCells = photoSlots.map(lbl => {
     const b64  = data.photoBase64 && data.photoBase64[lbl];
-    const mime = data.photoMime   && data.photoMime[lbl] || 'image/jpeg';
-    const url  = photoUrls && photoUrls[lbl];
-    if (!b64) return '';
-    const imgTag = `<img src="data:${mime};base64,${b64}" style="width:100%;height:100px;object-fit:cover;display:block;">`;
-    const link   = url ? `<a href="${url}" style="display:block;">${imgTag}</a>` : imgTag;
-    return `<div style="display:flex;flex-direction:column;gap:4px;">${link}<div style="font-size:10px;color:#555;text-align:center;">${lbl}</div></div>`;
-  }).filter(Boolean);
-  const photosGrid = photoCells.length
-    ? `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">${photoCells.join('')}</div>`
-    : '<div style="color:#aaa;font-size:12px;">No photographs attached</div>';
+    const mime = (data.photoMime && data.photoMime[lbl]) || 'image/jpeg';
+    const inner = b64
+      ? `<img src="data:${mime};base64,${b64}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+      : `<div style="width:100%;height:100%;background:#e5e5e5;"></div>`;
+    return `<div style="border:1px solid #ccc;overflow:hidden;aspect-ratio:1;">${inner}</div>`;
+  }).join('');
+  const photosGrid = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;">${photoCells}</div>`;
 
-  // Damage diagram SVG — 12-col × 10-row grid with centered ellipse
-  const svgW = 520, svgH = 260, cols = 12, rows = 10;
-  const cx = svgW / 2, cy = svgH / 2, rx = 255, ry = 120;
-  let gridLines = '';
-  for (let c = 0; c <= cols; c++) {
-    const x = c * (svgW / cols);
-    gridLines += `<line x1="${x}" y1="0" x2="${x}" y2="${svgH}" stroke="#ccc" stroke-width="0.5"/>`;
-  }
-  for (let r = 0; r <= rows; r++) {
-    const y = r * (svgH / rows);
-    gridLines += `<line x1="0" y1="${y}" x2="${svgW}" y2="${y}" stroke="#ccc" stroke-width="0.5"/>`;
-  }
-  const damageSvg = `
-    <svg width="${svgW}" height="${svgH}" xmlns="http://www.w3.org/2000/svg" style="border:1px solid #ccc;display:block;">
-      <rect width="${svgW}" height="${svgH}" fill="#fafafa"/>
-      ${gridLines}
-      <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="#888" stroke-width="1.5"/>
-    </svg>`;
+  // Double horizontal rule
+  const doubleRule = `<div style="margin:14px 0;"><div style="border-top:1px solid #666;"></div><div style="border-top:1px solid #666;margin-top:3px;"></div></div>`;
 
-  const legend = `
-    <div style="font-size:10px;color:#555;line-height:1.9;white-space:nowrap;">
-      <div>&#9900; Chip &nbsp;&nbsp; &#10003; Dent &nbsp;&nbsp; &#8212; Scratches</div>
-      <div>&#9900; Scuffs &nbsp;&nbsp; //// Cracks &nbsp;&nbsp; = Part missing</div>
-      <div>&#8960; Stains/dirt &nbsp;&nbsp; &#215; Paint loss &nbsp;&nbsp; &#8743; Tear &nbsp;&nbsp; &#8745;&#8745; Crease</div>
-    </div>`;
-
+  // Field row — gray bold label left, value right
   const fieldRow = (label, value) =>
-    `<div style="display:flex;border-bottom:1px solid #e0e0e0;padding:7px 0;min-height:32px;">
-       <div style="width:200px;flex-shrink:0;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:12px;color:#555;padding-right:12px;">${label}</div>
-       <div style="flex:1;font-size:12px;color:#111;">${value || ''}</div>
+    `<div style="display:flex;border-bottom:1px solid #e0e0e0;padding:7px 0;min-height:30px;align-items:flex-start;">
+       <div style="width:210px;flex-shrink:0;font-size:11px;font-weight:700;color:#555;padding-right:12px;line-height:1.5;">${label}</div>
+       <div style="flex:1;font-size:12px;color:#111;line-height:1.5;">${value || ''}</div>
      </div>`;
 
-  const sectionLabel = (txt) =>
-    `<div style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#9ca3af;margin:20px 0 6px;">${txt}</div>`;
-
-  const divider = `<hr style="border:none;border-top:1px solid #ccc;margin:14px 0;">`;
+  // Condition diagram SVG — full-page graph grid with large circle
+  const cell = 20, cols = 26, rows = 30;
+  const svgW = cols * cell, svgH = rows * cell;   // 520 × 600
+  let gridLines = '';
+  for (let c = 0; c <= cols; c++) {
+    const x = c * cell;
+    gridLines += `<line x1="${x}" y1="0" x2="${x}" y2="${svgH}" stroke="#bbb" stroke-width="0.5"/>`;
+  }
+  for (let r = 0; r <= rows; r++) {
+    const y = r * cell;
+    gridLines += `<line x1="0" y1="${y}" x2="${svgW}" y2="${y}" stroke="#bbb" stroke-width="0.5"/>`;
+  }
+  const cx = svgW / 2, cy = svgH / 2, radius = Math.round(svgW * 0.43);
+  const damageSvg = `<svg viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg"
+      style="display:block;width:100%;height:auto;border:1px solid #bbb;">
+    <rect width="${svgW}" height="${svgH}" fill="white"/>
+    ${gridLines}
+    <circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="#666" stroke-width="1.5"/>
+  </svg>`;
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
     @page { size: 8.5in 11in; margin: 0.75in; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #111; background: #fff; }
+    .page2 { page-break-before: always; }
   </style></head><body>
-  <!-- Header -->
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-    <div style="font-size:16px;font-weight:700;letter-spacing:0.02em;">Sebastian Gladstone</div>
-    <div style="text-align:right;font-size:12px;line-height:1.8;">
-      <div><span style="color:#777;">Date in:</span> ${data.dateIn || ''}</div>
-      <div><span style="color:#777;">Date out:</span> ${data.dateOut || ''}</div>
-    </div>
-  </div>
-  ${divider}
 
-  <!-- Artwork info -->
-  ${fieldRow('Stock number', data.stockNum)}
-  <div style="display:flex;border-bottom:1px solid #e0e0e0;padding:7px 0;min-height:32px;">
-    <div style="width:200px;flex-shrink:0;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:12px;color:#555;padding-right:12px;">Artwork</div>
-    <div style="flex:1;font-size:12px;color:#111;">
-      <strong>${data.artist || ''}</strong><br>
-      ${data.title ? `<em>${data.title}</em>` : ''}${data.year ? `, ${data.year}` : ''}<br>
-      ${data.medium || ''}<br>
-      ${data.dimensions || ''}
-    </div>
-    ${thumbHtml}
-  </div>
-  ${divider}
+  <!-- ═══ PAGE 1 ═══ -->
 
-  <!-- Condition -->
-  ${fieldRow('General condition', conditionBoxes)}
+  <!-- Header: title/info left, thumbnail right -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+    <div style="flex:1;padding-right:24px;">
+      <div style="font-size:20px;font-weight:700;margin-bottom:3px;">Condition Report</div>
+      <div style="font-size:14px;margin-bottom:10px;">Sebastian Gladstone</div>
+      <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:10px;">
+        <span>Date:</span>&nbsp;<span style="font-weight:400;">${data.dateIn || ''}</span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span>Location:</span>&nbsp;<span style="font-weight:400;">${data.location || ''}</span>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:8px;">Artwork</div>
+      <div style="padding-left:80px;line-height:1.6;">
+        <div style="font-weight:700;font-size:12px;">${data.artist || ''}</div>
+        <div style="font-size:12px;"><em>${data.title || ''}</em>${data.year ? `, ${data.year}` : ''}</div>
+        <div style="font-size:12px;">${data.medium || ''}</div>
+        <div style="font-size:12px;">${data.dimensions || ''}</div>
+      </div>
+    </div>
+    <div style="flex-shrink:0;">${thumbHtml}</div>
+  </div>
+
+  ${doubleRule}
+
+  <!-- Condition fields -->
+  ${fieldRow('General Condition', conditionBoxes)}
   ${fieldRow('Comments', (data.comments || '').replace(/\n/g, '<br>'))}
   ${fieldRow('Inscription information', (data.inscription || '').replace(/\n/g, '<br>'))}
   ${fieldRow('Frame condition and dimensions', (data.frameCondition || '').replace(/\n/g, '<br>'))}
-  ${divider}
+
+  ${doubleRule}
 
   <!-- Photographs -->
-  ${sectionLabel('Photographs')}
+  <div style="font-size:13px;font-weight:700;">Photographs</div>
   ${photosGrid}
-  ${divider}
 
-  <!-- Damage diagram -->
-  ${sectionLabel('Condition diagram')}
-  <div style="display:flex;gap:16px;align-items:flex-start;">
-    ${legend}
-    <div style="flex:1;">${damageSvg}</div>
-  </div>
-  ${divider}
-
-  <!-- Signature -->
-  <div style="display:flex;gap:48px;margin-top:8px;">
-    <div style="flex:1;">
-      <div style="font-size:10px;color:#777;margin-bottom:6px;">Signature</div>
-      <div style="border-bottom:1px solid #555;min-height:28px;padding-bottom:4px;">${data.signedBy || ''}</div>
+  <!-- ═══ PAGE 2 ═══ -->
+  <div class="page2">
+    <div style="font-size:16px;font-weight:700;margin-bottom:10px;">Condition Diagram</div>
+    <div style="font-size:11px;color:#555;line-height:2;margin-bottom:14px;">
+      <div>&#9900; Chip &nbsp;&nbsp;&nbsp; &#10003; Dent &nbsp;&nbsp;&nbsp; &#8212; Scratches</div>
+      <div>&#9900; Scuffs &nbsp;&nbsp;&nbsp; //// Cracks &nbsp;&nbsp;&nbsp; = Part missing</div>
+      <div>&#8960; Stains &nbsp;&nbsp;&nbsp; &#215; Paint loss &nbsp;&nbsp;&nbsp; &#8743; Tear &nbsp;&nbsp;&nbsp; &#8745;&#8745; Crease</div>
     </div>
-    <div style="flex:1;">
-      <div style="font-size:10px;color:#777;margin-bottom:6px;">Date</div>
-      <div style="border-bottom:1px solid #555;min-height:28px;padding-bottom:4px;">${data.sigDate || ''}</div>
+
+    ${damageSvg}
+
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:28px;padding-top:6px;border-top:1px solid #555;">
+      <div style="font-size:13px;font-weight:700;">Signature</div>
+      <div style="font-size:13px;font-weight:700;">Date</div>
     </div>
   </div>
+
   </body></html>`;
 }
 

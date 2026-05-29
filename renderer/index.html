@@ -20,9 +20,7 @@
     .sidebar {
       width: 220px;
       flex-shrink: 0;
-      background-image: url('linen-black.jpg');
-      background-size: cover;
-      background-position: center;
+      background: #000;
       display: flex;
       flex-direction: column;
       -webkit-app-region: drag;
@@ -113,13 +111,84 @@
       transition: color 0.12s, border-color 0.12s;
     }
     .ql-btn:hover { color: #c8cdd5; border-color: #9aa0aa; }
+    .artist-mgr-pill {
+      margin: 0 16px 10px;
+      text-align: center;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(140,148,160,0.6);
+      padding: 4px 8px;
+      border: 1px solid rgba(160,170,185,0.2);
+      border-radius: 20px;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+      transition: all 0.15s;
+    }
+    .artist-mgr-pill:hover { color: #c8cdd5; border-color: #9aa0aa; background: rgba(0,0,0,0.2); }
+    /* Artist Manager Modal */
+    .amgr-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 9000;
+    }
+    .amgr-overlay.open { display: block; }
+    .amgr-modal {
+      display: none; position: fixed;
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 360px; max-height: 520px;
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      z-index: 9001; flex-direction: column;
+      overflow: hidden;
+    }
+    .amgr-modal.open { display: flex; }
+    .amgr-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid #f3f4f6;
+      font-size: 13px; font-weight: 700; color: #111;
+    }
+    .amgr-close { background: none; border: none; font-size: 16px; cursor: pointer; color: #9ca3af; }
+    .amgr-list {
+      flex: 1; overflow-y: auto; padding: 10px 16px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .amgr-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 10px; border-radius: 7px; font-size: 13px; color: #374151;
+      background: #f9fafb;
+    }
+    .amgr-item:hover { background: #f3f4f6; }
+    .amgr-del { background: none; border: none; color: #d1d5db; font-size: 13px; cursor: pointer; padding: 0 2px; }
+    .amgr-del:hover { color: #ef4444; }
+    .amgr-add-row {
+      display: flex; gap: 8px; padding: 10px 16px;
+      border-top: 1px solid #f3f4f6;
+    }
+    .amgr-add-row input {
+      flex: 1; padding: 7px 10px; border: 1.5px solid #e5e7eb;
+      border-radius: 8px; font-size: 13px; outline: none;
+    }
+    .amgr-add-row input:focus { border-color: #c9a84c; }
+    .amgr-add-btn {
+      background: #f3f4f6; border: none; border-radius: 8px;
+      padding: 7px 14px; font-size: 12px; font-weight: 600;
+      cursor: pointer; color: #374151;
+    }
+    .amgr-add-btn:hover { background: #e5e7eb; }
+    .amgr-foot {
+      display: flex; gap: 8px; padding: 12px 16px;
+      border-top: 1px solid #f3f4f6;
+    }
+    .amgr-cancel { flex: 1; background: #f3f4f6; border: none; border-radius: 8px; padding: 9px; font-size: 13px; font-weight: 600; cursor: pointer; color: #374151; }
+    .amgr-save   { flex: 2; background: #c9a84c; border: none; border-radius: 8px; padding: 9px; font-size: 13px; font-weight: 600; cursor: pointer; color: #000; }
+    .amgr-tab { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; color: #6b7280; }
+    .amgr-tab.active { background: #111; border-color: #111; color: #fff; }
 
     /* ── Content ── */
     .content { flex: 1; overflow: hidden; background: #fafafa; display: flex; flex-direction: column; }
     .module { display: none; }
     .module.active { display: flex; flex-direction: column; height: 100%; }
     /* Non-bennet/logistics modules scroll normally */
-    .module.active:not(#mod-bennet):not(#mod-logistics) { overflow-y: auto; }
+    .module.active:not(#mod-bennet):not(#mod-logistics):not(#mod-tristan) { overflow-y: auto; }
 
     .module-header {
       padding: 28px 40px 0;
@@ -422,6 +491,22 @@
       font-family: Georgia, 'Times New Roman', serif;
       font-size: 10px; font-style: italic; letter-spacing: 0.03em;
     }
+    .bn-type-badge {
+      position: absolute; top: 10px; right: 10px;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; border-radius: 4px; padding: 2px 7px;
+      background: #f3f4f6; color: #9ca3af;
+    }
+    .bn-type-badge.inv-sale { background: #fef3c7; color: #92400e; }
+    .bn-section-tabs { display: flex; gap: 5px; margin-left: 10px; }
+    .bn-section-tab {
+      font-size: 10px; font-weight: 700; padding: 3px 11px;
+      border-radius: 20px; border: 1.5px solid #e5e7eb;
+      cursor: pointer; color: #6b7280; background: transparent;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      -webkit-app-region: no-drag; transition: all 0.15s;
+    }
+    .bn-section-tab.active { background: #111; color: #fff; border-color: #111; }
     /* SKU tones per card type */
     .bn-card-sku                      { color: #c0c4cc; }
     .bn-card-inprod    .bn-card-sku   { color: #059669; }
@@ -549,6 +634,7 @@
 
     /* Inquiries panel */
     #mod-bennet { overflow: hidden; }
+    #mod-tristan { overflow: hidden; }
     .bn-scroll-body {
       flex: 1;
       overflow-y: auto;
@@ -560,7 +646,7 @@
       display: flex;
       flex-direction: column;
       min-height: 0;
-      padding: 0 32px 0;
+      padding: 0 32px 24px;
     }
     .bn-inq-header {
       font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
@@ -892,7 +978,7 @@
     .log-card-center { flex: 1; min-width: 0; }
     .log-card-client { font-size: 14px; font-weight: 700; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .log-card-artwork { font-size: 12px; color: #6b7280; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .log-card-stock { font-size: 11px; color: #9ca3af; margin-top: 2px; font-style: italic; }
+    .log-card-stock { display: inline-block; font-size: 10px; font-family: ui-monospace, 'Courier New', monospace; font-weight: 700; color: #374151; background: #f1f3f4; padding: 2px 7px; border-radius: 5px; margin-top: 5px; letter-spacing: 0.03em; }
     .log-card-fin { font-size: 11px; color: #9ca3af; margin-top: 4px; }
     .log-card-right { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; flex-shrink: 0; }
     .log-status-pill {
@@ -909,6 +995,22 @@
     .log-status-paid   { background: #dcfce7; color: #15803d; border-color: #86efac; }
     .log-status-unpaid { background: #f3f4f6; color: #6b7280; border-color: #e5e7eb; }
     .log-status-blank  { background: #f9fafb; color: #9ca3af; border-color: #e5e7eb; }
+    /* Logistics status card themes */
+    .log-card-pending   { background: #cdd0d5; border-color: #9ca3af; }
+    .log-card-pending:hover { border-color: #6b7280; box-shadow: 0 2px 8px rgba(0,0,0,0.10); }
+    .log-card.log-card-gift { border: 2px solid #a855f7; }
+    .log-card.log-card-gift:hover { border-color: #9333ea; }
+    .log-card-ready     { background: #f0f9ff; border-color: #7dd3fc; }
+    .log-card-ready:hover { border-color: #38bdf8; box-shadow: 0 2px 8px rgba(14,165,233,0.12); }
+    .log-card-completed { background: #f0fdf4; border-color: #86efac; }
+    .log-card-completed:hover { border-color: #4ade80; box-shadow: 0 2px 8px rgba(22,163,74,0.10); }
+    .log-card-error     { background: #fff1f2; border-color: #fca5a5; }
+    .log-card-error:hover { border-color: #f87171; box-shadow: 0 2px 8px rgba(220,38,38,0.10); }
+    .log-ls-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+    .log-ls-ready     { background: #bae6fd; color: #0369a1; }
+    .log-ls-pending   { background: #f3f4f6; color: #6b7280; }
+    .log-ls-completed { background: #bbf7d0; color: #15803d; }
+    .log-ls-error     { background: #fecaca; color: #dc2626; }
     .log-empty { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 14px; }
     .log-loading { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 14px; }
 
@@ -1008,6 +1110,9 @@
     <div class="nav-item" onclick="showModule('books', this)">
       <span class="nav-icon">📚</span> Books
     </div>
+    <div class="nav-item" onclick="showModule('logistics', this)">
+      <span class="nav-icon">📋</span> Logistics
+    </div>
 
     <div class="nav-label">Studio</div>
     <div class="nav-item" onclick="showModule('gallery', this)">
@@ -1027,8 +1132,8 @@
     <div class="nav-item" onclick="showModule('bennet', this)">
       <span class="nav-icon">🎨</span> Bennet Schlesinger
     </div>
-    <div class="nav-item" onclick="showModule('logistics', this)">
-      <span class="nav-icon">📦</span> Logistics
+    <div class="nav-item" onclick="showModule('tristan', this)">
+      <span class="nav-icon">🖼</span> Tristan Unrau
     </div>
 
     <div class="nav-label">Records</div>
@@ -1045,6 +1150,7 @@
     </div>
   </nav>
 
+  <div class="artist-mgr-pill" onclick="amgrOpen()">✏ Manage Lists</div>
   <div class="sidebar-quick-links">
     <button class="ql-btn" onclick="window.open('https://drive.google.com/drive/u/0/folders/1SaiY0KVhBgL-giWpCl5P47ZOQYKsbsUd')">G-D</button>
     <button class="ql-btn" onclick="window.open('https://website-artlogicwebsite0261.artlogic.net/admin/')">W</button>
@@ -1057,6 +1163,28 @@
   </div>
   <div class="sidebar-footer" id="app-version">v1.0.0</div>
 </aside>
+
+<!-- Lists Manager Modal -->
+<div class="amgr-overlay" id="amgr-overlay" onclick="amgrClose()"></div>
+<div class="amgr-modal" id="amgr-modal">
+  <div class="amgr-head">
+    <span>Manage Lists</span>
+    <button class="amgr-close" onclick="amgrClose()">✕</button>
+  </div>
+  <div style="display:flex;gap:6px;padding:0 16px 10px;">
+    <button id="amgr-tab-artists"    class="amgr-tab active"  onclick="amgrSwitchList('artists')">Artists</button>
+    <button id="amgr-tab-signatures" class="amgr-tab"         onclick="amgrSwitchList('signatures')">Signatures</button>
+  </div>
+  <div class="amgr-list" id="amgr-list"></div>
+  <div class="amgr-add-row">
+    <input type="text" id="amgr-input" placeholder="Add…" onkeydown="if(event.key==='Enter')amgrAdd()">
+    <button class="amgr-add-btn" onclick="amgrAdd()">+ Add</button>
+  </div>
+  <div class="amgr-foot">
+    <button class="amgr-cancel" onclick="amgrClose()">Cancel</button>
+    <button class="amgr-save" onclick="amgrSave()">Save Changes</button>
+  </div>
+</div>
 
 <!-- ══ CONTENT ══ -->
 <main class="content">
@@ -1252,8 +1380,8 @@
     </div>
     <div class="gallery-wrap">
       <div class="year-toggle">
-        <button class="year-btn active" id="yr-THIS" onclick="setGalleryYear(THIS_YEAR, this)">THIS_YEAR</button>
-        <button class="year-btn" id="yr-NEXT" onclick="setGalleryYear(NEXT_YEAR, this)">NEXT_YEAR</button>
+        <button class="year-btn active" id="yr-THIS" onclick="setGalleryYear(THIS_YEAR, this)">2026</button>
+        <button class="year-btn" id="yr-NEXT" onclick="setGalleryYear(NEXT_YEAR, this)">2027</button>
         <button class="year-btn" style="margin-left:auto;font-weight:400;color:#888;font-size:13px;" onclick="refreshGallery()">↻ Refresh</button>
       </div>
       <div id="gallery-body">
@@ -1331,31 +1459,6 @@
             <div class="form-grid">
               <div class="field"><label>Artist</label><select id="ship-artist">
                   <option value="">Select artist…</option>
-            <option>Chad Murray</option>
-            <option>Clayton Schiff</option>
-            <option>Cosima zu Knyphausen</option>
-            <option>Darya Diamond</option>
-            <option>Dustin Hodges</option>
-            <option>Eli Peng</option>
-            <option>Emma McMillan</option>
-            <option>Emmanuel Louisnord Desir</option>
-            <option>Francis Picabia</option>
-            <option>Franne Davids</option>
-            <option>G.V. Rodriguez</option>
-            <option>Herman Cherry</option>
-            <option>Jason Nocito</option>
-            <option>Jiang Chiang</option>
-            <option>Kate Spencer Stewart</option>
-            <option>Luis Bermudez</option>
-            <option>Malcolm Kenter</option>
-            <option>Melvino Garretti</option>
-            <option>Nan Montgomery</option>
-            <option>Nevine Mahmoud</option>
-            <option>Nick Angelo</option>
-            <option>Nick Hoecker</option>
-            <option>Nihura Montiel</option>
-            <option>Timo Fahler</option>
-            <option>Tristan Unrau</option>
                 </select></div>
               <div class="field"><label>Title</label><input type="text" id="ship-title-new" placeholder="Artwork title"></div>
             </div>
@@ -1653,6 +1756,7 @@
       </div>
       <div style="-webkit-app-region:no-drag;display:flex;gap:8px;">
         <button onclick="bnpOpen()" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0.02em;">💸 Log Payable</button>
+        <button onclick="bnisNewSale()" style="background:#c9a84c;color:#000;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0.02em;">📦 Inventory Sale</button>
         <button onclick="bnNewCommission()" style="background:#c9a84c;color:#000;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0.02em;">+ New Commission</button>
       </div>
     </div>
@@ -1681,18 +1785,33 @@
       <div class="bn-loading">Loading commissions…</div>
     </div>
 
-    <!-- Inquiry panel -->
+    <!-- Inquiry / Inventory Sales tabbed panel -->
     <div class="bn-inq-wrap">
       <div class="bn-inq-header" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>Recent Inquiries</span>
-        <button onclick="bnNewInquiry()" style="background:#c9a84c;color:#000;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;-webkit-app-region:no-drag;">+ New Inquiry</button>
+        <div style="display:flex;align-items:center;">
+          <span id="bn-section-label">Recent Inquiries</span>
+          <div class="bn-section-tabs">
+            <button class="bn-section-tab active" onclick="bnSwitchTab('inquiries',this)">Inquiries</button>
+            <button class="bn-section-tab" onclick="bnSwitchTab('inventory',this)">Inventory Sales</button>
+          </div>
+        </div>
+        <button id="bn-inq-new-btn" onclick="bnNewInquiry()" style="background:#c9a84c;color:#000;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;-webkit-app-region:no-drag;">+ New Inquiry</button>
       </div>
-      <div style="padding:0 0 10px;">
-        <input id="bn-inq-search" type="text" placeholder="Search inquiries…" oninput="bnFilterInquiries()" style="width:100%;box-sizing:border-box;border:1.5px solid #e5e7eb;border-radius:8px;padding:7px 12px;font-size:12px;color:#111;outline:none;background:#fff;">
+      <!-- Inquiries tab -->
+      <div id="bn-tab-inquiries">
+        <div style="padding:0 0 10px;">
+          <input id="bn-inq-search" type="text" placeholder="Search inquiries…" oninput="bnFilterInquiries()" style="width:100%;box-sizing:border-box;border:1.5px solid #e5e7eb;border-radius:8px;padding:7px 12px;font-size:12px;color:#111;outline:none;background:#fff;">
+        </div>
+        <div class="bn-inq-scroll" id="bn-inq-scroll">
+          <div id="bn-inq-body">
+            <div class="bn-loading">Loading inquiries…</div>
+          </div>
+        </div>
       </div>
-      <div class="bn-inq-scroll" id="bn-inq-scroll">
-        <div id="bn-inq-body">
-          <div class="bn-loading">Loading inquiries…</div>
+      <!-- Inventory Sales tab -->
+      <div id="bn-tab-inventory" style="display:none;">
+        <div id="bnis-body">
+          <div class="bn-loading">Loading inventory sales…</div>
         </div>
       </div>
     </div>
@@ -2006,6 +2125,229 @@
     </div>
   </div>
 
+  <!-- Inventory Sale drawer -->
+  <div class="bn-overlay" id="bnis-overlay" onclick="bnisCloseDrawer()"></div>
+  <div class="bn-drawer" id="bnis-drawer">
+    <div class="bn-drawer-head">
+      <div>
+        <div class="bn-drawer-client" id="bnisd-client">—</div>
+        <div class="bn-drawer-sub" id="bnisd-sub">—</div>
+      </div>
+      <button class="bn-close-btn" onclick="bnisCloseDrawer()">✕</button>
+    </div>
+    <div class="bn-drawer-body">
+
+      <!-- Client -->
+      <div class="bn-section-label">Client</div>
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>Client Name</label>
+          <input type="text" id="bnisd-client-name" placeholder="Full name">
+        </div>
+        <div class="bn-field">
+          <label>Organization</label>
+          <input type="text" id="bnisd-client-org" placeholder="Gallery or company">
+        </div>
+      </div>
+
+      <!-- Artwork -->
+      <div class="bn-section-label" style="margin-top:14px;">Artwork</div>
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>Title</label>
+          <input type="text" id="bnisd-title" placeholder="Title">
+        </div>
+        <div class="bn-field">
+          <label>Year</label>
+          <input type="text" id="bnisd-year" placeholder="2024">
+        </div>
+        <div class="bn-field">
+          <label>Dimensions</label>
+          <input type="text" id="bnisd-dimensions" placeholder='e.g. 24" × 36"'>
+        </div>
+        <div class="bn-field">
+          <label>Material</label>
+          <input type="text" id="bnisd-material" placeholder="Oil on canvas">
+        </div>
+      </div>
+      <div class="bn-field-grid single" style="margin-top:10px;">
+        <div class="bn-field">
+          <label>SKU</label>
+          <textarea id="bnisd-description" placeholder="e.g. BSC0274"></textarea>
+        </div>
+      </div>
+
+      <!-- Financial -->
+      <div class="bn-section-label" style="margin-top:14px;">Financial</div>
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>Price ($)</label>
+          <input type="text" id="bnisd-price" placeholder="0.00">
+        </div>
+        <div class="bn-field">
+          <label>Sale Price ($)</label>
+          <input type="text" id="bnisd-salePrice" placeholder="0.00">
+        </div>
+        <div class="bn-field">
+          <label>Bennet Payout ($)</label>
+          <input type="text" id="bnisd-bennetPayout" placeholder="0.00">
+        </div>
+        <div class="bn-field">
+          <label>SG Invoice #</label>
+          <input type="text" id="bnisd-sgInvoice" placeholder="INV-">
+        </div>
+        <div class="bn-field">
+          <label>Bennet Payment</label>
+          <input type="text" id="bnisd-artistPaid" placeholder="e.g. PAID, 50% deposit…">
+        </div>
+        <div class="bn-field">
+          <label>Gallery Payment</label>
+          <input type="text" id="bnisd-galleryPaid" placeholder="e.g. PAID, Invoice sent…">
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="bn-section-label" style="margin-top:14px;">Status</div>
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>Status</label>
+          <select id="bnisd-status">
+            <option value="">—</option>
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        </div>
+      </div>
+      <div class="bn-field-grid single" style="margin-top:10px;">
+        <div class="bn-field">
+          <label>Notes</label>
+          <textarea id="bnisd-notes" placeholder="Notes…"></textarea>
+        </div>
+      </div>
+
+      <!-- Shipping -->
+      <div class="bn-section-label" style="margin-top:14px;">Shipping</div>
+      <div class="bn-field-grid single">
+        <div class="bn-field">
+          <label>Ship-to Address</label>
+          <textarea id="bnisd-shipAddress" placeholder="Full shipping address…" style="min-height:56px;"></textarea>
+        </div>
+      </div>
+      <div class="bn-field-grid" style="margin-top:10px;">
+        <div class="bn-field">
+          <label>Shipper</label>
+          <input type="text" id="bnisd-shipper" placeholder="FedEx / UPS / Hand-deliver">
+        </div>
+        <div class="bn-field">
+          <label>Shipping Ref</label>
+          <input type="text" id="bnisd-shipRef" placeholder="">
+        </div>
+        <div class="bn-field">
+          <label>Tracking #</label>
+          <input type="text" id="bnisd-tracking" placeholder="">
+        </div>
+        <div class="bn-field">
+          <label>Tracking Sent</label>
+          <select id="bnisd-trackingSent">
+            <option value="">—</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Contact & Files -->
+      <div class="bn-section-label" style="margin-top:14px;">Contact &amp; Files</div>
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>POC (email/phone)</label>
+          <input type="text" id="bnisd-poc" placeholder="contact@email.com">
+        </div>
+        <div class="bn-field">
+          <label>File Reference</label>
+          <input type="text" id="bnisd-fileRef" placeholder="Drive link or filename">
+        </div>
+      </div>
+
+    </div>
+    <div class="bn-drawer-foot">
+      <button class="bn-cancel-btn" onclick="bnisCloseDrawer()">Cancel</button>
+      <button class="bn-save-btn" id="bnis-save-btn" onclick="bnisSave()">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- TRISTAN UNRAU INTEREST LOG -->
+  <section id="mod-tristan" class="module">
+    <div class="module-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="-webkit-app-region:no-drag;">
+        <div class="module-title">Tristan Unrau</div>
+        <div class="module-subtitle">Interest log</div>
+      </div>
+      <div style="-webkit-app-region:no-drag;">
+        <button onclick="triNewEntry()" style="background:#c9a84c;color:#000;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0.02em;">+ New Interest</button>
+      </div>
+    </div>
+    <div class="bn-scroll-body">
+      <div class="bn-inq-wrap" style="padding-top:20px;">
+        <div style="padding:0 0 10px;">
+          <input id="tri-search" type="text" placeholder="Search interests…" oninput="triFilter()" style="width:100%;box-sizing:border-box;border:1.5px solid #e5e7eb;border-radius:8px;padding:7px 12px;font-size:12px;color:#111;outline:none;background:#fff;">
+        </div>
+        <div class="bn-inq-scroll" id="tri-body">
+          <div class="bn-loading">Loading…</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tristan New Interest drawer -->
+  <div class="bn-overlay" id="tri-overlay" onclick="triClose()"></div>
+  <div class="bn-drawer" id="tri-drawer">
+    <div class="bn-drawer-head">
+      <div>
+        <div class="bn-drawer-client">New Interest</div>
+        <div class="bn-drawer-sub">Add to Tristan Unrau Interest Log</div>
+      </div>
+      <button class="bn-close-btn" onclick="triClose()">✕</button>
+    </div>
+    <div class="bn-drawer-body">
+      <div class="bn-field-grid">
+        <div class="bn-field">
+          <label>Date</label>
+          <input type="date" id="tri-date">
+        </div>
+        <div class="bn-field">
+          <label>Name</label>
+          <input type="text" id="tri-name" placeholder="Full name">
+        </div>
+        <div class="bn-field">
+          <label>Organization</label>
+          <input type="text" id="tri-org" placeholder="Gallery or company">
+        </div>
+        <div class="bn-field">
+          <label>Email</label>
+          <input type="text" id="tri-email" placeholder="email@example.com">
+        </div>
+      </div>
+      <div class="bn-field-grid single" style="margin-top:10px;">
+        <div class="bn-field">
+          <label>Artwork of Interest</label>
+          <input type="text" id="tri-artwork" placeholder="Work title or description">
+        </div>
+      </div>
+      <div class="bn-field-grid single" style="margin-top:10px;">
+        <div class="bn-field">
+          <label>Notes</label>
+          <textarea id="tri-notes" placeholder="Notes or details…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="bn-drawer-foot">
+      <button class="bn-cancel-btn" onclick="triClose()">Cancel</button>
+      <button class="bn-save-btn" id="tri-save-btn" onclick="triSave()">Add Entry</button>
+    </div>
+  </div>
+
   <!-- RESELLER CERTIFICATES -->
   <section id="mod-reseller" class="module">
     <div class="module-header">
@@ -2094,8 +2436,16 @@
             <input type="text" id="cr-dimensions" placeholder="e.g. 32 H x 31 W x 1.5 D" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
           </div>
           <div>
-            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Date In</label>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Date</label>
             <input type="date" id="cr-datein" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Location</label>
+            <select id="cr-location" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;background:#fff;">
+              <option value="">Select…</option>
+              <option value="LA">LA</option>
+              <option value="NYC">NYC</option>
+            </select>
           </div>
           <div>
             <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Date Out <span style="color:#9ca3af;font-weight:400;">(optional)</span></label>
@@ -2139,7 +2489,9 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
           <div>
             <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Signed By</label>
-            <input type="text" id="cr-signedby" placeholder="Name" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;">
+            <select id="cr-signedby" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;background:#fff;">
+              <option value="">Select…</option>
+            </select>
           </div>
           <div>
             <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Signature Date</label>
@@ -2176,10 +2528,16 @@
       <div class="log-header-bar" style="padding:0;">
         <div class="log-loc-pills">
           <button class="log-loc-pill active-la" id="log-pill-la" onclick="logSetLoc('LA')">🌴 LA</button>
-          <button class="log-loc-pill" id="log-pill-ny" onclick="logSetLoc('NY')">🗽 NY</button>
+          <button class="log-loc-pill" id="log-pill-ny" onclick="logSetLoc('NY')">🗽 NYC</button>
         </div>
         <button class="log-add-btn" onclick="logOpenNewDrawer()">＋ Add Entry</button>
       </div>
+    </div>
+    <div class="bn-filters" id="log-filters">
+      <button class="bn-filter-btn active" onclick="logSetFilter('all',this)">All</button>
+      <button class="bn-filter-btn" onclick="logSetFilter('Pending',this)">Pending</button>
+      <button class="bn-filter-btn" onclick="logSetFilter('Ready to Ship',this)">Ready to Ship</button>
+      <button class="bn-filter-btn" onclick="logSetFilter('Completed',this)">Completed</button>
     </div>
     <div class="log-scroll-body">
       <div id="log-list" class="log-list-wrap">
@@ -2192,7 +2550,8 @@
   <div class="log-overlay" id="log-overlay" onclick="logCloseDrawer()"></div>
   <div class="log-drawer" id="log-drawer">
     <div class="log-drawer-head">
-      <div>
+      <button class="bn-back-btn" onclick="logCloseDrawer()" style="background:none;border:none;color:#6b7280;font-size:13px;font-weight:600;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;-webkit-app-region:no-drag;">← Back</button>
+      <div style="flex:1;min-width:0;">
         <div class="log-drawer-title" id="logd-title">New Entry</div>
         <div class="log-drawer-sub" id="logd-sub">Fill in the details below</div>
       </div>
@@ -2205,7 +2564,7 @@
         <div class="bn-section-label">Location</div>
         <div style="display:flex;gap:8px;margin-bottom:14px;">
           <button class="log-paid-btn sel-paid" id="logd-loc-la" onclick="logdSetLoc('LA')">🌴 LA</button>
-          <button class="log-paid-btn" id="logd-loc-ny" onclick="logdSetLoc('NY')">🗽 NY</button>
+          <button class="log-paid-btn" id="logd-loc-ny" onclick="logdSetLoc('NY')">🗽 NYC</button>
         </div>
       </div>
 
@@ -2237,7 +2596,9 @@
       <div class="bn-field-grid">
         <div class="bn-field">
           <label>Artist</label>
-          <input type="text" id="logd-artist" placeholder="Artist name">
+          <select id="logd-artist">
+            <option value="">Select artist…</option>
+          </select>
         </div>
         <div class="bn-field">
           <label>Title</label>
@@ -2290,7 +2651,7 @@
       <div class="bn-section-label" style="margin-top:14px;">Payment Status</div>
       <div class="bn-field-grid">
         <div class="bn-field">
-          <label>Artist Paid</label>
+          <label>Artist Payment</label>
           <div class="log-paid-toggle">
             <button class="log-paid-btn sel-blank" id="logd-ap-blank" onclick="logdSetPaid('artist','')">—</button>
             <button class="log-paid-btn" id="logd-ap-paid" onclick="logdSetPaid('artist','PAID')">PAID</button>
@@ -2298,13 +2659,23 @@
           </div>
         </div>
         <div class="bn-field">
-          <label>Gallery Paid</label>
+          <label>Gallery Payment</label>
           <div class="log-paid-toggle">
             <button class="log-paid-btn sel-blank" id="logd-gp-blank" onclick="logdSetPaid('gallery','')">—</button>
             <button class="log-paid-btn" id="logd-gp-paid" onclick="logdSetPaid('gallery','PAID')">PAID</button>
             <button class="log-paid-btn" id="logd-gp-unpaid" onclick="logdSetPaid('gallery','UNPAID')">UNPAID</button>
           </div>
         </div>
+      </div>
+
+      <!-- Logistics Status -->
+      <div class="bn-section-label" style="margin-top:14px;">Logistics Status</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+        <button class="log-paid-btn sel-paid" id="logd-ls-blank"     onclick="logdSetLogisticsStatus('')">—</button>
+        <button class="log-paid-btn" id="logd-ls-ready"     onclick="logdSetLogisticsStatus('Ready to Ship')">Ready to Ship</button>
+        <button class="log-paid-btn" id="logd-ls-pending"   onclick="logdSetLogisticsStatus('Pending')">Pending</button>
+        <button class="log-paid-btn" id="logd-ls-completed" onclick="logdSetLogisticsStatus('Completed')">Completed</button>
+        <button class="log-paid-btn" id="logd-ls-error"     onclick="logdSetLogisticsStatus('Error')">Error</button>
       </div>
 
       <!-- Notes -->
@@ -2367,6 +2738,169 @@
     document.getElementById('book-date').value = v;
   })();
 
+  // ─── Artist List ────────────────────────────────────────────────────────────
+  let _artistList = [];
+
+  function loadArtists() {
+    fetch(SCRIPT_URL + '?action=artists&t=' + Date.now())
+      .then(r => r.json())
+      .then(d => {
+        _artistList = d.artists || [];
+        populateArtistSelects();
+        amgrRefreshList();
+      })
+      .catch(() => {});
+  }
+
+  function populateArtistSelects() {
+    ['ship-artist', 'logd-artist'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">Select artist…</option>' +
+        _artistList.map(a => `<option value="${escHtml(a)}">${escHtml(a)}</option>`).join('');
+      if (cur) sel.value = cur;
+    });
+  }
+
+  // Artist Manager
+  // ── List manager state ──
+  let _amgrList    = 'artists';   // 'artists' | 'signatures'
+  let _amgrWorking = [];
+
+  const AMGR_CFG = {
+    artists: {
+      fetchAction:  'artists',
+      responseKey:  'artists',
+      updateType:   'artists-update',
+      payloadKey:   'artists',
+      emptyLabel:   'No artists yet.',
+      getData:      () => _artistList,
+      setData:      v  => { _artistList = v; populateArtistSelects(); }
+    },
+    signatures: {
+      fetchAction:  'signatures',
+      responseKey:  'signatures',
+      updateType:   'signatures-update',
+      payloadKey:   'signatures',
+      emptyLabel:   'No signatures yet.',
+      getData:      () => _signatureList,
+      setData:      v  => { _signatureList = v; populateSignatureSelects(); }
+    }
+  };
+
+  function amgrOpen(list) {
+    _amgrList    = list || 'artists';
+    _amgrWorking = [...AMGR_CFG[_amgrList].getData()];
+    // Highlight active tab
+    document.querySelectorAll('.amgr-tab').forEach(t => t.classList.remove('active'));
+    const tab = document.getElementById('amgr-tab-' + _amgrList);
+    if (tab) tab.classList.add('active');
+    amgrRefreshList();
+    document.getElementById('amgr-overlay').classList.add('open');
+    document.getElementById('amgr-modal').classList.add('open');
+    setTimeout(() => document.getElementById('amgr-input').focus(), 100);
+  }
+
+  function amgrSwitchList(list) {
+    _amgrList    = list;
+    _amgrWorking = [...AMGR_CFG[list].getData()];
+    document.querySelectorAll('.amgr-tab').forEach(t => t.classList.remove('active'));
+    const tab = document.getElementById('amgr-tab-' + list);
+    if (tab) tab.classList.add('active');
+    amgrRefreshList();
+    document.getElementById('amgr-input').value = '';
+    document.getElementById('amgr-input').focus();
+  }
+
+  function amgrClose() {
+    document.getElementById('amgr-overlay').classList.remove('open');
+    document.getElementById('amgr-modal').classList.remove('open');
+  }
+
+  function amgrRefreshList() {
+    const el = document.getElementById('amgr-list');
+    if (!el) return;
+    if (!_amgrWorking.length) {
+      el.innerHTML = `<div style="color:#9ca3af;font-size:13px;padding:12px 0;">${AMGR_CFG[_amgrList].emptyLabel}</div>`;
+      return;
+    }
+    el.innerHTML = [..._amgrWorking].sort().map((a, i) =>
+      `<div class="amgr-item">
+        <span>${escHtml(a)}</span>
+        <button class="amgr-del" onclick="amgrRemove(${i})" title="Remove">✕</button>
+      </div>`
+    ).join('');
+  }
+
+  function amgrAdd() {
+    const input = document.getElementById('amgr-input');
+    const name  = (input.value || '').trim();
+    if (!name) return;
+    if (!_amgrWorking.includes(name)) {
+      _amgrWorking.push(name);
+      _amgrWorking.sort();
+    }
+    input.value = '';
+    amgrRefreshList();
+    input.focus();
+  }
+
+  function amgrRemove(idx) {
+    const sorted = [..._amgrWorking].sort();
+    const name   = sorted[idx];
+    _amgrWorking = _amgrWorking.filter(a => a !== name);
+    amgrRefreshList();
+  }
+
+  function amgrSave() {
+    const cfg = AMGR_CFG[_amgrList];
+    const btn = document.querySelector('.amgr-save');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const body = { type: cfg.updateType };
+    body[cfg.payloadKey] = _amgrWorking;
+    fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(body) })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          cfg.setData([..._amgrWorking].sort());
+          amgrClose();
+        } else {
+          alert('Save failed: ' + (d.error || 'Unknown error'));
+        }
+      })
+      .catch(err => alert('Network error: ' + err))
+      .finally(() => { btn.disabled = false; btn.textContent = 'Save Changes'; });
+  }
+
+  // ── Signatures list ──
+  let _signatureList = [];
+
+  function loadSignatures() {
+    fetch(SCRIPT_URL + '?action=signatures&t=' + Date.now())
+      .then(r => r.json())
+      .then(d => {
+        _signatureList = d.signatures || [];
+        populateSignatureSelects();
+      })
+      .catch(() => {});
+  }
+
+  function populateSignatureSelects() {
+    ['cr-signedby'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">Select…</option>' +
+        _signatureList.map(n => `<option value="${escHtml(n)}">${escHtml(n)}</option>`).join('');
+      if (cur) sel.value = cur;
+    });
+  }
+
+  // Load both lists on startup
+  loadArtists();
+  loadSignatures();
+
   // Module switching
   function showModule(name, el) {
     document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
@@ -2377,6 +2911,7 @@
     if (name === 'handbook')  { loadHandbook(); }
     if (name === 'bennet')    { bnLoad(); }
     if (name === 'logistics') { logLoad(logState.loc); }
+    if (name === 'tristan')   { triLoad(); }
   }
 
   // ── Gallery ──
@@ -2453,13 +2988,22 @@
     const nyc = (data.nyc || []).filter(s => s.artist || s.show);
     const la  = (data.la  || []).filter(s => s.artist || s.show);
 
+    const today = new Date(); today.setHours(0,0,0,0);
     const renderList = shows => {
       if (!shows.length) return '<div class="gallery-empty">No shows scheduled.</div>';
       return shows.map(s => {
-        const name   = s.artist || s.show || '';
-        const cls    = s.active ? 'show-row is-active' : s.upcoming ? 'show-row is-upcoming' : 'show-row';
-        const dot    = s.active ? '<span class="show-now-dot"></span>' : '';
-        const dates  = s.start && s.end ? s.start + ' – ' + s.end : s.start || s.end || s.dates || '';
+        const name  = s.artist || s.show || '';
+        const dates = s.start && s.end ? s.start + ' – ' + s.end : s.start || s.end || s.dates || '';
+        let active = false, upcoming = false;
+        const rangeM = dates.match(/(\d{1,2}\/\d{1,2})\s*[–\-]\s*(\d{1,2}\/\d{1,2})/);
+        if (rangeM) {
+          const start = parseMMDD(rangeM[1], year);
+          let   end   = parseMMDD(rangeM[2], year);
+          if (start && end && end < start) end = parseMMDD(rangeM[2], year + 1);
+          if (start && end) { active = today >= start && today <= end; upcoming = !active && today < start; }
+        }
+        const cls = active ? 'show-row is-active' : upcoming ? 'show-row is-upcoming' : 'show-row';
+        const dot = active ? '<span class="show-now-dot"></span>' : '';
         return `<div class="${cls}">
           <span class="show-name-text">${dot}${escHtml(name)}</span>
           <span class="show-dates-text">${escHtml(dates)}</span>
@@ -2475,6 +3019,14 @@
 
   function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function parseMMDD(mmdd, year) {
+    const p = String(mmdd || '').trim().split('/');
+    if (p.length !== 2) return null;
+    const m = parseInt(p[0]), d = parseInt(p[1]);
+    if (isNaN(m) || isNaN(d)) return null;
+    return new Date(year, m - 1, d);
   }
 
   // Ship drop zone (photo optional)
@@ -2506,10 +3058,10 @@
 
   function setArtworkMode(mode) {
     shipState.artworkMode = mode;
-    document.getElementById('ship-art-new').style.display     = mode === 'new' ? 'block' : 'none';
-    document.getElementById('ship-art-exist').style.display   = mode === 'existing' ? 'block' : 'none';
-    document.getElementById('ship-art-new-btn').className     = 'year-btn' + (mode === 'new' ? ' active' : '');
-    document.getElementById('ship-art-exist-btn').className   = 'year-btn' + (mode === 'existing' ? ' active' : '');
+    document.getElementById('ship-art-new').style.display = mode === 'new' ? 'block' : 'none';
+    const _ae = document.getElementById('ship-art-exist');    if (_ae) _ae.style.display = mode === 'existing' ? 'block' : 'none';
+    const _nb = document.getElementById('ship-art-new-btn');  if (_nb) _nb.className = 'year-btn' + (mode === 'new' ? ' active' : '');
+    const _eb = document.getElementById('ship-art-exist-btn');if (_eb) _eb.className = 'year-btn' + (mode === 'existing' ? ' active' : '');
   }
 
   function setShipLoc(side, val, btn) {
@@ -2529,9 +3081,10 @@
     if (!shipState.from)       { showError('ship', 'Please set the From location.'); return; }
     if (!shipState.to)         { showError('ship', 'Please set the To destination.'); return; }
 
-    const artwork = shipState.artworkMode === 'new'
+    const _titleExist = document.getElementById('ship-title-exist');
+    const artwork = (shipState.artworkMode === 'new' || !_titleExist)
       ? document.getElementById('ship-title-new').value.trim()
-      : document.getElementById('ship-title-exist').value.trim();
+      : _titleExist.value.trim();
 
     const basePayload = {
       type: 'shipping', direction: shipState.direction,
@@ -2603,7 +3156,7 @@
     document.getElementById('ship-notes').value = '';
     document.getElementById('ship-artist').value = '';
     document.getElementById('ship-title-new').value = '';
-    document.getElementById('ship-title-exist').value = '';
+    const _ste = document.getElementById('ship-title-exist'); if (_ste) _ste.value = '';
 
     showState('ship', 'form');
     // set today's date
@@ -2747,7 +3300,7 @@
       .then(r => r.text())
       .then(text => {
         try { callback(JSON.parse(text)); }
-        catch { callback({ success: true }); }
+        catch { callback({ success: false, error: 'Unexpected server response' }); }
       })
       .catch(err => callback({ success: false, error: err.message }));
   }
@@ -3332,6 +3885,7 @@
     }
     document.getElementById('bn-grid').innerHTML = '<div class="bn-loading">Loading commissions…</div>';
     document.getElementById('bn-inq-body').innerHTML = '<div class="bn-loading">Loading inquiries…</div>';
+    document.getElementById('bnis-body').innerHTML = '<div class="bn-loading">Loading inventory sales…</div>';
 
     fetch(BENNET_SCRIPT_URL + '?action=commissions')
       .then(r => r.json())
@@ -3339,7 +3893,7 @@
         _bnCommissions = d.commissions || [];
         bnRenderGrid();
         if (d.version) document.getElementById('app-version').textContent =
-          'SG v' + window.sgg.version.replace(/\.0$/, '') + ' | B v' + d.version;
+          'SG v' + ((window.sgg && window.sgg.version) ? window.sgg.version.replace(/\.0$/, '') : '—') + ' | B v' + d.version;
       })
       .catch(() => {
         document.getElementById('bn-grid').innerHTML = '<div class="bn-empty">Failed to load commissions.</div>';
@@ -3351,11 +3905,13 @@
       .catch(() => {
         document.getElementById('bn-inq-body').innerHTML = '<div class="bn-empty">Failed to load inquiries.</div>';
       });
+
+    bnisLoad();
   }
 
   function bnSetFilter(val, btn) {
     _bnFilter = val;
-    document.querySelectorAll('.bn-filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#bn-filters .bn-filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     bnRenderGrid();
   }
@@ -3410,7 +3966,7 @@
   }
 
   function bnCardHtml(c) {
-    const initials  = (c.client || '?').split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
+    const initials  = (c.client || '?').split(' ').slice(0,2).map(w => w[0] || '').filter(Boolean).join('').toUpperCase();
     const pillCls   = bnStatusPillClass(c.status);
     const colorCls  = bnCardColorClass(c.status);
     const price    = c.salePrice ? '$' + c.salePrice : (c.price ? '$' + c.price : '—');
@@ -3422,27 +3978,28 @@
     const dueUrgent = !delivered && !cancelled && !isNaN(days) && days <= 7;
     const payPill = (label, val) => {
       const isPaid = (val || '').toLowerCase().includes('paid');
-      const txt = val ? val : '—';
+      const txt = val ? escHtml(val) : '—';
       return `<span class="bn-pay-pill ${isPaid ? 'paid' : 'unpaid'}">${isPaid ? '✓ ' : ''}${label}: ${txt}</span>`;
     };
     return `<div class="bn-card ${colorCls}" onclick="bnOpenDrawer(${c.rowIndex})">
+      <div class="bn-type-badge">Commission</div>
       <div class="bn-card-header">
-        <div class="bn-initials">${initials}</div>
+        <div class="bn-initials">${escHtml(initials)}</div>
         <div class="bn-card-meta">
-          <div class="bn-card-client">${c.client || '—'}</div>
-          <div class="bn-card-title">${c.title || '—'}${c.year ? ' · ' + c.year : ''}</div>
+          <div class="bn-card-client">${escHtml(c.client || '—')}</div>
+          <div class="bn-card-title">${escHtml(c.title || '—')}${c.year ? ' · ' + escHtml(c.year) : ''}</div>
         </div>
       </div>
-      <span class="bn-pill ${pillCls}">${c.status || 'Unknown'}</span>
+      <span class="bn-pill ${pillCls}">${escHtml(c.status || 'Unknown')}</span>
       <div class="bn-pay-row">
         ${payPill('Gallery', c.galleryPaid)}
         ${payPill('Bennet', c.artistPaid)}
       </div>
       <div class="bn-card-footer">
         <div class="bn-card-price">${price}</div>
-        ${dueLabel ? `<div class="bn-card-due${dueUrgent ? ' urgent' : ''}">${dueLabel}</div>` : ''}
+        ${dueLabel ? `<div class="bn-card-due${dueUrgent ? ' urgent' : ''}">${escHtml(dueLabel)}</div>` : ''}
       </div>
-      <div class="bn-card-sku">${c.description || 'unassigned'}</div>
+      <div class="bn-card-sku">${escHtml(c.description || 'unassigned')}</div>
     </div>`;
   }
 
@@ -3611,16 +4168,16 @@
       })();
       const esc = s => (s || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
       return `<div class="bn-inq-tile" style="cursor:pointer;" onclick="bniEdit(${idx})">
-        <div class="bn-inq-date">${dateStr}</div>
+        <div class="bn-inq-date">${escHtml(dateStr)}</div>
         <div style="flex:1;min-width:0;">
-          <div class="bn-inq-name">${name || '—'}</div>
-          ${org    ? `<div class="bn-inq-org">${org}</div>`         : ''}
-          ${artwork? `<div class="bn-inq-artwork">${artwork}</div>` : ''}
-          ${notes  ? `<div class="bn-inq-notes">${notes}</div>`     : ''}
+          <div class="bn-inq-name">${escHtml(name || '—')}</div>
+          ${org    ? `<div class="bn-inq-org">${escHtml(org)}</div>`         : ''}
+          ${artwork? `<div class="bn-inq-artwork">${escHtml(artwork)}</div>` : ''}
+          ${notes  ? `<div class="bn-inq-notes">${escHtml(notes)}</div>`     : ''}
         </div>
         <div class="bn-inq-actions" onclick="event.stopPropagation()">
-          ${email ? `<a class="bn-mailto" href="mailto:${email}">${email}</a>` : ''}
-          <button class="bn-inq-convert" onclick="bnInquiryToCommission('${esc(name)}','${esc(org)}','${esc(email)}','${esc(artwork)}')">→ Commission</button>
+          ${email ? `<a class="bn-mailto" href="mailto:${escHtml(email)}">${escHtml(email)}</a>` : ''}
+          <button class="bn-inq-convert" data-name="${escHtml(name)}" data-org="${escHtml(org)}" data-email="${escHtml(email)}" data-artwork="${escHtml(artwork)}" onclick="bnInquiryToCommission(this.dataset.name,this.dataset.org,this.dataset.email,this.dataset.artwork)">→ Commission</button>
         </div>
       </div>`;
     };
@@ -3771,7 +4328,7 @@
   }
 
   // ESC closes drawer
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { bnCloseDrawer(); bniClose(); bnpClose(); logCloseDrawer(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { bnCloseDrawer(); bniClose(); bnpClose(); logCloseDrawer(); triClose(); } });
 
   // ─────────────────────────────────────────
   // LOG PAYABLE PANEL
@@ -3946,6 +4503,100 @@
     reader.readAsDataURL(_bnp.file);
   }
 
+  // ─────────────────────────────────────────
+  // TRISTAN UNRAU INTEREST LOG
+  // ─────────────────────────────────────────
+  let _triEntries = [];
+
+  function triLoad() {
+    document.getElementById('tri-body').innerHTML = '<div class="bn-loading">Loading…</div>';
+    fetch(BENNET_SCRIPT_URL + '?action=tristan&t=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        _triEntries = (data.entries || []).sort((a, b) => {
+          return new Date(b.Timestamp || b.Date || 0) - new Date(a.Timestamp || a.Date || 0);
+        });
+        triRender(_triEntries);
+      })
+      .catch(() => {
+        document.getElementById('tri-body').innerHTML = '<div class="bn-empty">Failed to load. Check connection.</div>';
+      });
+  }
+
+  function triRender(list) {
+    const wrap = document.getElementById('tri-body');
+    if (!list.length) {
+      wrap.innerHTML = '<div class="bn-empty" style="padding:24px 0;">No entries yet. Click + New Interest to log one.</div>';
+      return;
+    }
+    wrap.innerHTML = list.map(e => {
+      const dateStr = (() => {
+        const d = new Date(e.Timestamp || e.Date || '');
+        return isNaN(d) ? (e.Timestamp || e.Date || '—') : (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear();
+      })();
+      return `<div class="bn-inq-tile">
+        <div class="bn-inq-date">${escHtml(dateStr)}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="bn-inq-name">${escHtml(e.Name || '—')}</div>
+          ${e.Organization ? `<div class="bn-inq-org">${escHtml(e.Organization)}</div>` : ''}
+          ${e.Artwork     ? `<div class="bn-inq-artwork">${escHtml(e.Artwork)}</div>`   : ''}
+          ${e.Notes       ? `<div class="bn-inq-notes">${escHtml(e.Notes)}</div>`       : ''}
+        </div>
+        <div class="bn-inq-actions">
+          ${e.Email ? `<a class="bn-mailto" href="mailto:${escHtml(e.Email)}">${escHtml(e.Email)}</a>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function triFilter() {
+    const q = (document.getElementById('tri-search').value || '').toLowerCase();
+    if (!q) { triRender(_triEntries); return; }
+    triRender(_triEntries.filter(e =>
+      [e.Name, e.Organization, e.Email, e.Artwork, e.Notes].some(v => (v || '').toLowerCase().includes(q))
+    ));
+  }
+
+  function triNewEntry() {
+    const d = new Date();
+    document.getElementById('tri-date').value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    document.getElementById('tri-name').value    = '';
+    document.getElementById('tri-org').value     = '';
+    document.getElementById('tri-email').value   = '';
+    document.getElementById('tri-artwork').value = '';
+    document.getElementById('tri-notes').value   = '';
+    document.getElementById('tri-save-btn').textContent = 'Add Entry';
+    document.getElementById('tri-save-btn').disabled = false;
+    document.getElementById('tri-overlay').classList.add('open');
+    document.getElementById('tri-drawer').classList.add('open');
+  }
+
+  function triClose() {
+    document.getElementById('tri-overlay').classList.remove('open');
+    document.getElementById('tri-drawer').classList.remove('open');
+  }
+
+  function triSave() {
+    const btn = document.getElementById('tri-save-btn');
+    btn.textContent = 'Saving…'; btn.disabled = true;
+    const payload = {
+      type:         'create_tristan',
+      date:         document.getElementById('tri-date').value,
+      name:         document.getElementById('tri-name').value.trim(),
+      org:          document.getElementById('tri-org').value.trim(),
+      email:        document.getElementById('tri-email').value.trim(),
+      artwork:      document.getElementById('tri-artwork').value.trim(),
+      notes:        document.getElementById('tri-notes').value.trim(),
+    };
+    fetch(BENNET_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) { triClose(); triLoad(); }
+        else { btn.disabled = false; btn.textContent = 'Save Entry'; alert('Save failed: ' + (d.error || 'Unknown error')); }
+      })
+      .catch(err => { btn.disabled = false; btn.textContent = 'Save Entry'; alert('Network error: ' + err); });
+  }
+
   // ── Reseller Certificates ──────────────────────────────────────────────────
   const _rc = { file: null };
 
@@ -4042,10 +4693,10 @@
   };
 
   const CR_PHOTO_SLOTS = [
-    'Artwork Thumbnail', 'Front', 'Back',
+    'Front', 'Back',
     'Top-Left Corner', 'Top-Right Corner',
     'Bottom-Left Corner', 'Bottom-Right Corner',
-    'Detail 1', 'Detail 2'
+    'Detail 1', 'Detail 2', 'Signature'
   ];
 
   // Build photo grid slots
@@ -4155,10 +4806,12 @@
 
       document.getElementById('cr-loading-msg').textContent = 'Generating PDF…';
 
+      const location = (document.getElementById('cr-location').value || '').trim();
+
       const payload = {
         scriptUrl: SCRIPT_URL,
         stockNum, artist, title, year, medium, dimensions,
-        dateIn, dateOut, comments, inscription, frameCondition,
+        dateIn, dateOut, location, comments, inscription, frameCondition,
         condition: _cr.condition || '',
         signedBy, sigDate,
         photos: photosPayload,
@@ -4192,7 +4845,7 @@
 
     // Clear inputs
     ['cr-stock','cr-artist','cr-title','cr-year','cr-medium','cr-dimensions',
-     'cr-comments','cr-inscription','cr-frame','cr-signedby'].forEach(id => {
+     'cr-comments','cr-inscription','cr-frame','cr-signedby','cr-location'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
@@ -4277,16 +4930,40 @@
   // ─────────────────────────────────────────
   // LOGISTICS MODULE
   // ─────────────────────────────────────────
+  let _logFilter = 'all';
+
+  function logSetFilter(val, btn) {
+    _logFilter = val;
+    document.querySelectorAll('#log-filters .bn-filter-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    logApplyFilter();
+  }
+
+  function logApplyFilter() {
+    const statusOrder = { 'pending': 0, 'ready to ship': 1, 'completed': 2, 'error': 3 };
+    let rows = logState.rows;
+    if (_logFilter !== 'all') {
+      rows = rows.filter(r => (r.logisticsStatus || '').toLowerCase().trim() === _logFilter.toLowerCase().trim());
+    }
+    rows = [...rows].sort((a, b) => {
+      const ak = (a.logisticsStatus || '').toLowerCase().trim();
+      const bk = (b.logisticsStatus || '').toLowerCase().trim();
+      return (statusOrder[ak] ?? 4) - (statusOrder[bk] ?? 4);
+    });
+    logRenderCards(rows);
+  }
+
   const logState = {
-    loc:         'LA',
-    rows:        [],
-    editRow:     null,   // row object being edited (null = new)
-    photoFile:   null,
-    photoBase64: null,
-    photoMime:   null,
-    artistPaid:  '',
-    galleryPaid: '',
-    drawerLoc:   'LA',   // loc for new entries
+    loc:                  'LA',
+    rows:                 [],
+    editRow:              null,
+    photoFile:            null,
+    photoBase64:          null,
+    photoMime:            null,
+    artistPaymentStatus:  '',
+    galleryPaid:          '',
+    logisticsStatus:      '',
+    drawerLoc:            'LA',
   };
 
   function logSetLoc(loc) {
@@ -4298,13 +4975,10 @@
 
   function fixDriveUrl(url) {
     if (!url) return '';
-    if (url.includes('uc?export=view')) return url;
-    // /file/d/ID/view  →  uc?export=view&id=ID
+    // Extract file ID from any Drive URL variant, then use thumbnail endpoint
     var m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (m) return 'https://drive.google.com/uc?export=view&id=' + m[1];
-    // ?id=ID or &id=ID
-    m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (m) return 'https://drive.google.com/uc?export=view&id=' + m[1];
+    if (!m) m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w200';
     return url;
   }
 
@@ -4318,21 +4992,16 @@
           return;
         }
         logState.rows = data.rows || [];
-        logRenderCards(logState.rows);
+        logApplyFilter();
       })
       .catch(err => {
         document.getElementById('log-list').innerHTML = '<div class="log-empty">Failed to load. Check connection.</div>';
       });
   }
 
-  function logParseTitle(titleStr) {
-    // title column: artist\ntitle, year\nmedium\ndims\n...\nstock#
-    const lines = (titleStr || '').split('\n').map(l => l.trim()).filter(Boolean);
-    return {
-      artist: lines[0] || '',
-      titleYear: lines[1] || '',
-      stock: lines.length > 1 ? lines[lines.length - 1] : '',
-    };
+  function logFormatArtwork(r) {
+    const titleYear = [r.title, r.year].filter(Boolean).join(', ');
+    return { artist: r.artist || '', titleYear, sku: r.sku || '' };
   }
 
   function logStatusClass(val) {
@@ -4349,33 +5018,30 @@
       return;
     }
     wrap.innerHTML = rows.map(r => {
-      const parsed = logParseTitle(r.title);
-      const thumbHtml = r.imageUrl
-        ? `<div class="log-thumb"><img src="${escHtml(fixDriveUrl(r.imageUrl))}" alt="artwork" onerror="this.parentElement.innerHTML='🖼️'"></div>`
+      const fmt = logFormatArtwork(r);
+      const _rawUrl = (r.imageUrl && r.imageUrl !== 'CellImage') ? r.imageUrl : '';
+      const thumbHtml = _rawUrl
+        ? `<div class="log-thumb"><img src="${escHtml(fixDriveUrl(_rawUrl))}" alt="artwork" onerror="this.parentElement.innerHTML='🖼️'"></div>`
         : `<div class="log-thumb">🖼️</div>`;
-      const artistLine = parsed.artist || '';
-      const titleLine  = parsed.titleYear || '';
-      const stockLine  = parsed.stock && parsed.stock !== artistLine && parsed.stock !== titleLine
-        ? parsed.stock : '';
-      const apCls = logStatusClass(r.artistPaid);
       const gpCls = logStatusClass(r.galleryPaid);
-      const apTxt = r.artistPaid || '—';
       const gpTxt = r.galleryPaid || '—';
       const rowIdx = r.row;
       const finParts = [];
       if (r.invoice)   finParts.push('INV: ' + r.invoice);
       if (r.price)     finParts.push('$' + r.price);
       if (r.salePrice) finParts.push('Sale: $' + r.salePrice);
-      return `<div class="log-card" onclick="logOpenDrawer(${rowIdx})">
+      const lsKey = (s => { const v = (s||'').toLowerCase().trim(); if (v==='ready to ship') return 'ready'; if (v==='completed') return 'completed'; if (v==='error') return 'error'; if (v==='pending') return 'pending'; return ''; })(r.logisticsStatus);
+      const lsBadge = lsKey ? `<span class="log-ls-badge log-ls-${lsKey}">${escHtml(r.logisticsStatus)}</span>` : '';
+      return `<div class="log-card${lsKey ? ' log-card-' + lsKey : ''}" onclick="logOpenDrawer(${rowIdx})">
         ${thumbHtml}
         <div class="log-card-center">
           <div class="log-card-client">${escHtml(r.client || '—')}</div>
-          ${artistLine || titleLine ? `<div class="log-card-artwork">${escHtml(artistLine)}${artistLine && titleLine ? ' · ' : ''}${escHtml(titleLine)}</div>` : ''}
-          ${stockLine ? `<div class="log-card-stock">${escHtml(stockLine)}</div>` : ''}
+          ${fmt.artist || fmt.titleYear ? `<div class="log-card-artwork">${escHtml(fmt.artist)}${fmt.artist && fmt.titleYear ? ' · ' : ''}${escHtml(fmt.titleYear)}</div>` : ''}
+          ${fmt.sku ? `<div class="log-card-stock">${escHtml(fmt.sku)}</div>` : ''}
           ${finParts.length ? `<div class="log-card-fin">${escHtml(finParts.join(' · '))}</div>` : ''}
         </div>
         <div class="log-card-right" onclick="event.stopPropagation()">
-          <span class="log-status-pill ${apCls}" onclick="logToggleStatus(${rowIdx}, 'artist', '${escHtml(r.artistPaid)}')">Artist: ${escHtml(apTxt)}</span>
+          ${lsBadge}
           <span class="log-status-pill ${gpCls}" onclick="logToggleStatus(${rowIdx}, 'gallery', '${escHtml(r.galleryPaid)}')">Gallery: ${escHtml(gpTxt)}</span>
         </div>
       </div>`;
@@ -4391,25 +5057,32 @@
     if (!row) return;
 
     // Optimistic update
-    if (field === 'artist')  row.artistPaid  = next;
     if (field === 'gallery') row.galleryPaid = next;
-    logRenderCards(logState.rows);
+    logApplyFilter();
 
     // Build update payload with all existing data
     const payload = {
-      type:             'logistics-update',
-      loc:              logState.loc,
-      row:              rowIdx,
-      client:           row.client,
-      existingImageUrl: row.imageUrl,
-      title:            row.title,
-      invoice:          row.invoice,
-      price:            row.price,
-      salePrice:        row.salePrice,
-      salesPayout:      row.salesPayout,
-      artistPaid:       row.artistPaid,
-      galleryPaid:      row.galleryPaid,
-      notes:            row.notes,
+      type:                'logistics-update',
+      loc:                 logState.loc,
+      row:                 rowIdx,
+      client:              row.client,
+      existingImageUrl:    row.imageUrl,
+      artist:              row.artist,
+      title:               row.title,
+      year:                row.year,
+      sku:                 row.sku,
+      dimensions:          row.dimensions,
+      material:            row.material,
+      invoice:             row.invoice,
+      price:               row.price,
+      salePrice:           row.salePrice,
+      artistPayoutAmount:  row.artistPayoutAmount,
+      artistPaymentStatus: row.artistPaymentStatus,
+      artistPayoutRecords: row.artistPayoutRecords,
+      galleryPaid:         row.galleryPaid,
+      logisticsStatus:     row.logisticsStatus,
+      dueDate:             row.dueDate,
+      notes:               row.notes,
     };
 
     fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
@@ -4428,9 +5101,10 @@
     logState.photoFile   = null;
     logState.photoBase64 = null;
     logState.photoMime   = null;
-    logState.artistPaid  = '';
-    logState.galleryPaid = '';
-    logState.drawerLoc   = logState.loc;
+    logState.artistPaymentStatus = '';
+    logState.galleryPaid         = '';
+    logState.logisticsStatus     = '';
+    logState.drawerLoc           = logState.loc;
 
     document.getElementById('logd-title').textContent = 'New Entry';
     document.getElementById('logd-sub').textContent   = 'Add to ' + logState.loc + ' tab';
@@ -4453,6 +5127,7 @@
     // Reset paid toggles
     logdSetPaid('artist',  '');
     logdSetPaid('gallery', '');
+    logdSetLogisticsStatus('');
 
     const btn = document.getElementById('log-save-btn');
     btn.disabled = false;
@@ -4483,45 +5158,27 @@
         `<img src="${escHtml(row.imageUrl)}" class="log-dz-preview"><div class="dz-label" style="font-size:11px;color:#16a34a;">Existing photo (drop to replace)</div>`;
     }
 
-    // Parse title column back into fields
-    const lines = (row.title || '').split('\n').map(l => l.trim());
-    const artist     = lines[0] || '';
-    const titleYear  = lines[1] || '';
-    const tySplit    = titleYear.split(',');
-    const artTitle   = tySplit[0] ? tySplit[0].trim() : '';
-    const year       = tySplit[1] ? tySplit[1].trim() : '';
-    const medium     = lines[2] || '';
-    const dims       = lines[3] || '';
-    // framed dims — look for "(framed)" marker
-    let dimsFramed = '', stockLine = '';
-    if (lines.length >= 5) {
-      if (lines[4].endsWith('(framed)')) {
-        dimsFramed = lines[4].replace(/\s*\(framed\)$/, '').trim();
-        stockLine  = lines[5] || '';
-      } else {
-        stockLine = lines[4] || '';
-      }
-    }
-
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
     set('logd-client',      row.client);
-    set('logd-artist',      artist);
-    set('logd-arttitle',    artTitle);
-    set('logd-year',        year);
-    set('logd-medium',      medium);
-    set('logd-dims',        dims);
-    set('logd-dims-framed', dimsFramed);
-    set('logd-stock',       stockLine);
+    set('logd-artist',      row.artist);
+    set('logd-arttitle',    row.title);
+    set('logd-year',        row.year);
+    set('logd-medium',      row.material);
+    set('logd-dims',        row.dimensions);
+    set('logd-dims-framed', '');
+    set('logd-stock',       row.sku);
     set('logd-invoice',     row.invoice);
     set('logd-price',       row.price);
     set('logd-saleprice',   row.salePrice);
-    set('logd-payout',      row.salesPayout);
+    set('logd-payout',      row.artistPayoutAmount);
     set('logd-notes',       row.notes);
 
-    logState.artistPaid  = row.artistPaid  || '';
-    logState.galleryPaid = row.galleryPaid || '';
-    logdSetPaid('artist',  logState.artistPaid);
+    logState.artistPaymentStatus = row.artistPaymentStatus || '';
+    logState.galleryPaid         = row.galleryPaid         || '';
+    logState.logisticsStatus     = row.logisticsStatus     || '';
+    logdSetPaid('artist',  logState.artistPaymentStatus);
     logdSetPaid('gallery', logState.galleryPaid);
+    logdSetLogisticsStatus(logState.logisticsStatus);
 
     const btn = document.getElementById('log-save-btn');
     btn.disabled = false;
@@ -4547,8 +5204,8 @@
   }
 
   function logdSetPaid(field, val) {
-    if (field === 'artist')  logState.artistPaid  = val;
-    if (field === 'gallery') logState.galleryPaid = val;
+    if (field === 'artist')  logState.artistPaymentStatus = val;
+    if (field === 'gallery') logState.galleryPaid          = val;
 
     const prefix = field === 'artist' ? 'logd-ap' : 'logd-gp';
     ['blank','paid','unpaid'].forEach(k => {
@@ -4557,6 +5214,15 @@
     if (val === 'PAID')   document.getElementById(prefix + '-paid').className   = 'log-paid-btn sel-paid';
     else if (val === 'UNPAID') document.getElementById(prefix + '-unpaid').className = 'log-paid-btn sel-unpaid';
     else document.getElementById(prefix + '-blank').className = 'log-paid-btn sel-blank';
+  }
+
+  function logdSetLogisticsStatus(val) {
+    logState.logisticsStatus = val;
+    const ids = { '': 'logd-ls-blank', 'Ready to Ship': 'logd-ls-ready', 'Pending': 'logd-ls-pending', 'Completed': 'logd-ls-completed', 'Error': 'logd-ls-error' };
+    Object.entries(ids).forEach(([k, id]) => {
+      const el = document.getElementById(id);
+      if (el) el.className = 'log-paid-btn' + (val === k ? ' sel-paid' : '');
+    });
   }
 
   function logHandleDrop(e) {
@@ -4589,23 +5255,16 @@
     document.getElementById('logd-fileInput').value = '';
   }
 
-  function logBuildTitle() {
-    const artist     = (document.getElementById('logd-artist').value || '').trim();
-    const artTitle   = (document.getElementById('logd-arttitle').value || '').trim();
-    const year       = (document.getElementById('logd-year').value || '').trim();
-    const medium     = (document.getElementById('logd-medium').value || '').trim();
-    const dims       = (document.getElementById('logd-dims').value || '').trim();
-    const dimsFramed = (document.getElementById('logd-dims-framed').value || '').trim();
-    const stock      = (document.getElementById('logd-stock').value || '').trim();
-
-    const parts = [];
-    if (artist)                      parts.push(artist);
-    if (artTitle || year)            parts.push([artTitle, year].filter(Boolean).join(', '));
-    if (medium)                      parts.push(medium);
-    if (dims)                        parts.push(dims);
-    if (dimsFramed)                  parts.push(dimsFramed + ' (framed)');
-    if (stock)                       parts.push(stock);
-    return parts.join('\n');
+  function logReadFields() {
+    const g = id => (document.getElementById(id)?.value || '').trim();
+    return {
+      artist:     g('logd-artist'),
+      title:      g('logd-arttitle'),
+      year:       g('logd-year'),
+      material:   g('logd-medium'),
+      dimensions: [g('logd-dims'), g('logd-dims-framed') ? g('logd-dims-framed') + ' (framed)' : ''].filter(Boolean).join('\n'),
+      sku:        g('logd-stock'),
+    };
   }
 
   function logSave() {
@@ -4613,22 +5272,30 @@
     btn.disabled = true;
     btn.textContent = 'Saving…';
 
-    const isEdit = !!logState.editRow;
-    const loc    = isEdit ? logState.loc : logState.drawerLoc;
-    const title  = logBuildTitle();
+    const isEdit  = !!logState.editRow;
+    const loc     = isEdit ? logState.loc : logState.drawerLoc;
+    const artwork = logReadFields();
 
     const payload = {
-      type:        isEdit ? 'logistics-update' : 'logistics-add',
-      loc:         loc,
-      client:      (document.getElementById('logd-client').value || '').trim(),
-      title:       title,
-      invoice:     (document.getElementById('logd-invoice').value || '').trim(),
-      price:       document.getElementById('logd-price').value || '',
-      salePrice:   document.getElementById('logd-saleprice').value || '',
-      salesPayout: document.getElementById('logd-payout').value || '',
-      artistPaid:  logState.artistPaid,
-      galleryPaid: logState.galleryPaid,
-      notes:       (document.getElementById('logd-notes').value || '').trim(),
+      type:                isEdit ? 'logistics-update' : 'logistics-add',
+      loc,
+      client:              (document.getElementById('logd-client').value || '').trim(),
+      artist:              artwork.artist,
+      title:               artwork.title,
+      year:                artwork.year,
+      sku:                 artwork.sku,
+      dimensions:          artwork.dimensions,
+      material:            artwork.material,
+      invoice:             (document.getElementById('logd-invoice').value || '').trim(),
+      price:               document.getElementById('logd-price').value || '',
+      salePrice:           document.getElementById('logd-saleprice').value || '',
+      artistPayoutAmount:  document.getElementById('logd-payout').value || '',
+      artistPaymentStatus: logState.artistPaymentStatus,
+      artistPayoutRecords: '',
+      galleryPaid:         logState.galleryPaid,
+      logisticsStatus:     logState.logisticsStatus,
+      dueDate:             '',
+      notes:               (document.getElementById('logd-notes').value || '').trim(),
     };
 
     if (isEdit) {
@@ -4663,6 +5330,239 @@
         btn.textContent = isEdit ? 'Save Changes' : 'Save Entry';
         alert('Network error: ' + err);
       });
+  }
+
+  // ── Inventory Sales ──────────────────────────────────────
+  let _bnisInventory  = [];
+  let _bnisActiveRow  = null;
+
+  function bnSwitchTab(tab, btn) {
+    document.querySelectorAll('.bn-section-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    const isInv = tab === 'inventory';
+    document.getElementById('bn-tab-inquiries').style.display  = isInv ? 'none' : '';
+    document.getElementById('bn-tab-inventory').style.display  = isInv ? '' : 'none';
+    document.getElementById('bn-section-label').textContent    = isInv ? 'Inventory Sales' : 'Recent Inquiries';
+    const newBtn = document.getElementById('bn-inq-new-btn');
+    newBtn.textContent = isInv ? '+ New Sale' : '+ New Inquiry';
+    newBtn.onclick     = isInv ? bnisNewSale : bnNewInquiry;
+  }
+
+  function bnisLoad() {
+    fetch(BENNET_SCRIPT_URL + '?action=inventory-sales')
+      .then(r => r.json())
+      .then(d => {
+        _bnisInventory = d.sales || [];
+        bnisRenderList();
+      })
+      .catch(() => {
+        document.getElementById('bnis-body').innerHTML = '<div class="bn-empty">Failed to load inventory sales.</div>';
+      });
+  }
+
+  function bnisRenderList() {
+    const body = document.getElementById('bnis-body');
+    if (!_bnisInventory.length) {
+      body.innerHTML = '<div class="bn-empty" style="padding:24px 0;">No inventory sales yet.</div>';
+      return;
+    }
+    const payPill = (label, val) => {
+      const isPaid = (val || '').toLowerCase().includes('paid');
+      return `<span class="bn-pay-pill ${isPaid ? 'paid' : 'unpaid'}">${isPaid ? '✓ ' : ''}${label}: ${val || '—'}</span>`;
+    };
+    body.innerHTML = _bnisInventory.map(s => {
+      const initials = (s.client || '?').split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
+      const price    = s.salePrice ? '$' + s.salePrice : (s.price ? '$' + s.price : '—');
+      const statusCls = (s.status || '').toLowerCase() === 'completed' || (s.status || '').toLowerCase() === 'delivered'
+        ? 'bn-card-delivered' : '';
+      return `<div class="bn-card ${statusCls}" onclick="bnisOpenDrawer(${s.rowIndex})" style="margin-bottom:10px;">
+        <div class="bn-type-badge inv-sale">Inventory Sale</div>
+        <div class="bn-card-header">
+          <div class="bn-initials">${initials}</div>
+          <div class="bn-card-meta">
+            <div class="bn-card-client">${escHtml(s.client || '—')}</div>
+            <div class="bn-card-title">${escHtml(s.title || '—')}${s.year ? ' · ' + escHtml(s.year) : ''}</div>
+          </div>
+        </div>
+        ${s.status ? `<span class="bn-pill bn-pill-inquiry" style="background:#f0fdf4;color:#15803d;border-color:#bbf7d0;">${escHtml(s.status)}</span>` : ''}
+        <div class="bn-pay-row">
+          ${payPill('Gallery', s.galleryPaid)}
+          ${payPill('Bennet', s.artistPaid)}
+        </div>
+        <div class="bn-card-footer">
+          <div class="bn-card-price">${price}</div>
+          <div class="bn-card-sku">${escHtml(s.description || 'unassigned')}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function bnisNewSale() {
+    _bnisActiveRow = null;
+    document.getElementById('bnisd-client').textContent = 'New Inventory Sale';
+    document.getElementById('bnisd-sub').textContent    = 'Fill in the details below';
+    ['bnisd-client-name','bnisd-client-org','bnisd-title','bnisd-year',
+     'bnisd-dimensions','bnisd-material','bnisd-description',
+     'bnisd-price','bnisd-salePrice','bnisd-bennetPayout','bnisd-sgInvoice',
+     'bnisd-artistPaid','bnisd-galleryPaid','bnisd-status',
+     'bnisd-notes','bnisd-shipAddress','bnisd-shipper','bnisd-shipRef',
+     'bnisd-tracking','bnisd-trackingSent','bnisd-poc','bnisd-fileRef'
+    ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    const btn = document.getElementById('bnis-save-btn');
+    btn.disabled    = false;
+    btn.textContent = 'Create Sale';
+    btn.onclick     = bnisCreate;
+    document.getElementById('bnis-overlay').classList.add('open');
+    document.getElementById('bnis-drawer').classList.add('open');
+  }
+
+  function bnisOpenDrawer(rowIndex) {
+    const s = _bnisInventory.find(x => x.rowIndex === rowIndex);
+    if (!s) return;
+    _bnisActiveRow = rowIndex;
+    document.getElementById('bnisd-client').textContent = s.client || '—';
+    document.getElementById('bnisd-sub').textContent    = [s.title, s.year].filter(Boolean).join(' · ') || '—';
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    set('bnisd-client-name',  s.client);
+    set('bnisd-client-org',   s.org || '');
+    set('bnisd-title',        s.title);
+    set('bnisd-year',         s.year);
+    set('bnisd-dimensions',   s.dimensions);
+    set('bnisd-material',     s.material);
+    set('bnisd-description',  s.description);
+    set('bnisd-price',        s.price);
+    set('bnisd-salePrice',    s.salePrice);
+    set('bnisd-bennetPayout', s.bennetPayout);
+    set('bnisd-sgInvoice',    s.sgInvoice);
+    set('bnisd-artistPaid',   s.artistPaid);
+    set('bnisd-galleryPaid',  s.galleryPaid);
+    set('bnisd-status',       s.status);
+    set('bnisd-notes',        s.notes);
+    set('bnisd-shipAddress',  s.shipAddress);
+    set('bnisd-shipper',      s.shipper);
+    set('bnisd-shipRef',      s.shipRef);
+    set('bnisd-tracking',     s.tracking);
+    set('bnisd-trackingSent', s.trackingSent);
+    set('bnisd-poc',          s.poc);
+    set('bnisd-fileRef',      s.fileRef);
+    const btn = document.getElementById('bnis-save-btn');
+    btn.disabled    = false;
+    btn.textContent = 'Save Changes';
+    btn.onclick     = bnisSave;
+    document.getElementById('bnis-overlay').classList.add('open');
+    document.getElementById('bnis-drawer').classList.add('open');
+  }
+
+  function bnisCloseDrawer() {
+    document.getElementById('bnis-overlay').classList.remove('open');
+    document.getElementById('bnis-drawer').classList.remove('open');
+    _bnisActiveRow = null;
+    const btn = document.getElementById('bnis-save-btn');
+    btn.onclick     = bnisSave;
+    btn.textContent = 'Save Changes';
+    btn.disabled    = false;
+  }
+
+  function bnisCreate() {
+    const btn = document.getElementById('bnis-save-btn');
+    btn.disabled    = true;
+    btn.textContent = 'Creating…';
+    const get  = id => document.getElementById(id).value;
+    const data = {
+      client:       get('bnisd-client-name'),
+      title:        get('bnisd-title'),
+      year:         get('bnisd-year'),
+      dimensions:   get('bnisd-dimensions'),
+      material:     get('bnisd-material'),
+      description:  get('bnisd-description'),
+      price:        get('bnisd-price'),
+      salePrice:    get('bnisd-salePrice'),
+      bennetPayout: get('bnisd-bennetPayout'),
+      sgInvoice:    get('bnisd-sgInvoice'),
+      artistPaid:   get('bnisd-artistPaid'),
+      galleryPaid:  get('bnisd-galleryPaid'),
+      status:       get('bnisd-status'),
+      notes:        get('bnisd-notes'),
+      shipAddress:  get('bnisd-shipAddress'),
+      shipper:      get('bnisd-shipper'),
+      shipRef:      get('bnisd-shipRef'),
+      tracking:     get('bnisd-tracking'),
+      trackingSent: get('bnisd-trackingSent'),
+      poc:          get('bnisd-poc'),
+      fileRef:      get('bnisd-fileRef'),
+    };
+    fetch(BENNET_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ type: 'create_inventory_sale', data })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        btn.textContent = 'Created ✓';
+        setTimeout(() => { bnisCloseDrawer(); bnisLoad(); }, 700);
+      } else {
+        btn.disabled = false; btn.textContent = 'Create Sale';
+        alert('Failed to create: ' + (d.error || 'Unknown error'));
+      }
+    })
+    .catch(err => {
+      btn.disabled = false; btn.textContent = 'Create Sale';
+      alert('Network error: ' + err);
+    });
+  }
+
+  function bnisSave() {
+    if (!_bnisActiveRow) return;
+    const btn = document.getElementById('bnis-save-btn');
+    btn.disabled    = true;
+    btn.textContent = 'Saving…';
+    const get     = id => document.getElementById(id).value;
+    const updates = {
+      client:       get('bnisd-client-name'),
+      title:        get('bnisd-title'),
+      year:         get('bnisd-year'),
+      dimensions:   get('bnisd-dimensions'),
+      material:     get('bnisd-material'),
+      description:  get('bnisd-description'),
+      price:        get('bnisd-price'),
+      salePrice:    get('bnisd-salePrice'),
+      bennetPayout: get('bnisd-bennetPayout'),
+      sgInvoice:    get('bnisd-sgInvoice'),
+      artistPaid:   get('bnisd-artistPaid'),
+      galleryPaid:  get('bnisd-galleryPaid'),
+      status:       get('bnisd-status'),
+      notes:        get('bnisd-notes'),
+      shipAddress:  get('bnisd-shipAddress'),
+      shipper:      get('bnisd-shipper'),
+      shipRef:      get('bnisd-shipRef'),
+      tracking:     get('bnisd-tracking'),
+      trackingSent: get('bnisd-trackingSent'),
+      poc:          get('bnisd-poc'),
+      fileRef:      get('bnisd-fileRef'),
+    };
+    fetch(BENNET_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ type: 'update_inventory_sale', rowIndex: _bnisActiveRow, updates })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        const idx = _bnisInventory.findIndex(x => x.rowIndex === _bnisActiveRow);
+        if (idx !== -1) Object.assign(_bnisInventory[idx], updates);
+        bnisRenderList();
+        btn.textContent = 'Saved ✓';
+        setTimeout(() => bnisCloseDrawer(), 700);
+      } else {
+        btn.disabled = false; btn.textContent = 'Save Changes';
+        alert('Save failed: ' + (d.error || 'Unknown error'));
+      }
+    })
+    .catch(err => {
+      btn.disabled = false; btn.textContent = 'Save Changes';
+      alert('Network error: ' + err);
+    });
   }
 </script>
 </body>
