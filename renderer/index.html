@@ -1013,6 +1013,23 @@
     .log-ls-error     { background: #fecaca; color: #dc2626; }
     .log-empty { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 14px; }
     .log-loading { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 14px; }
+    /* Drag-and-drop */
+    .log-drag-handle {
+      display: flex; align-items: center; padding: 0 10px 0 0;
+      color: #e5e7eb; font-size: 15px; cursor: grab;
+      user-select: none; flex-shrink: 0; transition: color 0.1s;
+      -webkit-app-region: no-drag;
+    }
+    .log-card:hover .log-drag-handle { color: #9ca3af; }
+    .log-card.log-dragging { opacity: 0.35; }
+    .log-card.log-drop-above { box-shadow: 0 -2px 0 0 #3b82f6, 0 2px 8px rgba(0,0,0,0.07); }
+    .log-card.log-drop-below { box-shadow: 0 2px 0 0 #3b82f6, 0 2px 8px rgba(0,0,0,0.07); }
+    .log-reset-order-btn {
+      background: none; border: 1px solid #e5e7eb; border-radius: 6px;
+      padding: 5px 10px; font-size: 11px; font-weight: 600; color: #9ca3af;
+      cursor: pointer; font-family: inherit; transition: all 0.12s; white-space: nowrap;
+    }
+    .log-reset-order-btn:hover { border-color: #9ca3af; color: #374151; }
 
     /* Logistics drawer — reuses .bn-overlay / .bn-drawer patterns */
     .log-overlay {
@@ -2530,6 +2547,7 @@
           <button class="log-loc-pill active-la" id="log-pill-la" onclick="logSetLoc('LA')">🌴 LA</button>
           <button class="log-loc-pill" id="log-pill-ny" onclick="logSetLoc('NY')">🗽 NYC</button>
         </div>
+        <button class="log-reset-order-btn" id="log-reset-order-btn" onclick="logResetOrder()" style="display:none;">↺ Reset Order</button>
         <button class="log-add-btn" onclick="logOpenNewDrawer()">＋ Add Entry</button>
       </div>
     </div>
@@ -4945,11 +4963,20 @@
     if (_logFilter !== 'all') {
       rows = rows.filter(r => (r.logisticsStatus || '').toLowerCase().trim() === _logFilter.toLowerCase().trim());
     }
-    rows = [...rows].sort((a, b) => {
-      const ak = (a.logisticsStatus || '').toLowerCase().trim();
-      const bk = (b.logisticsStatus || '').toLowerCase().trim();
-      return (statusOrder[ak] ?? 4) - (statusOrder[bk] ?? 4);
-    });
+    // Use saved drag order if present; otherwise fall back to status sort
+    const savedOrder = (() => { try { return JSON.parse(localStorage.getItem('log-order-' + logState.loc)); } catch(e2) { return null; } })();
+    if (savedOrder && Array.isArray(savedOrder)) {
+      const orderMap = {};
+      savedOrder.forEach((id, idx) => { orderMap[String(id)] = idx; });
+      rows = [...rows].sort((a, b) => (orderMap[String(a.row)] ?? 9999) - (orderMap[String(b.row)] ?? 9999));
+    } else {
+      rows = [...rows].sort((a, b) => {
+        const ak = (a.logisticsStatus || '').toLowerCase().trim();
+        const bk = (b.logisticsStatus || '').toLowerCase().trim();
+        return (statusOrder[ak] ?? 4) - (statusOrder[bk] ?? 4);
+      });
+    }
+    logUpdateResetBtn();
     logRenderCards(rows);
   }
 
@@ -4970,6 +4997,7 @@
     logState.loc = loc;
     document.getElementById('log-pill-la').className = 'log-loc-pill' + (loc === 'LA' ? ' active-la' : '');
     document.getElementById('log-pill-ny').className = 'log-loc-pill' + (loc === 'NY' ? ' active-ny' : '');
+    logUpdateResetBtn();
     logLoad(loc);
   }
 
@@ -5032,7 +5060,8 @@
       if (r.salePrice) finParts.push('Sale: $' + r.salePrice);
       const lsKey = (s => { const v = (s||'').toLowerCase().trim(); if (v==='ready to ship') return 'ready'; if (v==='completed') return 'completed'; if (v==='error') return 'error'; if (v==='pending') return 'pending'; return ''; })(r.logisticsStatus);
       const lsBadge = lsKey ? `<span class="log-ls-badge log-ls-${lsKey}">${escHtml(r.logisticsStatus)}</span>` : '';
-      return `<div class="log-card${lsKey ? ' log-card-' + lsKey : ''}" onclick="logOpenDrawer(${rowIdx})">
+      return `<div class="log-card${lsKey ? ' log-card-' + lsKey : ''}" draggable="true" data-row="${rowIdx}" onclick="logOpenDrawer(${rowIdx})" ondragstart="logDragStart(event,${rowIdx})" ondragover="logDragOver(event)" ondragleave="logDragLeave(event)" ondrop="logDrop(event,${rowIdx})" ondragend="logDragEnd(event)">
+        <div class="log-drag-handle">⠿</div>
         ${thumbHtml}
         <div class="log-card-center">
           <div class="log-card-client">${escHtml(r.client || '—')}</div>
@@ -5047,6 +5076,71 @@
       </div>`;
     }).join('');
   }
+
+  // ─── Drag-and-drop sort ───────────────────────────────────────────────────
+  let _logDragSrcRow = null;
+
+  function logDragStart(e, rowIdx) {
+    _logDragSrcRow = rowIdx;
+    e.dataTransfer.effectAllowed = 'move';
+    // Brief delay so the dragging card isn't instantly hidden
+    setTimeout(() => { const el = document.querySelector('[data-row="' + rowIdx + '"]'); if (el) el.classList.add('log-dragging'); }, 0);
+  }
+
+  function logDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const card = e.currentTarget;
+    document.querySelectorAll('.log-card').forEach(c => c.classList.remove('log-drop-above','log-drop-below'));
+    const rect = card.getBoundingClientRect();
+    card._dropBefore = e.clientY < rect.top + rect.height / 2;
+    card.classList.add(card._dropBefore ? 'log-drop-above' : 'log-drop-below');
+  }
+
+  function logDragLeave(e) {
+    e.currentTarget.classList.remove('log-drop-above','log-drop-below');
+  }
+
+  function logDrop(e, targetRow) {
+    e.preventDefault();
+    const targetCard = e.currentTarget;
+    const dropBefore = targetCard._dropBefore !== false;
+    document.querySelectorAll('.log-card').forEach(c => c.classList.remove('log-drop-above','log-drop-below','log-dragging'));
+    if (_logDragSrcRow === null || _logDragSrcRow === targetRow) { _logDragSrcRow = null; return; }
+
+    // Read the current DOM render order
+    const cards = [...document.querySelectorAll('#log-list .log-card')];
+    const currentOrder = cards.map(c => parseInt(c.dataset.row));
+    const srcPos = currentOrder.indexOf(_logDragSrcRow);
+    const tgtPos = currentOrder.indexOf(targetRow);
+    if (srcPos === -1 || tgtPos === -1) { _logDragSrcRow = null; return; }
+
+    const newOrder = [...currentOrder];
+    const [moved] = newOrder.splice(srcPos, 1);
+    const insertAt = newOrder.indexOf(targetRow) + (dropBefore ? 0 : 1);
+    newOrder.splice(insertAt, 0, moved);
+
+    localStorage.setItem('log-order-' + logState.loc, JSON.stringify(newOrder));
+    _logDragSrcRow = null;
+    logApplyFilter();
+  }
+
+  function logDragEnd(e) {
+    document.querySelectorAll('.log-card').forEach(c => c.classList.remove('log-dragging','log-drop-above','log-drop-below'));
+    _logDragSrcRow = null;
+  }
+
+  function logUpdateResetBtn() {
+    const btn = document.getElementById('log-reset-order-btn');
+    if (!btn) return;
+    btn.style.display = localStorage.getItem('log-order-' + logState.loc) ? '' : 'none';
+  }
+
+  function logResetOrder() {
+    localStorage.removeItem('log-order-' + logState.loc);
+    logApplyFilter();
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
   function logToggleStatus(rowIdx, field, currentVal) {
     // Cycle: '' → 'PAID' → 'UNPAID' → ''
