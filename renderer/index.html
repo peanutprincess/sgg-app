@@ -20,22 +20,12 @@
     .sidebar {
       width: 220px;
       flex-shrink: 0;
-      background: #000;
+      background: #fff;
       display: flex;
       flex-direction: column;
       -webkit-app-region: drag;
-      border-right: none;
+      border-right: 1px solid #e5e7eb;
       position: relative;
-    }
-    /* Silver left-edge stripe */
-    .sidebar::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 3px;
-      background: linear-gradient(180deg, #9aa0aa, #d0d5dd, #8a9099, #b8bec8, #9aa0aa);
-      z-index: 10;
-      pointer-events: none;
     }
     .sidebar-top {
       padding: 44px 20px 16px;
@@ -43,6 +33,7 @@
     .sidebar-logo {
       width: 160px;
       display: block;
+      filter: invert(1);
     }
     .nav-section {
       flex: 1;
@@ -52,7 +43,7 @@
     .nav-label {
       font-size: 9px;
       font-weight: 700;
-      color: #9aa0aa;
+      color: #b0b7c3;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       padding: 14px 20px 5px;
@@ -62,7 +53,7 @@
       align-items: center;
       gap: 10px;
       padding: 9px 20px;
-      color: rgba(160,168,180,0.7);
+      color: #6b7280;
       cursor: pointer;
       font-size: 13px;
       font-weight: 500;
@@ -70,23 +61,23 @@
       transition: color 0.12s, background 0.12s;
       -webkit-user-select: none;
     }
-    .nav-item:hover { color: #c8cdd5; background: rgba(180,188,200,0.06); }
-    .nav-item.active { color: #dde0e6; background: rgba(180,188,200,0.1); border-left-color: #9aa0aa; }
+    .nav-item:hover { color: #111; background: #f3f4f6; }
+    .nav-item.active { color: #111; background: #f3f4f6; border-left-color: #c9a84c; font-weight: 600; }
     .nav-icon { font-size: 15px; width: 20px; text-align: center; }
     .nav-soon {
       margin-left: auto;
       font-size: 9px;
-      color: rgba(160,168,180,0.5);
-      background: rgba(0,0,0,0.3);
+      color: #b0b7c3;
+      background: #f3f4f6;
       padding: 2px 5px;
       border-radius: 4px;
     }
     .sidebar-footer {
       padding: 14px 20px;
-      color: rgba(140,148,160,0.7);
+      color: #9ca3af;
       font-size: 10px;
       -webkit-app-region: no-drag;
-      border-top: 1px solid rgba(160,170,185,0.15);
+      border-top: 1px solid #f3f4f6;
     }
     .sidebar-quick-links {
       display: flex;
@@ -98,33 +89,33 @@
     .ql-btn {
       flex: 0 0 calc(20% - 4px);
       padding: 5px 0;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(160,170,185,0.2);
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
       border-radius: 5px;
-      color: rgba(150,158,170,0.8);
+      color: #6b7280;
       font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
       font-size: 10px;
       font-weight: 600;
       letter-spacing: 0.04em;
       cursor: pointer;
       text-align: center;
-      transition: color 0.12s, border-color 0.12s;
+      transition: color 0.12s, border-color 0.12s, background 0.12s;
     }
-    .ql-btn:hover { color: #c8cdd5; border-color: #9aa0aa; }
+    .ql-btn:hover { color: #111; border-color: #9ca3af; background: #f3f4f6; }
     .artist-mgr-pill {
       margin: 0 16px 10px;
       text-align: center;
       font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: rgba(140,148,160,0.6);
+      color: #9ca3af;
       padding: 4px 8px;
-      border: 1px solid rgba(160,170,185,0.2);
+      border: 1px solid #e5e7eb;
       border-radius: 20px;
       cursor: pointer;
       -webkit-app-region: no-drag;
       transition: all 0.15s;
     }
-    .artist-mgr-pill:hover { color: #c8cdd5; border-color: #9aa0aa; background: rgba(0,0,0,0.2); }
+    .artist-mgr-pill:hover { color: #374151; border-color: #9ca3af; background: #f3f4f6; }
     /* Artist Manager Modal */
     .amgr-overlay {
       display: none; position: fixed; inset: 0;
