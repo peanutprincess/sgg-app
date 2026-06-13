@@ -1189,8 +1189,9 @@
     <button class="amgr-close" onclick="amgrClose()">✕</button>
   </div>
   <div style="display:flex;gap:6px;padding:0 16px 10px;">
-    <button id="amgr-tab-artists"    class="amgr-tab active"  onclick="amgrSwitchList('artists')">Artists</button>
-    <button id="amgr-tab-signatures" class="amgr-tab"         onclick="amgrSwitchList('signatures')">Signatures</button>
+    <button id="amgr-tab-artists"     class="amgr-tab active"  onclick="amgrSwitchList('artists')">Artists</button>
+    <button id="amgr-tab-signatures"  class="amgr-tab"         onclick="amgrSwitchList('signatures')">Signatures</button>
+    <button id="amgr-tab-contractors" class="amgr-tab"         onclick="amgrSwitchList('contractors')">Contractors</button>
   </div>
   <div class="amgr-list" id="amgr-list"></div>
   <div class="amgr-add-row">
@@ -1208,9 +1209,12 @@
 
   <!-- EXPENSES -->
   <section id="mod-expenses" class="module active">
-    <div class="module-header">
-      <div class="module-title">Expenses</div>
-      <div class="module-subtitle">Upload receipts — saved to Drive &amp; logged to sheet</div>
+    <div class="module-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="module-title">Expenses</div>
+        <div class="module-subtitle">Upload receipts — saved to Drive &amp; logged to sheet</div>
+      </div>
+      <a href="https://docs.google.com/spreadsheets/d/1IaEQLuCyzPwvshvqS36sEPqaHuRAw8p4Q-KZ2nsATRM/edit?gid=36617192#gid=36617192" target="_blank" style="background:#f0fdf4;color:#166534;border:1.5px solid #bbf7d0;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-app-region:no-drag;">📋 View Results Sheet ↗</a>
     </div>
     <div class="form-card">
       <div id="exp-form">
@@ -1337,15 +1341,6 @@
         <div class="form-full field">
           <label>Contractor</label>
           <div class="contractor-grid" id="inv-contractor-grid">
-            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Chasen Wolcott</button>
-            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Jesus Cardenas</button>
-            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Jonathan Austin</button>
-            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Kial Hocker</button>
-            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Matthew Debbaudt</button>
-            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Sheila Alcibar</button>
-            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Stevie Soares</button>
-            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Sydney Busic</button>
-            <button type="button" class="contractor-pill" onclick="toggleContractor(this)">Yatta</button>
           </div>
         </div>
 
@@ -1443,9 +1438,12 @@
 
   <!-- SHIPPING LOG -->
   <section id="mod-shipping" class="module">
-    <div class="module-header">
-      <div class="module-title">Shipping &amp; Movements</div>
-      <div class="module-subtitle">Log artwork shipments and transfers</div>
+    <div class="module-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="module-title">Shipping &amp; Movements</div>
+        <div class="module-subtitle">Log artwork shipments and transfers</div>
+      </div>
+      <a href="https://docs.google.com/spreadsheets/d/1IaEQLuCyzPwvshvqS36sEPqaHuRAw8p4Q-KZ2nsATRM/edit" target="_blank" style="background:#f0fdf4;color:#166534;border:1.5px solid #bbf7d0;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-app-region:no-drag;">📋 View Results Sheet ↗</a>
     </div>
     <div class="form-card">
 
@@ -1662,9 +1660,12 @@
 
   <!-- BOOKS -->
   <section id="mod-books" class="module">
-    <div class="module-header">
-      <div class="module-title">Books</div>
-      <div class="module-subtitle">Log book sales and gifts — updates inventory</div>
+    <div class="module-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="module-title">Books</div>
+        <div class="module-subtitle">Log book sales and gifts — updates inventory</div>
+      </div>
+      <a href="https://docs.google.com/spreadsheets/d/1IaEQLuCyzPwvshvqS36sEPqaHuRAw8p4Q-KZ2nsATRM/edit?gid=1070665233#gid=1070665233" target="_blank" style="background:#f0fdf4;color:#166534;border:1.5px solid #bbf7d0;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-app-region:no-drag;">📋 View Results Sheet ↗</a>
     </div>
     <div class="form-card">
       <div id="book-form">
@@ -2301,7 +2302,8 @@
         <div class="module-title">Tristan Unrau</div>
         <div class="module-subtitle">Interest log</div>
       </div>
-      <div style="-webkit-app-region:no-drag;">
+      <div style="-webkit-app-region:no-drag;display:flex;align-items:center;gap:10px;">
+        <a href="https://docs.google.com/spreadsheets/d/1nx30zFjY8TFplbI7CTAgtusLNbUDdZ0tPltvqJ8F6bM/edit?gid=1221040509#gid=1221040509" target="_blank" style="background:#f0fdf4;color:#166534;border:1.5px solid #bbf7d0;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-app-region:no-drag;">📋 View Results Sheet ↗</a>
         <button onclick="triNewEntry()" style="background:#c9a84c;color:#000;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0.02em;">+ New Interest</button>
       </div>
     </div>
@@ -2367,9 +2369,12 @@
 
   <!-- RESELLER CERTIFICATES -->
   <section id="mod-reseller" class="module">
-    <div class="module-header">
-      <div class="module-title">Reseller Certificates</div>
-      <div class="module-subtitle">Upload a reseller certificate PDF — saved to Drive &amp; logged to sheet</div>
+    <div class="module-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="module-title">Reseller Certificates</div>
+        <div class="module-subtitle">Upload a reseller certificate PDF — saved to Drive &amp; logged to sheet</div>
+      </div>
+      <a href="https://docs.google.com/spreadsheets/d/1IaEQLuCyzPwvshvqS36sEPqaHuRAw8p4Q-KZ2nsATRM/edit?gid=1195581977#gid=1195581977" target="_blank" style="background:#f0fdf4;color:#166534;border:1.5px solid #bbf7d0;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-app-region:no-drag;">📋 View Results Sheet ↗</a>
     </div>
     <div style="max-width:520px;margin:28px auto 0;padding:0 24px 60px;">
 
@@ -2417,9 +2422,12 @@
 
   <!-- CONDITION REPORTS -->
   <section id="mod-cr" class="module">
-    <div class="module-header">
-      <div class="module-title">Condition Reports</div>
-      <div class="module-subtitle">Fill in artwork details and photos — generates a PDF condition report</div>
+    <div class="module-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="module-title">Condition Reports</div>
+        <div class="module-subtitle">Fill in artwork details and photos — generates a PDF condition report</div>
+      </div>
+      <a href="https://drive.google.com/drive/u/0/folders/1EWYGMqhFwNRtT_jWGXNBY2XB7FQvmgtc" target="_blank" style="background:#f0fdf4;color:#166534;border:1.5px solid #bbf7d0;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-app-region:no-drag;">📋 View Results Folder ↗</a>
     </div>
     <div style="max-width:760px;margin:0 auto;padding:24px 24px 80px;">
 
@@ -2549,6 +2557,7 @@
         </div>
         <button class="log-reset-order-btn" id="log-reset-order-btn" onclick="logResetOrder()" style="display:none;">↺ Reset Order</button>
         <button class="log-add-btn" onclick="logOpenNewDrawer()">＋ Add Entry</button>
+        <a href="https://docs.google.com/spreadsheets/d/1ITOG8VPJa6U9W2WjWj79767ZQaCv8EAct2Uw5xOAZO4/edit" target="_blank" style="background:#f0fdf4;color:#166534;border:1.5px solid #bbf7d0;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-app-region:no-drag;">📋 View Results Sheet ↗</a>
       </div>
     </div>
     <div class="bn-filters" id="log-filters">
@@ -2718,6 +2727,7 @@
         <div class="hb-title">📖 Company Handbook</div>
         <input class="hb-search" id="hb-search" type="text" placeholder="Search handbook…" oninput="searchHandbook(this.value)">
         <button class="again-btn" onclick="refreshHandbook()" style="flex-shrink:0;padding:7px 12px;font-size:12px;">↺ Refresh</button>
+        <a href="https://docs.google.com/document/d/1UyamIq8Hsgy4QUKm-X4-ghpO-FDpLeoh5qyRWVyCPrI/edit" target="_blank" style="background:#f0fdf4;color:#166534;border:1.5px solid #bbf7d0;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;flex-shrink:0;-webkit-app-region:no-drag;">📋 Open Doc ↗</a>
       </div>
     </div>
     <div class="hb-body">
@@ -2758,6 +2768,7 @@
 
   // ─── Artist List ────────────────────────────────────────────────────────────
   let _artistList = [];
+  let _contractorList = [];
 
   function loadArtists() {
     fetch(SCRIPT_URL + '?action=artists&t=' + Date.now())
@@ -2781,9 +2792,27 @@
     });
   }
 
+  function loadContractors() {
+    fetch(SCRIPT_URL + '?action=contractors&t=' + Date.now())
+      .then(r => r.json())
+      .then(d => {
+        _contractorList = d.contractors || [];
+        populateContractorGrid();
+      })
+      .catch(() => {});
+  }
+
+  function populateContractorGrid() {
+    const grid = document.getElementById('inv-contractor-grid');
+    if (!grid) return;
+    grid.innerHTML = _contractorList.map(name =>
+      `<button type="button" class="contractor-pill" onclick="toggleContractor(this)">${escHtml(name)}</button>`
+    ).join('');
+  }
+
   // Artist Manager
   // ── List manager state ──
-  let _amgrList    = 'artists';   // 'artists' | 'signatures'
+  let _amgrList    = 'artists';   // 'artists' | 'signatures' | 'contractors'
   let _amgrWorking = [];
 
   const AMGR_CFG = {
@@ -2804,6 +2833,15 @@
       emptyLabel:   'No signatures yet.',
       getData:      () => _signatureList,
       setData:      v  => { _signatureList = v; populateSignatureSelects(); }
+    },
+    contractors: {
+      fetchAction:  'contractors',
+      responseKey:  'contractors',
+      updateType:   'contractors-update',
+      payloadKey:   'contractors',
+      emptyLabel:   'No contractors yet.',
+      getData:      () => _contractorList,
+      setData:      v  => { _contractorList = v; populateContractorGrid(); }
     }
   };
 
@@ -2918,6 +2956,7 @@
   // Load both lists on startup
   loadArtists();
   loadSignatures();
+  loadContractors();
 
   // Module switching
   function showModule(name, el) {
@@ -2925,6 +2964,9 @@
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('mod-' + name).classList.add('active');
     el.classList.add('active');
+    if (name !== 'bennet') {
+      try { document.getElementById('app-version').textContent = 'SG v' + (window.sgg.version || '').replace(/\.0$/, ''); } catch(e) {}
+    }
     if (name === 'gallery')   { loadGallery(); startGalleryAutoRefresh(); } else { stopGalleryAutoRefresh(); }
     if (name === 'handbook')  { loadHandbook(); }
     if (name === 'bennet')    { bnLoad(); }
@@ -3781,6 +3823,27 @@
       btn.textContent = '📂 Show PDF in Finder';
       btn.onclick = () => window.sgg.showInFinder(result.pdfPath);
       linksEl.appendChild(btn);
+
+      // Upload to Drive in the background
+      const driveBtn = document.createElement('button');
+      driveBtn.className = 'again-btn';
+      driveBtn.style.cssText = 'width:100%;text-align:left;padding:10px 14px;font-size:13px;color:#6b7280;';
+      driveBtn.textContent = '☁️ Saving to Drive…';
+      driveBtn.disabled = true;
+      linksEl.appendChild(driveBtn);
+
+      sendToServer({ type: 'save_backtag', fileData: result.pdfBase64, fileName: result.pdfName, mimeType: 'application/pdf' }, driveResult => {
+        if (driveResult.success && driveResult.fileUrl) {
+          driveBtn.textContent = '☁️ Saved to Drive ↗';
+          driveBtn.style.color = '#166534';
+          driveBtn.disabled = false;
+          driveBtn.onclick = () => window.open(driveResult.fileUrl);
+        } else {
+          driveBtn.textContent = '⚠️ Drive save failed';
+          driveBtn.style.color = '#dc2626';
+          driveBtn.disabled = false;
+        }
+      });
     } catch(err) {
       btShow('bt-upload');
       document.getElementById('bt-error').textContent = 'Error: ' + err.message;

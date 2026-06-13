@@ -142,7 +142,7 @@ ipcMain.handle('run-backtag', async (event, pdfPath) => {
   // Step 3: Clean up intermediate SVG files
   svgPaths.forEach(p => { try { fs.unlinkSync(p); } catch {} });
 
-  return { ok: true, pdfPath: outPdf };
+  return { ok: true, pdfPath: outPdf, pdfBase64: pdfBuf.toString('base64'), pdfName: path.basename(outPdf) };
 });
 
 ipcMain.on('get-version', (event) => { event.returnValue = app.getVersion(); });
